@@ -23,6 +23,13 @@ func setup(maximum: int) -> void:
 	changed.emit(current, max_health)
 
 
+func heal(amount: int) -> void:
+	if is_dead:
+		return
+	current = mini(current + amount, max_health)
+	changed.emit(current, max_health)
+
+
 func take_damage(amount: int) -> void:
 	if is_dead:
 		return

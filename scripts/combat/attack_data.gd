@@ -15,8 +15,11 @@ extends Resource
 @export var startup_time: float = 0.1
 ## How long the hitbox is live.
 @export var active_time: float = 0.12
-## Player: the combo window to chain the next attack. Enemy: the punish window.
+## Player: wind-down after the hitbox closes. Enemy: the punish window.
 @export var recovery_time: float = 0.25
+## Player only: how long after the hitbox closes the next combo hit or a dodge
+## may cut recovery short. 0 = no cancel; the attack commits through recovery.
+@export var cancel_window: float = 0.0
 
 @export_group("Enemy")
 ## Visible wind-up before the attack lands. Long enough for the player to react.

@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="PlayerLoadout" format=3 uid="uid://81xcfs8mflc7"]
+
+[ext_resource type="Script" uid="uid://cvjtbq5w4m30y" path="res://scripts/player/player_loadout.gd" id="1_loadout"]
+[ext_resource type="Script" uid="uid://y3a2jlso8j4p" path="res://scripts/commands/skill_data.gd" id="2_skill"]
+[ext_resource type="Script" uid="uid://b134nsxh5ksou" path="res://scripts/commands/item_data.gd" id="3_item"]
+[ext_resource type="Script" uid="uid://dgmf2wf00pke0" path="res://scripts/commands/item_stack.gd" id="4_stack"]
+[ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="5_attack"]
+[ext_resource type="Texture2D" uid="uid://6tmdds36eimp" path="res://icon.svg" id="6_icon"]
+
+[sub_resource type="Resource" id="Resource_potion"]
+script = ExtResource("3_item")
+display_name = "Potion"
+icon = ExtResource("6_icon")
+heal_amount = 40
+
+[sub_resource type="Resource" id="Resource_potion_stack"]
+script = ExtResource("4_stack")
+item = SubResource("Resource_potion")
+count = 3
+
+[sub_resource type="Resource" id="Resource_tonic"]
+script = ExtResource("3_item")
+display_name = "Tonic"
+icon = ExtResource("6_icon")
+stamina_restore = 100.0
+
+[sub_resource type="Resource" id="Resource_tonic_stack"]
+script = ExtResource("4_stack")
+item = SubResource("Resource_tonic")
+count = 2
+
+[sub_resource type="Resource" id="Resource_rising_attack"]
+script = ExtResource("5_attack")
+display_name = "Rising Slash"
+damage = 24
+knockback = 7.0
+lunge_speed = 2.0
+startup_time = 0.15
+active_time = 0.15
+recovery_time = 0.4
+
+[sub_resource type="Resource" id="Resource_rising"]
+script = ExtResource("2_skill")
+display_name = "Rising Slash"
+icon = ExtResource("6_icon")
+stamina_cost = 30.0
+attack = SubResource("Resource_rising_attack")
+
+[sub_resource type="Resource" id="Resource_dash_attack"]
+script = ExtResource("5_attack")
+display_name = "Dash Strike"
+damage = 20
+knockback = 5.0
+lunge_speed = 14.0
+active_time = 0.2
+recovery_time = 0.5
+
+[sub_resource type="Resource" id="Resource_dash"]
+script = ExtResource("2_skill")
+display_name = "Dash Strike"
+icon = ExtResource("6_icon")
+stamina_cost = 40.0
+attack = SubResource("Resource_dash_attack")
+
+[resource]
+script = ExtResource("1_loadout")
+skills = Array[ExtResource("2_skill")]([SubResource("Resource_rising"), SubResource("Resource_dash")])
+inventory = Array[ExtResource("4_stack")]([SubResource("Resource_potion_stack"), SubResource("Resource_tonic_stack")])

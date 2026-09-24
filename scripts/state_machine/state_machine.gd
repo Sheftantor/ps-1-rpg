@@ -46,5 +46,9 @@ func transition_to(state_name: StringName, msg: Dictionary = {}) -> void:
 	state_changed.emit(previous.name, current.name)
 
 
+func has_state(state_name: StringName) -> bool:
+	return _states.has(state_name)
+
+
 func current_name() -> StringName:
 	return current.name if current != null else &""

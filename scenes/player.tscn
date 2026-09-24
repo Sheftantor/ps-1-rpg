@@ -6,6 +6,18 @@
 [ext_resource type="Script" uid="uid://ddr3jmrv1sw61" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
 [ext_resource type="Script" uid="uid://dm4ka8v6bajrj" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
 [ext_resource type="Script" uid="uid://b0a6txu5u8use" path="res://scripts/combat/health.gd" id="6_health"]
+[ext_resource type="Resource" path="res://resources/player/player_loadout.tres" id="7_loadout"]
+[ext_resource type="Script" path="res://scripts/combat/stamina.gd" id="8_stamina"]
+[ext_resource type="Script" uid="uid://l8o5mpopl6tw" path="res://scripts/state_machine/state_machine.gd" id="9_machine"]
+[ext_resource type="Script" path="res://scripts/player/states/idle.gd" id="10_idle"]
+[ext_resource type="Script" path="res://scripts/player/states/move.gd" id="11_move"]
+[ext_resource type="Script" path="res://scripts/player/states/dodge.gd" id="12_dodge"]
+[ext_resource type="Script" path="res://scripts/player/states/light_attack.gd" id="13_light_attack"]
+[ext_resource type="Script" path="res://scripts/player/states/heavy_attack.gd" id="14_heavy_attack"]
+[ext_resource type="Script" path="res://scripts/player/states/block.gd" id="15_block"]
+[ext_resource type="Script" path="res://scripts/player/states/hit_stun.gd" id="16_hit_stun"]
+[ext_resource type="Script" path="res://scripts/player/states/dead.gd" id="17_dead"]
+[ext_resource type="Script" path="res://scripts/ui/command_menu.gd" id="18_menu"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -63,6 +75,7 @@ collision_layer = 2
 collision_mask = 5
 script = ExtResource("1_player")
 stats = ExtResource("3_stats")
+loadout = ExtResource("7_loadout")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1848658058]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -122,3 +135,38 @@ transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0)
 top_level = true
 visible = false
 mesh = SubResource("PrismMesh_marker")
+
+[node name="Stamina" type="Node" parent="."]
+script = ExtResource("8_stamina")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("9_machine")
+initial_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("10_idle")
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("11_move")
+
+[node name="Dodge" type="Node" parent="StateMachine"]
+script = ExtResource("12_dodge")
+
+[node name="LightAttack" type="Node" parent="StateMachine"]
+script = ExtResource("13_light_attack")
+
+[node name="HeavyAttack" type="Node" parent="StateMachine"]
+script = ExtResource("14_heavy_attack")
+
+[node name="Block" type="Node" parent="StateMachine"]
+script = ExtResource("15_block")
+
+[node name="HitStun" type="Node" parent="StateMachine"]
+script = ExtResource("16_hit_stun")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("17_dead")
+
+[node name="CommandMenu" type="CanvasLayer" parent="."]
+layer = 10
+script = ExtResource("18_menu")

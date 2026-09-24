@@ -19,7 +19,7 @@ group_uniforms ps1;
 // Virtual vertical resolution that vertices snap to. Lower = more jitter.
 uniform float snap_resolution : hint_range(16.0, 1080.0) = 240.0;
 // 0 = perspective-correct UVs, 1 = full affine warping.
-uniform float affine_strength : hint_range(0.0, 1.0) = 1.0;
+uniform float affine_strength : hint_range(0.0, 1.0) = 0.0;
 // Levels per color channel (PS1 framebuffer was 15-bit, i.e. 32 levels).
 uniform float color_depth : hint_range(2.0, 256.0) = 32.0;
 uniform bool dithering = true;

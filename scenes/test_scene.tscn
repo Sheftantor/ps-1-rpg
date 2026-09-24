@@ -2,6 +2,8 @@
 
 [ext_resource type="PackedScene" uid="uid://1gh1uj6b4gct" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="2_ps1"]
+[ext_resource type="Script" uid="uid://bn2gcman2e170" path="res://scripts/debug/debug_hud.gd" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="4_7ddre"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -51,3 +53,15 @@ shape = SubResource("BoxShape3D_ground")
 
 [node name="Player" parent="." unique_id=1209444035 instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+
+[node name="DebugHUD" type="CanvasLayer" parent="." unique_id=2055951171]
+script = ExtResource("3_hud")
+
+[node name="Label" type="Label" parent="DebugHUD" unique_id=2123353520]
+offset_left = 12.0
+offset_top = 8.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+
+[node name="Enemy" parent="." unique_id=1094493194 instance=ExtResource("4_7ddre")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.670521, 0, -6.6944394)
