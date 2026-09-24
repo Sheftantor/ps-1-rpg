@@ -1,0 +1,124 @@
+[gd_scene format=3 uid="uid://1gh1uj6b4gct"]
+
+[ext_resource type="Script" uid="uid://b8tucuckieblf" path="res://scripts/player/player.gd" id="1_player"]
+[ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="2_ps1"]
+[ext_resource type="Resource" path="res://resources/player/player_stats.tres" id="3_stats"]
+[ext_resource type="Script" uid="uid://ddr3jmrv1sw61" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
+[ext_resource type="Script" uid="uid://dm4ka8v6bajrj" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
+[ext_resource type="Script" uid="uid://b0a6txu5u8use" path="res://scripts/combat/health.gd" id="6_health"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_body"]
+render_priority = 0
+shader = ExtResource("2_ps1")
+shader_parameter/albedo_color = Color(0.85, 0.35, 0.25, 1)
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/checker_size = 8.0
+shader_parameter/checker_color = Color(0.7, 0.7, 0.7, 1)
+shader_parameter/snap_resolution = 240.0
+shader_parameter/affine_strength = 1.0
+shader_parameter/color_depth = 32.0
+shader_parameter/dithering = true
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+material = SubResource("ShaderMaterial_body")
+radius = 0.4
+height = 1.8
+radial_segments = 12
+rings = 4
+
+[sub_resource type="BoxMesh" id="BoxMesh_nose"]
+material = SubResource("ShaderMaterial_body")
+size = Vector3(0.18, 0.12, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
+size = Vector3(1.2, 1.2, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_debug"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.6, 0.2, 0.35)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hitbox"]
+material = SubResource("StandardMaterial3D_debug")
+size = Vector3(1.2, 1.2, 1.4)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.45
+height = 1.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+shading_mode = 0
+albedo_color = Color(1, 0.2, 0.2, 1)
+
+[sub_resource type="PrismMesh" id="PrismMesh_marker"]
+material = SubResource("StandardMaterial3D_marker")
+size = Vector3(0.35, 0.35, 0.08)
+
+[node name="Player" type="CharacterBody3D" unique_id=454185796]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_player")
+stats = ExtResource("3_stats")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1848658058]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Facing" type="Node3D" parent="." unique_id=1734982898]
+
+[node name="Body" type="MeshInstance3D" parent="Facing" unique_id=560092991]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Nose" type="MeshInstance3D" parent="Facing/Body" unique_id=1787000888]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -0.38)
+mesh = SubResource("BoxMesh_nose")
+
+[node name="Hitbox" type="Area3D" parent="Facing" unique_id=482295950]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1)
+collision_layer = 0
+collision_mask = 16
+monitoring = false
+monitorable = false
+script = ExtResource("4_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/Hitbox" unique_id=830540535]
+shape = SubResource("BoxShape3D_hitbox")
+
+[node name="DebugMesh" type="MeshInstance3D" parent="Facing/Hitbox" unique_id=1630489511]
+mesh = SubResource("BoxMesh_hitbox")
+
+[node name="Hurtbox" type="Area3D" parent="." unique_id=1919024979]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hurtbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox" unique_id=513532303]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="Health" type="Node" parent="." unique_id=1967515924]
+script = ExtResource("6_health")
+
+[node name="CameraRig" type="Node3D" parent="." unique_id=271155626]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraRig" unique_id=1841811412]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 0, 0, 0)
+spring_length = 4.5
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/SpringArm3D" unique_id=828223536]
+current = true
+fov = 70.0
+
+[node name="LockOnMarker" type="MeshInstance3D" parent="." unique_id=1665562181]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0)
+top_level = true
+visible = false
+mesh = SubResource("PrismMesh_marker")

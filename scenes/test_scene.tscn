@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://cxu7koee2sadi"]
+
+[ext_resource type="PackedScene" uid="uid://1gh1uj6b4gct" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="2_ps1"]
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.18, 0.2, 0.28, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.45, 0.45, 0.55, 1)
+ambient_light_energy = 0.6
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ground"]
+render_priority = 0
+shader = ExtResource("2_ps1")
+shader_parameter/albedo_color = Color(0.45, 0.55, 0.35, 1)
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/checker_size = 20.0
+shader_parameter/checker_color = Color(0.7, 0.7, 0.7, 1)
+shader_parameter/snap_resolution = 240.0
+shader_parameter/affine_strength = 1.0
+shader_parameter/color_depth = 32.0
+shader_parameter/dithering = true
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+material = SubResource("ShaderMaterial_ground")
+size = Vector2(40, 40)
+subdivide_width = 10
+subdivide_depth = 10
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(40, 1, 40)
+
+[node name="TestScene" type="Node3D" unique_id=123073449]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=686266642]
+environment = SubResource("Environment_main")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1569237265]
+transform = Transform3D(0.8660254, -0.25, 0.4330127, 0, 0.8660254, 0.5, -0.5, -0.4330127, 0.75, 0, 10, 0)
+light_energy = 1.2
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=1230819708]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=2142076094]
+mesh = SubResource("PlaneMesh_ground")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1395783727]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="Player" parent="." unique_id=1209444035 instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)

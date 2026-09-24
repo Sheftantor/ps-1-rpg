@@ -1,0 +1,139 @@
+[gd_scene load_steps=28 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy/enemy.gd" id="1_enemy"]
+[ext_resource type="Shader" path="res://shaders/ps1.gdshader" id="2_ps1"]
+[ext_resource type="Resource" path="res://resources/enemies/grunt_stats.tres" id="3_stats"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
+[ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
+[ext_resource type="Script" path="res://scripts/combat/health.gd" id="6_health"]
+[ext_resource type="Script" path="res://scripts/state_machine/state_machine.gd" id="7_machine"]
+[ext_resource type="Script" path="res://scripts/enemy/states/idle.gd" id="8_idle"]
+[ext_resource type="Script" path="res://scripts/enemy/states/aware.gd" id="9_aware"]
+[ext_resource type="Script" path="res://scripts/enemy/states/reposition.gd" id="10_reposition"]
+[ext_resource type="Script" path="res://scripts/enemy/states/approach.gd" id="11_approach"]
+[ext_resource type="Script" path="res://scripts/enemy/states/telegraph.gd" id="12_telegraph"]
+[ext_resource type="Script" path="res://scripts/enemy/states/attack.gd" id="13_attack"]
+[ext_resource type="Script" path="res://scripts/enemy/states/recover.gd" id="14_recover"]
+[ext_resource type="Script" path="res://scripts/enemy/states/stagger.gd" id="15_stagger"]
+[ext_resource type="Script" path="res://scripts/enemy/states/dead.gd" id="16_dead"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_body"]
+render_priority = 0
+shader = ExtResource("2_ps1")
+shader_parameter/albedo_color = Color(0.45, 0.3, 0.7, 1)
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/checker_size = 8.0
+shader_parameter/checker_color = Color(0.7, 0.7, 0.7, 1)
+shader_parameter/snap_resolution = 240.0
+shader_parameter/affine_strength = 1.0
+shader_parameter/color_depth = 32.0
+shader_parameter/dithering = true
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+material = SubResource("ShaderMaterial_body")
+radius = 0.45
+height = 1.9
+radial_segments = 12
+rings = 4
+
+[sub_resource type="BoxMesh" id="BoxMesh_nose"]
+material = SubResource("ShaderMaterial_body")
+size = Vector3(0.22, 0.14, 0.24)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.45
+height = 1.9
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
+size = Vector3(1.2, 1.2, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_debug"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.15, 0.15, 0.35)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hitbox"]
+material = SubResource("StandardMaterial3D_debug")
+size = Vector3(1.2, 1.2, 1.4)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.5
+height = 2.0
+
+[node name="Enemy" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_enemy")
+stats = ExtResource("3_stats")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Facing" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Facing"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Nose" type="MeshInstance3D" parent="Facing/Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -0.42)
+mesh = SubResource("BoxMesh_nose")
+
+[node name="Hitbox" type="Area3D" parent="Facing"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, -1)
+collision_layer = 0
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("4_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/Hitbox"]
+shape = SubResource("BoxShape3D_hitbox")
+
+[node name="DebugMesh" type="MeshInstance3D" parent="Facing/Hitbox"]
+mesh = SubResource("BoxMesh_hitbox")
+
+[node name="Hurtbox" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hurtbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("6_health")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("7_machine")
+initial_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("8_idle")
+
+[node name="Aware" type="Node" parent="StateMachine"]
+script = ExtResource("9_aware")
+
+[node name="Reposition" type="Node" parent="StateMachine"]
+script = ExtResource("10_reposition")
+
+[node name="Approach" type="Node" parent="StateMachine"]
+script = ExtResource("11_approach")
+
+[node name="Telegraph" type="Node" parent="StateMachine"]
+script = ExtResource("12_telegraph")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("13_attack")
+
+[node name="Recover" type="Node" parent="StateMachine"]
+script = ExtResource("14_recover")
+
+[node name="Stagger" type="Node" parent="StateMachine"]
+script = ExtResource("15_stagger")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("16_dead")

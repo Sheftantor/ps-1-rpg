@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="EnemyStats" format=3 uid="uid://bomowos6354nu"]
+
+[ext_resource type="Script" uid="uid://e4ea8tpb76l5" path="res://scripts/enemy/enemy_stats.gd" id="1_stats"]
+[ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="2_attack"]
+
+[sub_resource type="Resource" id="Resource_lunge"]
+script = ExtResource("2_attack")
+display_name = "Lunge"
+knockback = 5.0
+lunge_speed = 11.0
+startup_time = 0.0
+active_time = 0.25
+recovery_time = 0.6
+telegraph_time = 0.45
+max_range = 5.0
+telegraph_pulse_amount = 0.08
+telegraph_pulse_rate = 6.0
+
+[sub_resource type="Resource" id="Resource_swing"]
+script = ExtResource("2_attack")
+display_name = "Swing"
+damage = 25
+knockback = 8.0
+lunge_speed = 2.0
+startup_time = 0.0
+active_time = 0.2
+recovery_time = 0.9
+telegraph_time = 0.95
+max_range = 2.2
+telegraph_color = Color(1, 0.15, 0.1, 1)
+telegraph_pulse_amount = 0.18
+telegraph_pulse_rate = 3.0
+
+[resource]
+script = ExtResource("1_stats")
+attacks = Array[ExtResource("2_attack")]([SubResource("Resource_lunge"), SubResource("Resource_swing")])
