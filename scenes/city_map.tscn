@@ -1,0 +1,243 @@
+[gd_scene format=3]
+
+[ext_resource type="Environment" path="res://resources/rendering/city_night_environment.tres" id="1_ufokl"]
+[ext_resource type="Compositor" path="res://resources/rendering/ps1_compositor.tres" id="2_dib7t"]
+[ext_resource type="MeshLibrary" path="res://resources/city/city_kit_mesh_library.tres" id="3_m0ahl"]
+[ext_resource type="Script" path="res://scripts/city/city_building.gd" id="4_y67ky"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/street_light.tscn" id="5_si2a8"]
+
+[node name="CityMap" type="Node3D" unique_id=2118145010]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1384123027]
+environment = ExtResource("1_ufokl")
+compositor = ExtResource("2_dib7t")
+
+[node name="Moonlight" type="DirectionalLight3D" parent="." unique_id=2012829847]
+transform = Transform3D(0.81915206, 0.46984634, -0.32898995, 0, 0.57357645, 0.81915206, 0.57357645, -0.6710101, 0.46984634, 0, 0, 0)
+light_color = Color(0.55, 0.62, 0.8, 1)
+light_energy = 0.22
+
+[node name="Ground" type="GridMap" parent="." unique_id=665572149]
+mesh_library = ExtResource("3_m0ahl")
+cell_size = Vector3(4, 6, 4)
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(65529, 65529, 5, 65529, 65530, 5, 65529, 65531, 5, 65529, 65532, 5, 65529, 65533, 5, 65529, 65534, 5, 65529, 65535, 5, 65529, 0, 1048580, 65529, 1, 655365, 65529, 2, 5, 65529, 3, 5, 65529, 4, 5, 65529, 5, 5, 65529, 6, 5, 65529, 7, 5, 65530, 65529, 5, 65530, 65530, 5, 65530, 65531, 5, 65530, 65532, 5, 65530, 65533, 5, 65530, 65534, 5, 65530, 65535, 5, 65530, 0, 1048580, 65530, 1, 655365, 65530, 2, 5, 65530, 3, 5, 65530, 4, 5, 65530, 5, 5, 65530, 6, 5, 65530, 7, 5, 65531, 65529, 5, 65531, 65530, 5, 65531, 65531, 5, 65531, 65532, 5, 65531, 65533, 5, 65531, 65534, 5, 65531, 65535, 5, 65531, 0, 1048580, 65531, 1, 655365, 65531, 2, 5, 65531, 3, 5, 65531, 4, 5, 65531, 5, 5, 65531, 6, 5, 65531, 7, 5, 65532, 65529, 5, 65532, 65530, 5, 65532, 65531, 5, 65532, 65532, 5, 65532, 65533, 5, 65532, 65534, 5, 65532, 65535, 5, 65532, 0, 1048580, 65532, 1, 655365, 65532, 2, 5, 65532, 3, 5, 65532, 4, 5, 65532, 5, 5, 65532, 6, 5, 65532, 7, 5, 65533, 65529, 5, 65533, 65530, 5, 65533, 65531, 5, 65533, 65532, 5, 65533, 65533, 5, 65533, 65534, 5, 65533, 65535, 5, 65533, 0, 1048580, 65533, 1, 655365, 65533, 2, 5, 65533, 3, 5, 65533, 4, 5, 65533, 5, 5, 65533, 6, 5, 65533, 7, 5, 65534, 65529, 5, 65534, 65530, 5, 65534, 65531, 5, 65534, 65532, 5, 65534, 65533, 5, 65534, 65534, 5, 65534, 65535, 5, 65534, 0, 1048580, 65534, 1, 655365, 65534, 2, 5, 65534, 3, 5, 65534, 4, 5, 65534, 5, 5, 65534, 6, 5, 65534, 7, 5, 65535, 65529, 1048581, 65535, 65530, 1048581, 65535, 65531, 1048581, 65535, 65532, 1048581, 65535, 65533, 1048581, 65535, 65534, 1048581, 65535, 65535, 1048581, 65535, 0, 1048580, 65535, 1, 1048581, 65535, 2, 1048581, 65535, 3, 1048581, 65535, 4, 1048581, 65535, 5, 1048581, 65535, 6, 1048581, 65535, 7, 1048581, 0, 65529, 4, 0, 65530, 4, 0, 65531, 4, 0, 65532, 4, 0, 65533, 4, 0, 65534, 4, 0, 65535, 4, 0, 0, 8, 0, 1, 4, 0, 2, 4, 0, 3, 4, 0, 4, 4, 0, 5, 4, 0, 6, 4, 0, 7, 4, 1, 65529, 1441797, 1, 65530, 1441797, 1, 65531, 1441797, 1, 65532, 1441797, 1, 65533, 1441797, 1, 65534, 1441797, 1, 65535, 1441797, 1, 0, 1048580, 1, 1, 1441797, 1, 2, 1441797, 1, 3, 1441797, 1, 4, 1441797, 1, 5, 1441797, 1, 6, 1441797, 1, 7, 1441797, 2, 65529, 5, 2, 65530, 5, 2, 65531, 5, 2, 65532, 5, 2, 65533, 5, 2, 65534, 5, 2, 65535, 5, 2, 0, 1048580, 2, 1, 655365, 2, 2, 5, 2, 3, 5, 2, 4, 5, 2, 5, 5, 2, 6, 5, 2, 7, 5, 3, 65529, 5, 3, 65530, 5, 3, 65531, 5, 3, 65532, 5, 3, 65533, 5, 3, 65534, 5, 3, 65535, 5, 3, 0, 1048580, 3, 1, 655365, 3, 2, 5, 3, 3, 5, 3, 4, 5, 3, 5, 5, 3, 6, 5, 3, 7, 5, 4, 65529, 5, 4, 65530, 5, 4, 65531, 5, 4, 65532, 5, 4, 65533, 5, 4, 65534, 5, 4, 65535, 5, 4, 0, 1048580, 4, 1, 655365, 4, 2, 5, 4, 3, 5, 4, 4, 5, 4, 5, 5, 4, 6, 5, 4, 7, 5, 5, 65529, 5, 5, 65530, 5, 5, 65531, 5, 5, 65532, 5, 5, 65533, 5, 5, 65534, 5, 5, 65535, 5, 5, 0, 1048580, 5, 1, 655365, 5, 2, 5, 5, 3, 5, 5, 4, 5, 5, 5, 5, 5, 6, 5, 5, 7, 5, 6, 65529, 5, 6, 65530, 5, 6, 65531, 5, 6, 65532, 5, 6, 65533, 5, 6, 65534, 5, 6, 65535, 5, 6, 0, 1048580, 6, 1, 655365, 6, 2, 5, 6, 3, 5, 6, 4, 5, 6, 5, 5, 6, 6, 5, 6, 7, 5, 7, 65529, 5, 7, 65530, 5, 7, 65531, 5, 7, 65532, 5, 7, 65533, 5, 7, 65534, 5, 7, 65535, 5, 7, 0, 1048580, 7, 1, 655365, 7, 2, 5, 7, 3, 5, 7, 4, 5, 7, 5, 5, 7, 6, 5, 7, 7, 5)
+}
+
+[node name="Structures" type="GridMap" parent="." unique_id=360230781]
+mesh_library = ExtResource("3_m0ahl")
+cell_size = Vector3(4, 6, 4)
+cell_center_y = false
+data = {
+"cells": PackedInt32Array(0, 65531, 7, 0, 3, 655367, 0, 6, 7, 4, 0, 1048583, 65531, 0, 1441799, 1, 65535, 6, 65535, 1, 655366)
+}
+
+[node name="Buildings" type="Node3D" parent="." unique_id=1405684]
+
+[node name="Building0" type="Node3D" parent="Buildings" unique_id=32505349]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8, 0, -28)
+script = ExtResource("4_y67ky")
+fire_escape = true
+
+[node name="Building1" type="Node3D" parent="Buildings" unique_id=1983165295]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.9999995, 0, -20)
+script = ExtResource("4_y67ky")
+width_cells = 1
+floors = 5
+tint = Color(0.92, 0.88, 0.84, 1)
+
+[node name="Building2" type="Node3D" parent="Buildings" unique_id=1006969995]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.9999995, 0, -16)
+script = ExtResource("4_y67ky")
+style = 1
+width_cells = 1
+tint = Color(0.86, 0.87, 0.9, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building3" type="Node3D" parent="Buildings" unique_id=1143291355]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.9999995, 0, -12)
+script = ExtResource("4_y67ky")
+style = 1
+floors = 6
+tint = Color(0.95, 0.9, 0.9, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building4" type="Node3D" parent="Buildings" unique_id=580149675]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -4)
+script = ExtResource("4_y67ky")
+style = 2
+width_cells = 3
+floors = 9
+tint = Color(0.82, 0.8, 0.78, 1)
+
+[node name="Building5" type="Node3D" parent="Buildings" unique_id=1505302716]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -16)
+script = ExtResource("4_y67ky")
+style = 3
+width_cells = 3
+floors = 22
+
+[node name="Building6" type="Node3D" parent="Buildings" unique_id=823878324]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8, 0, 8)
+script = ExtResource("4_y67ky")
+width_cells = 1
+tint = Color(0.92, 0.88, 0.84, 1)
+
+[node name="Building7" type="Node3D" parent="Buildings" unique_id=856121286]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8, 0, 12)
+script = ExtResource("4_y67ky")
+width_cells = 1
+tint = Color(0.86, 0.87, 0.9, 1)
+fire_escape = true
+
+[node name="Building8" type="Node3D" parent="Buildings" unique_id=993764340]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.9999995, 0, 16)
+script = ExtResource("4_y67ky")
+style = 1
+floors = 5
+tint = Color(0.95, 0.9, 0.9, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building9" type="Node3D" parent="Buildings" unique_id=393598099]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.9999995, 0, 24)
+script = ExtResource("4_y67ky")
+style = 2
+floors = 8
+tint = Color(0.82, 0.8, 0.78, 1)
+
+[node name="Building10" type="Node3D" parent="Buildings" unique_id=91895715]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 32, 0, 8)
+script = ExtResource("4_y67ky")
+style = 1
+width_cells = 1
+fire_escape = true
+
+[node name="Building11" type="Node3D" parent="Buildings" unique_id=960099208]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 28, 0, 8)
+script = ExtResource("4_y67ky")
+floors = 5
+tint = Color(0.92, 0.88, 0.84, 1)
+water_tower = true
+
+[node name="Building12" type="Node3D" parent="Buildings" unique_id=1083659809]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 32, 0, 20)
+script = ExtResource("4_y67ky")
+style = 1
+width_cells = 3
+floors = 7
+tint = Color(0.86, 0.87, 0.9, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building13" type="Node3D" parent="Buildings" unique_id=217892666]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4, 0, -4)
+script = ExtResource("4_y67ky")
+style = 2
+width_cells = 3
+floors = 14
+tint = Color(0.95, 0.9, 0.9, 1)
+
+[node name="Building14" type="Node3D" parent="Buildings" unique_id=1328711529]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4.0000005, 0, -16)
+script = ExtResource("4_y67ky")
+width_cells = 1
+tint = Color(0.82, 0.8, 0.78, 1)
+water_tower = true
+
+[node name="Building15" type="Node3D" parent="Buildings" unique_id=1504399865]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4.0000005, 0, -20)
+script = ExtResource("4_y67ky")
+style = 1
+floors = 5
+fire_escape = true
+
+[node name="Building16" type="Node3D" parent="Buildings" unique_id=1374796413]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0, -4)
+script = ExtResource("4_y67ky")
+style = 1
+floors = 6
+tint = Color(0.92, 0.88, 0.84, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building17" type="Node3D" parent="Buildings" unique_id=1675952979]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -4)
+script = ExtResource("4_y67ky")
+width_cells = 1
+floors = 3
+tint = Color(0.86, 0.87, 0.9, 1)
+
+[node name="Building18" type="Node3D" parent="Buildings" unique_id=1972278823]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0, -16)
+script = ExtResource("4_y67ky")
+style = 2
+width_cells = 3
+floors = 18
+tint = Color(0.95, 0.9, 0.9, 1)
+
+[node name="Building19" type="Node3D" parent="Buildings" unique_id=1551742761]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4, 0, 32)
+script = ExtResource("4_y67ky")
+tint = Color(0.82, 0.8, 0.78, 1)
+fire_escape = true
+
+[node name="Building20" type="Node3D" parent="Buildings" unique_id=939749492]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4.0000005, 0, 24)
+script = ExtResource("4_y67ky")
+style = 1
+floors = 5
+water_tower = true
+
+[node name="Building21" type="Node3D" parent="Buildings" unique_id=171215921]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4.0000005, 0, 16)
+script = ExtResource("4_y67ky")
+tint = Color(0.92, 0.88, 0.84, 1)
+fire_escape = true
+
+[node name="Building22" type="Node3D" parent="Buildings" unique_id=155240014]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16, 0, 8)
+script = ExtResource("4_y67ky")
+style = 1
+width_cells = 3
+floors = 5
+tint = Color(0.86, 0.87, 0.9, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building23" type="Node3D" parent="Buildings" unique_id=2108265853]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16, 0, 20)
+script = ExtResource("4_y67ky")
+width_cells = 3
+floors = 5
+tint = Color(0.95, 0.9, 0.9, 1)
+water_tower = true
+
+[node name="StreetLights" type="Node3D" parent="." unique_id=1385488206]
+
+[node name="StreetLight0" type="Node3D" parent="StreetLights" unique_id=56464907 instance=ExtResource("5_si2a8")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 4.5, 0, -22)
+
+[node name="StreetLight1" type="Node3D" parent="StreetLights" unique_id=972208168 instance=ExtResource("5_si2a8")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -22, 0, 4.5)
+
+[node name="StreetLight2" type="Node3D" parent="StreetLights" unique_id=1586078330 instance=ExtResource("5_si2a8")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.5, 0, -10)
+
+[node name="StreetLight3" type="Node3D" parent="StreetLights" unique_id=1971972657 instance=ExtResource("5_si2a8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -0.5)
+
+[node name="StreetLight4" type="Node3D" parent="StreetLights" unique_id=1812292341 instance=ExtResource("5_si2a8")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.5, 0, 14)
+
+[node name="StreetLight5" type="Node3D" parent="StreetLights" unique_id=1329161203 instance=ExtResource("5_si2a8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -0.5)
+
+[node name="StreetLight6" type="Node3D" parent="StreetLights" unique_id=1442050173 instance=ExtResource("5_si2a8")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 4.5, 0, 26)
+
+[node name="StreetLight7" type="Node3D" parent="StreetLights" unique_id=1808163442 instance=ExtResource("5_si2a8")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 26, 0, 4.5)

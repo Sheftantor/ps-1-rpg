@@ -1,0 +1,39 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/city_kit/wall_plain.tscn" id="1_wall_plain"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/wall_door.tscn" id="2_wall_door"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/wall_window.tscn" id="3_wall_window"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/wall_corner.tscn" id="4_wall_corner"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/road.tscn" id="5_road"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/sidewalk.tscn" id="6_sidewalk"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/stop_sign.tscn" id="7_stop_sign"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/car.tscn" id="8_car"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/road_intersection.tscn" id="9_road_intersection"]
+
+[node name="CityKit" type="Node3D"]
+
+[node name="WallPlain" parent="." instance=ExtResource("1_wall_plain")]
+
+[node name="WallDoor" parent="." instance=ExtResource("2_wall_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="WallWindow" parent="." instance=ExtResource("3_wall_window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+
+[node name="WallCorner" parent="." instance=ExtResource("4_wall_corner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 0)
+
+[node name="Road" parent="." instance=ExtResource("5_road")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 0)
+
+[node name="Sidewalk" parent="." instance=ExtResource("6_sidewalk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 0)
+
+[node name="StopSign" parent="." instance=ExtResource("7_stop_sign")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, 0)
+
+[node name="Car" parent="." instance=ExtResource("8_car")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 0, 0)
+
+[node name="RoadIntersection" parent="." instance=ExtResource("9_road_intersection")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 0)

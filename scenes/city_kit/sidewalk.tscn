@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/sidewalk_concrete.tres" id="1_walk"]
+[ext_resource type="Material" path="res://resources/materials/city/curb_concrete.tres" id="2_curb"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_slab"]
+material = ExtResource("1_walk")
+size = Vector3(4, 0.35, 3.7)
+subdivide_width = 3
+subdivide_depth = 3
+
+[sub_resource type="BoxMesh" id="BoxMesh_curb"]
+material = ExtResource("2_curb")
+size = Vector3(4, 0.37, 0.3)
+subdivide_width = 3
+
+[node name="Sidewalk" type="Node3D"]
+
+[node name="Slab" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.025, -0.15)
+mesh = SubResource("BoxMesh_slab")
+
+[node name="Curb" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.015, 1.85)
+mesh = SubResource("BoxMesh_curb")

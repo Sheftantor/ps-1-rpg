@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="1_ps1"]
+[ext_resource type="Texture2D" path="res://textures/city/asphalt_lane.png" id="2_tex"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/albedo_texture = ExtResource("2_tex")
+shader_parameter/box_projection = true
+shader_parameter/uv_scale = Vector2(0.25, 0.25)
+shader_parameter/uv_offset = Vector2(0.5, 0.5)
+shader_parameter/wet_sheen = 1.0

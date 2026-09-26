@@ -4,6 +4,9 @@
 [ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="2_ps1"]
 [ext_resource type="Script" uid="uid://bn2gcman2e170" path="res://scripts/debug/debug_hud.gd" id="3_hud"]
 [ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="4_7ddre"]
+[ext_resource type="PackedScene" uid="uid://0b5xe2irdfvq" path="res://Import/basement.glb" id="5_qjeyg"]
+[ext_resource type="PackedScene" path="res://scenes/city_map.tscn" id="6_wtsjf"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/sidewalk.tscn" id="7_rnaij"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -17,12 +20,20 @@ render_priority = 0
 shader = ExtResource("2_ps1")
 shader_parameter/albedo_color = Color(0.45, 0.55, 0.35, 1)
 shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
 shader_parameter/checker_size = 20.0
 shader_parameter/checker_color = Color(0.7, 0.7, 0.7, 1)
-shader_parameter/snap_resolution = 240.0
-shader_parameter/affine_strength = 1.0
-shader_parameter/color_depth = 32.0
-shader_parameter/dithering = true
+shader_parameter/emission_color = Color(0, 0, 0, 1)
+shader_parameter/emission_energy = 1.0
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
 material = SubResource("ShaderMaterial_ground")
@@ -43,6 +54,7 @@ transform = Transform3D(0.8660254, -0.25, 0.4330127, 0, 0.8660254, 0.5, -0.5, -0
 light_energy = 1.2
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1230819708]
+visible = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=2142076094]
 mesh = SubResource("PlaneMesh_ground")
@@ -65,3 +77,13 @@ theme_override_constants/outline_size = 4
 
 [node name="Enemy" parent="." unique_id=1094493194 instance=ExtResource("4_7ddre")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.670521, 0, -6.6944394)
+
+[node name="Sketchfab_Scene" parent="." unique_id=749342613 instance=ExtResource("5_qjeyg")]
+transform = Transform3D(0.305, 0, 0, 0, 0.305, 0, 0, 0, 0.305, 0.22974253, 0.030485153, 0.8006449)
+visible = false
+
+[node name="CityMap" parent="." unique_id=2087936432 instance=ExtResource("6_wtsjf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.747069, 0, -0.3973183)
+
+[node name="Sidewalk" parent="." unique_id=586342197 instance=ExtResource("7_rnaij")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.7360077, 0, 17.559711)

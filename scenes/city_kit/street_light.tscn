@@ -1,0 +1,45 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/streetlight_pole.tres" id="1_pole"]
+[ext_resource type="Material" path="res://resources/materials/city/lamp_glow.tres" id="2_glow"]
+
+[node name="StreetLight" type="Node3D"]
+
+[node name="Geometry" type="CSGCombiner3D" parent="."]
+use_collision = true
+
+[node name="Base" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+size = Vector3(0.35, 0.5, 0.35)
+material = ExtResource("1_pole")
+
+[node name="Pole" type="CSGCylinder3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.25, 0)
+radius = 0.08
+height = 6.5
+sides = 6
+material = ExtResource("1_pole")
+
+[node name="Arm" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.35, 0.9)
+size = Vector3(0.08, 0.08, 1.8)
+material = ExtResource("1_pole")
+
+[node name="Head" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.3, 1.85)
+size = Vector3(0.35, 0.18, 0.75)
+material = ExtResource("1_pole")
+
+[node name="Lens" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, 1.85)
+size = Vector3(0.28, 0.04, 0.6)
+material = ExtResource("2_glow")
+
+[node name="Light" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 6.1, 1.85)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 5.0
+spot_range = 13.0
+spot_attenuation = 0.8
+spot_angle = 62.0
+spot_angle_attenuation = 0.6

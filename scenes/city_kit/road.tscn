@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/road_asphalt.tres" id="1_road"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_slab"]
+material = ExtResource("1_road")
+size = Vector3(4, 0.2, 4)
+subdivide_width = 3
+subdivide_depth = 3
+
+[node name="Road" type="Node3D"]
+
+[node name="Slab" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = SubResource("BoxMesh_slab")

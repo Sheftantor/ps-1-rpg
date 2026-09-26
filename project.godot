@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 BeckettRuntime="*uid://do68dqybesb7r"
+PS1Renderer="*res://scripts/rendering/ps1_renderer.gd"
 
 [beckett]
 
@@ -40,3 +41,14 @@ enabled=PackedStringArray("res://addons/beckett/plugin.cfg")
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+
+[shader_globals]
+
+ps1_snap_resolution={
+"type": "float",
+"value": 240.0
+}
+ps1_affine_strength={
+"type": "float",
+"value": 1.0
+}

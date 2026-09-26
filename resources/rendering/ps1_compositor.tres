@@ -1,0 +1,15 @@
+[gd_resource type="Compositor" format=3 uid="uid://35rtppk6kiau"]
+
+[ext_resource type="Script" uid="uid://dsrvuddh80tmf" path="res://scripts/rendering/ps1_post_effect.gd" id="1_effect"]
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_ps1"]
+resource_local_to_scene = false
+resource_name = "PS1PostEffect"
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("1_effect")
+
+[resource]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_ps1")])

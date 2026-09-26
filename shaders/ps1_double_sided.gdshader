@@ -1,0 +1,5 @@
+// Double-sided variant of ps1.gdshader (no backface culling).
+shader_type spatial;
+render_mode diffuse_lambert, specular_disabled, vertex_lighting, cull_disabled;
+
+#include "res://shaders/ps1.gdshaderinc"
