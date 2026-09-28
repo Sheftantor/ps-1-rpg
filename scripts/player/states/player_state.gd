@@ -32,6 +32,12 @@ func stamina_regen_scale() -> float:
 	return 1.0
 
 
+## Whether this state plays its own animation. Otherwise Player picks
+## locomotion (idle/walk/run/jump) from the body's movement.
+func drives_animation() -> bool:
+	return false
+
+
 ## Idle/Move: start whatever is waiting in the input buffer, or Block while its
 ## input is held. Returns true if this changed state.
 func try_neutral_action() -> bool:

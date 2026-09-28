@@ -1,0 +1,59 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="1_ps1"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_steel"]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(0.72, 0.75, 0.8, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_brass"]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(0.62, 0.46, 0.2, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_leather"]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(0.26, 0.15, 0.08, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_blade"]
+material = SubResource("ShaderMaterial_steel")
+size = Vector3(0.036, 0.36, 0.007)
+
+[sub_resource type="PrismMesh" id="PrismMesh_tip"]
+material = SubResource("ShaderMaterial_steel")
+size = Vector3(0.036, 0.06, 0.007)
+
+[sub_resource type="BoxMesh" id="BoxMesh_guard"]
+material = SubResource("ShaderMaterial_brass")
+size = Vector3(0.11, 0.016, 0.026)
+
+[sub_resource type="BoxMesh" id="BoxMesh_grip"]
+material = SubResource("ShaderMaterial_leather")
+size = Vector3(0.018, 0.085, 0.018)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pommel"]
+material = SubResource("ShaderMaterial_brass")
+size = Vector3(0.028, 0.022, 0.028)
+
+[node name="Sword" type="Node3D"]
+
+[node name="Blade" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.238, 0)
+mesh = SubResource("BoxMesh_blade")
+
+[node name="Tip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.448, 0)
+mesh = SubResource("PrismMesh_tip")
+
+[node name="Guard" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("BoxMesh_guard")
+
+[node name="Grip" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_grip")
+
+[node name="Pommel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.053, 0)
+mesh = SubResource("BoxMesh_pommel")

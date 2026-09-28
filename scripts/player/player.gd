@@ -25,6 +25,32 @@ const HIT_FLASH_TIME: float = 0.12
 const LOCK_ON_MARKER_HEIGHT: float = 2.4
 const RESPAWN_DELAY: float = 1.5
 
+## Clips on the model's AnimationPlayer, built by
+## res://scripts/tools/build_player_animations.gd.
+const ANIM_IDLE: StringName = &"Idle"
+const ANIM_WALK: StringName = &"Walking"
+const ANIM_RUN: StringName = &"Running"
+const ANIM_JUMP: StringName = &"Jump"
+const ANIM_ATTACK: StringName = &"Attack"
+const ANIM_STRONG_ATTACK: StringName = &"StrongAttack"
+const ANIM_AIR_ATTACK: StringName = &"AirAttack"
+const ANIM_AIR_STRONG_ATTACK: StringName = &"AirStrongAttack"
+## Second name for the attack clips so a combo hit can crossfade into a fresh
+## copy of the swing that's already playing.
+const ANIM_CHAIN_LIBRARY: StringName = &"chain"
+## Ground speeds (m/s) where locomotion switches clip, and the speeds the
+## Walking/Running clips cover at 1x, which playback is scaled to match.
+const WALK_MIN_SPEED: float = 0.4
+const RUN_MIN_SPEED: float = 3.5
+const WALK_CLIP_SPEED: float = 1.7
+const RUN_CLIP_SPEED: float = 4.4
+## Where the Jump clip's falling pose starts, for walking off a ledge.
+const JUMP_FALL_TIME: float = 0.7
+## Airborne this long without jumping before the fall pose plays (slopes, steps).
+const FALL_ANIM_DELAY: float = 0.12
+const LOCOMOTION_BLEND: float = 0.15
+const ATTACK_BLEND: float = 0.06
+
 @export var stats: PlayerStats
 @export var loadout: PlayerLoadout
 @export var mouse_sensitivity: float = 0.0025
@@ -56,6 +82,9 @@ var _post_hit_timer: float = 0.0
 var _hit_flash_timer: float = 0.0
 var _hit_flash_color: Color = HIT_FLASH_COLOR
 var _debug_hit: AttackData
+var _air_time: float = 0.0
+## Every mesh on the model (body and sword), for hit/state flashes.
+var _flash_meshes: Array[GeometryInstance3D] = []
 
 @onready var health: Health = $Health
 @onready var stamina: Stamina = $Stamina
@@ -63,7 +92,7 @@ var _debug_hit: AttackData
 @onready var command_menu: CommandMenu = $CommandMenu
 @onready var hitbox: Hitbox = $Facing/Hitbox
 @onready var _facing: Node3D = $Facing
-@onready var _body_mesh: MeshInstance3D = $Facing/Body
+@onready var _anim: AnimationPlayer = $Facing/Model/AnimationPlayer
 @onready var _hurtbox: Hurtbox = $Hurtbox
 @onready var _camera_rig: Node3D = $CameraRig
 @onready var _spring_arm: SpringArm3D = $CameraRig/SpringArm3D
@@ -89,6 +118,13 @@ func _ready() -> void:
 	_debug_hit.display_name = "Debug hit"
 	_debug_hit.damage = debug_hit_damage
 	_debug_hit.knockback = debug_hit_knockback
+
+	for node: Node in $Facing/Model.find_children("*", "GeometryInstance3D"):
+		_flash_meshes.append(node as GeometryInstance3D)
+	var chain := AnimationLibrary.new()
+	for anim_name: StringName in [ANIM_ATTACK, ANIM_STRONG_ATTACK, ANIM_AIR_ATTACK, ANIM_AIR_STRONG_ATTACK]:
+		chain.add_animation(anim_name, _anim.get_animation(anim_name))
+	_anim.add_animation_library(ANIM_CHAIN_LIBRARY, chain)
 
 	state_machine.start(self)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -135,6 +171,7 @@ func _physics_process(delta: float) -> void:
 
 	_hurtbox.invulnerable = _post_hit_timer > 0.0 or current_state().is_invulnerable()
 	_update_lock_on_camera(delta)
+	_update_animation(delta)
 	_update_visuals()
 
 
@@ -411,4 +448,59 @@ func _update_visuals() -> void:
 	var flash := state_flash
 	if _hit_flash_timer > 0.0:
 		flash = _hit_flash_color
-	_body_mesh.set_instance_shader_parameter(&"flash_color", flash)
+	for mesh: GeometryInstance3D in _flash_meshes:
+		mesh.set_instance_shader_parameter(&"flash_color", flash)
+
+
+# --- Animation ------------------------------------------------------------------
+
+## Plays the attack or strong attack swing (the air version while airborne),
+## sped up or slowed to last `duration` so the swing lines up with the
+## attack's startup/active/recovery timing.
+func play_attack_animation(strong: bool, duration: float) -> void:
+	var anim_name: StringName
+	if is_on_floor():
+		anim_name = ANIM_STRONG_ATTACK if strong else ANIM_ATTACK
+	else:
+		anim_name = ANIM_AIR_STRONG_ATTACK if strong else ANIM_AIR_ATTACK
+	# play() on the clip that's already assigned wouldn't restart or blend, so
+	# a combo hit alternates with the clip's copy in the chain library.
+	if _anim.assigned_animation == anim_name:
+		anim_name = StringName("%s/%s" % [ANIM_CHAIN_LIBRARY, anim_name])
+	var length := _anim.get_animation(anim_name).length
+	_anim.speed_scale = 1.0
+	_anim.play(anim_name, ATTACK_BLEND, clampf(length / maxf(duration, 0.01), 0.5, 2.0))
+
+
+## States that don't drive the animation themselves (everything but attacks)
+## get locomotion: idle/walk/run by ground speed, or the jump clip in the air.
+func _update_animation(delta: float) -> void:
+	_air_time = 0.0 if is_on_floor() else _air_time + delta
+	if current_state().drives_animation():
+		return
+
+	if not is_on_floor():
+		if _anim.assigned_animation == ANIM_JUMP:
+			return
+		var jumped := velocity.y > 0.0 and _air_time <= FALL_ANIM_DELAY
+		if not jumped and _air_time < FALL_ANIM_DELAY:
+			return
+		_anim.speed_scale = 1.0
+		_anim.play(ANIM_JUMP, LOCOMOTION_BLEND)
+		if not jumped:
+			_anim.seek(JUMP_FALL_TIME)
+		return
+
+	var speed := Vector2(velocity.x, velocity.z).length()
+	if speed >= RUN_MIN_SPEED:
+		_play_locomotion(ANIM_RUN, speed / RUN_CLIP_SPEED)
+	elif speed >= WALK_MIN_SPEED:
+		_play_locomotion(ANIM_WALK, speed / WALK_CLIP_SPEED)
+	else:
+		_play_locomotion(ANIM_IDLE, 1.0)
+
+
+func _play_locomotion(anim_name: StringName, playback_speed: float) -> void:
+	_anim.speed_scale = clampf(playback_speed, 0.6, 2.0)
+	if _anim.current_animation != anim_name:
+		_anim.play(anim_name, LOCOMOTION_BLEND)

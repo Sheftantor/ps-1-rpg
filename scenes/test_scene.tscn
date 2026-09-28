@@ -87,3 +87,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.747069, 0, -0.3973183)
 
 [node name="Sidewalk" parent="." unique_id=586342197 instance=ExtResource("7_rnaij")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -7.7360077, 0, 17.559711)
+
+[node name="Enemy2" parent="." unique_id=121416347 instance=ExtResource("4_7ddre")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.207267, 0.1500001, 5.28902)
+
+[node name="Enemy3" parent="." unique_id=355887847 instance=ExtResource("4_7ddre")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.061545, 2.3841858e-07, 1.1796532)

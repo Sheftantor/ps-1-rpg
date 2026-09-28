@@ -12,10 +12,20 @@ func begin(new_attack: AttackData) -> void:
 	elapsed = 0.0
 	player.hitbox.deactivate()
 	player.aim_attack()
+	player.play_attack_animation(is_strong(), attack.startup_time + attack.active_time + attack.recovery_time)
 
 
 func exit() -> void:
 	player.hitbox.deactivate()
+
+
+## Strong attacks play the heavier StrongAttack/AirStrongAttack swing.
+func is_strong() -> bool:
+	return false
+
+
+func drives_animation() -> bool:
+	return true
 
 
 ## Advances the timeline. Returns true once recovery is over.

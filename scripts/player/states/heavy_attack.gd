@@ -10,6 +10,10 @@ func enter(msg: Dictionary) -> void:
 	begin(skill_attack if skill_attack != null else player.stats.heavy_attack)
 
 
+func is_strong() -> bool:
+	return true
+
+
 func physics_update(delta: float) -> void:
 	var finished := advance(delta)
 	if elapsed < attack.startup_time:
