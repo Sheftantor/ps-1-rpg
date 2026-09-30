@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/city_kit/wall_plain.tscn" id="1_wall_plain"]
 [ext_resource type="PackedScene" path="res://scenes/city_kit/wall_door.tscn" id="2_wall_door"]
@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" path="res://scenes/city_kit/stop_sign.tscn" id="7_stop_sign"]
 [ext_resource type="PackedScene" path="res://scenes/city_kit/car.tscn" id="8_car"]
 [ext_resource type="PackedScene" path="res://scenes/city_kit/road_intersection.tscn" id="9_road_intersection"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/road_one_way.tscn" id="10_road_one_way"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/car_left_lane.tscn" id="11_car_left_lane"]
 
 [node name="CityKit" type="Node3D"]
 
@@ -37,3 +39,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 0, 0)
 
 [node name="RoadIntersection" parent="." instance=ExtResource("9_road_intersection")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 0)
+
+[node name="RoadOneWay" parent="." instance=ExtResource("10_road_one_way")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, 0, 0)
+
+[node name="CarLeftLane" parent="." instance=ExtResource("11_car_left_lane")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 0)

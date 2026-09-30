@@ -34,6 +34,17 @@ window/stretch/aspect="expand"
 
 enabled=PackedStringArray("res://addons/beckett/plugin.cfg")
 
+[file_customization]
+
+folder_colors={
+"res://Import/": "red",
+"res://resources/": "orange",
+"res://scenes/": "yellow",
+"res://scripts/": "green",
+"res://shaders/": "teal",
+"res://textures/": "blue"
+}
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

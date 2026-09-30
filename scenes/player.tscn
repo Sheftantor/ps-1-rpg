@@ -62,6 +62,8 @@ size = Vector3(0.35, 0.35, 0.08)
 [node name="Player" type="CharacterBody3D" unique_id=454185796]
 collision_layer = 2
 collision_mask = 5
+floor_max_angle = 1.0471976
+floor_snap_length = 0.25
 script = ExtResource("1_player")
 stats = ExtResource("3_stats")
 loadout = ExtResource("7_loadout")

@@ -55,7 +55,10 @@ const AIM_BLEND_SPEED: float = 8.0
 ## the left hip, blade angled down and back.
 const SHEATH_OFFSET: Vector3 = Vector3(-0.22, 0.95, 0.08)
 const SHEATH_BLADE_DIR: Vector3 = Vector3(0.0, -0.75, 0.66)
-const SHOT_COLLISION_MASK: int = 1 | 4  # world + character bodies
+## Shots at a locked target are only stopped by the world (layer 1); an unaimed
+## shot also hits character bodies (layer 3).
+const SHOT_WORLD_MASK: int = 1
+const SHOT_COLLISION_MASK: int = 1 | 4
 const MUZZLE_FLASH_TIME: float = 0.06
 ## Ground speeds (m/s) each locomotion clip covers at 1x. The blend space puts
 ## walk at 1 and run at 2; playback is scaled so feet roughly match the ground.
@@ -637,19 +640,27 @@ func _sheathe_sword(sheathed: bool) -> void:
 
 
 ## Resolves one shot at `target` (or straight ahead with none): a ray from the
-## player's chest to the target's chest. If nothing solid is in the way, the hit
-## goes through the enemy's Hurtbox like a sword hit, at full damage within the
-## gun's effective range and reduced beyond it.
+## player's chest to the target's chest. Walls and props block it; other enemies
+## don't, so a queued shot lands on the enemy that was locked. The hit goes
+## through the enemy's Hurtbox like a sword hit, at full damage within the gun's
+## effective range and reduced beyond it.
 func fire_gun(target: Enemy) -> void:
 	_play_action(ANIM_AIM_FIRE, 1.0)
 	_show_muzzle_flash()
 	var origin := aim_origin()
-	var end := aim_point(target) if target != null else origin + forward() * gun.lock_range
-	var query := PhysicsRayQueryParameters3D.create(origin, end, SHOT_COLLISION_MASK, [get_rid()])
-	var result := get_world_3d().direct_space_state.intersect_ray(query)
-	var enemy := result.get("collider") as Enemy
+	var space := get_world_3d().direct_space_state
+	var enemy := target
+	if target != null:
+		var wall := space.intersect_ray(PhysicsRayQueryParameters3D.create(origin, aim_point(target), SHOT_WORLD_MASK, [get_rid()]))
+		if not wall.is_empty():
+			last_hit_result = "shot blocked"
+			return
+	else:
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(origin, origin + forward() * gun.lock_range,
+				SHOT_COLLISION_MASK, [get_rid()]))
+		enemy = hit.get("collider") as Enemy
 	if enemy == null or not enemy.is_alive():
-		last_hit_result = "shot missed" if result.is_empty() else "shot blocked"
+		last_hit_result = "shot missed"
 		return
 	var attack := gun.shot
 	if flat_distance_to(enemy) > gun.effective_range:

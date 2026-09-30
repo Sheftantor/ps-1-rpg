@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_save(_brick_wall(), "brick_wall")
 	_save(_asphalt(true), "asphalt_lane")
 	_save(_asphalt(false), "asphalt_plain")
+	_save(_asphalt_one_way(), "asphalt_one_way")
 	_save(_sidewalk(), "sidewalk")
 	_save(_roof_tar(), "roof_tar")
 	_save(_stone_trim(), "stone_trim")
@@ -117,6 +118,35 @@ func _asphalt(lane_markings: bool) -> Image:
 			for x in [31, 32]:
 				if _rng.randf() < 0.75:
 					image.set_pixel(x, y, Color(0.5, 0.48, 0.4))
+	return image
+
+
+## One half of an 8m one-way street (two tiles, the second rotated 180): curb
+## gutter and a 2m parking lane at u=0, a solid line, a 2m travel lane, and half
+## of the dashed divider between the two same-direction travel lanes at u=1.
+func _asphalt_one_way() -> Image:
+	_rng.seed = 616
+	var image := _blank(64, 64)
+	_rect(image, 0, 0, 64, 64, Color(0.17, 0.17, 0.18), 0.025)
+	for i in 90:
+		image.set_pixel(_rng.randi_range(0, 63), _rng.randi_range(0, 63), Color(0.24, 0.24, 0.24))
+	for i in 3:
+		_crack(image, Color(0.1, 0.1, 0.11), 18)
+	# Parking lane: slightly patchier, oil-stained asphalt.
+	for i in 6:
+		var cx := _rng.randi_range(4, 26)
+		var cy := _rng.randi_range(0, 63)
+		for j in 10:
+			_set_wrapped(image, Vector2i(cx + _rng.randi_range(-3, 3), cy + _rng.randi_range(-3, 3)), Color(0.13, 0.13, 0.14))
+	_rect(image, 0, 0, 2, 64, Color(0.14, 0.14, 0.15), 0.01)
+	var paint := Color(0.5, 0.48, 0.42)
+	for y in 64:
+		# Solid parking-lane line, worn in places.
+		if _rng.randf() < 0.85:
+			image.set_pixel(31, y, paint)
+		# Half of the dashed lane divider (the neighbouring tile paints the other half).
+		if (y >= 8 and y < 24 or y >= 40 and y < 56) and _rng.randf() < 0.8:
+			image.set_pixel(63, y, paint)
 	return image
 
 
