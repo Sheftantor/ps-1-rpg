@@ -2,21 +2,26 @@ class_name AttackState
 extends PlayerState
 ## Shared attack timeline: startup -> active (hitbox live) -> recovery, lunging
 ## forward until the hitbox closes. Subclasses decide what may cancel recovery.
+## Basic swings open the horizontal swing hitbox on their clip's hit frames; strong
+## attacks (no hit frames on the clip) use the wide hitbox on AttackData timing.
 
 var attack: AttackData = null
 var elapsed: float = 0.0
+var hitbox: Hitbox = null
 
 
 func begin(new_attack: AttackData) -> void:
 	attack = new_attack
 	elapsed = 0.0
 	player.hitbox.deactivate()
+	player.swing_hitbox.deactivate()
+	hitbox = player.hitbox if is_strong() else player.swing_hitbox
 	player.aim_attack()
 	player.play_attack_animation(is_strong(), attack.startup_time + attack.active_time + attack.recovery_time)
 
 
 func exit() -> void:
-	player.hitbox.deactivate()
+	hitbox.deactivate()
 
 
 ## Strong attacks play the heavier StrongAttack/AirStrongAttack swing.
@@ -37,11 +42,13 @@ func advance(delta: float) -> bool:
 	else:
 		player.move_horizontal(Vector3.ZERO, player.stats.deceleration, delta)
 
-	if elapsed >= attack.startup_time and elapsed < active_end:
-		if not player.hitbox.is_active():
-			player.hitbox.activate(attack, player)
-	elif player.hitbox.is_active():
-		player.hitbox.deactivate()
+	var on_hit_frames := player.attack_hit_frame_state()
+	var live := on_hit_frames == 1 if on_hit_frames >= 0 else elapsed >= attack.startup_time and elapsed < active_end
+	# One activation per swing, so each enemy is hit at most once (Hitbox tracks it).
+	if live and not hitbox.is_active():
+		hitbox.activate(attack, player)
+	elif not live and hitbox.is_active():
+		hitbox.deactivate()
 	return elapsed >= active_end + attack.recovery_time
 
 

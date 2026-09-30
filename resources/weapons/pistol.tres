@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://b722as2rwrfg5"]
+
+[ext_resource type="Script" uid="uid://bko71xs07rlxu" path="res://scripts/combat/weapon_data.gd" id="1_weapon"]
+[ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="2_attack"]
+[ext_resource type="PackedScene" path="res://scenes/pistol.tscn" id="3_model"]
+
+[sub_resource type="Resource" id="Resource_shot"]
+script = ExtResource("2_attack")
+display_name = "Pistol Shot"
+damage = 25
+knockback = 4.0
+
+[resource]
+script = ExtResource("1_weapon")
+display_name = "Pistol"
+model = ExtResource("3_model")
+shot = SubResource("Resource_shot")
+effective_range = 5.0
+out_of_range_damage_scale = 0.5

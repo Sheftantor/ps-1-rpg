@@ -1,0 +1,270 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="1_hud"]
+[ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://scripts/ui/target_links.gd" id="3_links"]
+[ext_resource type="Script" path="res://scripts/ui/target_reticle.gd" id="4_reticle"]
+[ext_resource type="Texture2D" path="res://resources/ui/player_health_under.tres" id="5_background"]
+[ext_resource type="Texture2D" path="res://resources/ui/player_health_fill.tres" id="6_gradient"]
+[ext_resource type="Texture2D" path="res://textures/ui/enemy_silhouette.png" id="7_silhouette"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stat_background"]
+bg_color = Color(0, 0, 0, 0.55)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_fill"]
+bg_color = Color(0.9, 0.7, 0.2, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0, 0, 0, 0.55)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.9, 0.9, 0.9, 0.8)
+
+[node name="PlayerHud" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_hud")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+
+[node name="Stats" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 380.0
+offset_bottom = 160.0
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="HealthRow" type="HBoxContainer" parent="Root/Stats"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Root/Stats/HealthRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HudStatLabel"
+text = "HP"
+
+[node name="Value" type="Label" parent="Root/Stats/HealthRow"]
+layout_mode = 2
+theme_type_variation = &"HudStatLabel"
+text = "100/100"
+horizontal_alignment = 2
+
+[node name="HealthBar" type="TextureProgressBar" parent="Root/Stats"]
+custom_minimum_size = Vector2(180, 14)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+value = 100.0
+nine_patch_stretch = true
+texture_under = ExtResource("5_background")
+texture_progress = ExtResource("6_gradient")
+
+[node name="StaminaRow" type="HBoxContainer" parent="Root/Stats"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Root/Stats/StaminaRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HudStatLabel"
+text = "STAMINA"
+
+[node name="Value" type="Label" parent="Root/Stats/StaminaRow"]
+layout_mode = 2
+theme_type_variation = &"HudStatLabel"
+text = "100/100"
+horizontal_alignment = 2
+
+[node name="StaminaBar" type="ProgressBar" parent="Root/Stats"]
+custom_minimum_size = Vector2(180, 10)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_stat_background")
+theme_override_styles/fill = SubResource("StyleBoxFlat_stamina_fill")
+value = 100.0
+show_percentage = false
+
+[node name="WeaponLabel" type="Label" parent="Root"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -56.0
+offset_right = 320.0
+offset_bottom = -16.0
+grow_vertical = 0
+text = "SWORD"
+vertical_alignment = 1
+
+[node name="Prompt" type="Label" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -120.0
+offset_right = 320.0
+offset_bottom = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "[E] PICK UP PISTOL"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Targeting" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Links" type="Control" parent="Root/Targeting"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_links")
+
+[node name="Reticle" type="Control" parent="Root/Targeting"]
+layout_mode = 0
+offset_left = 608.0
+offset_top = 328.0
+offset_right = 672.0
+offset_bottom = 392.0
+mouse_filter = 2
+script = ExtResource("4_reticle")
+
+[node name="TargetLabel" type="Label" parent="Root/Targeting/Reticle"]
+layout_mode = 0
+offset_left = -68.0
+offset_top = -38.0
+offset_right = 132.0
+offset_bottom = -4.0
+text = "TARGET"
+horizontal_alignment = 1
+
+[node name="RangeLabel" type="Label" parent="Root/Targeting/Reticle"]
+layout_mode = 0
+offset_left = -98.0
+offset_top = 68.0
+offset_right = 162.0
+offset_bottom = 102.0
+text = "IN RANGE  0.0M"
+horizontal_alignment = 1
+
+[node name="ModeLabel" type="Label" parent="Root/Targeting"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 20.0
+offset_right = 200.0
+offset_bottom = 56.0
+grow_horizontal = 2
+text = "TIME STOP"
+horizontal_alignment = 1
+
+[node name="QueueRow" type="HBoxContainer" parent="Root/Targeting"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -196.0
+offset_right = 620.0
+offset_bottom = -64.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="SlotTemplate" type="PanelContainer" parent="Root/Targeting/QueueRow"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
+
+[node name="VBox" type="VBoxContainer" parent="Root/Targeting/QueueRow/SlotTemplate"]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="Root/Targeting/QueueRow/SlotTemplate/VBox"]
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7_silhouette")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Root/Targeting/QueueRow/SlotTemplate/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "ENEMY 1"
+horizontal_alignment = 1
+
+[node name="Prompts" type="HBoxContainer" parent="Root/Targeting"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -52.0
+offset_right = 420.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="Queue" type="Label" parent="Root/Targeting/Prompts"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "[LMB] LOCK SHOT"
+
+[node name="Switch" type="Label" parent="Root/Targeting/Prompts"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "[MOUSE] SWITCH"
+
+[node name="Undo" type="Label" parent="Root/Targeting/Prompts"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "[R] UNDO"
+
+[node name="Execute" type="Label" parent="Root/Targeting/Prompts"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "[RMB] EXECUTE"
+
+[node name="Cancel" type="Label" parent="Root/Targeting/Prompts"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "[CTRL] CANCEL"

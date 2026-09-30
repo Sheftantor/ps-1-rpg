@@ -5,6 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://cxgifsnuog08r" path="res://Import/Character/MC-Rig/tripo_convert_016b917f-db36-43be-9f7a-85e054f88dc0_0.png" id="3_skin"]
 [ext_resource type="AnimationLibrary" path="res://resources/player/player_animations.tres" id="4_anims"]
 [ext_resource type="PackedScene" path="res://scenes/sword.tscn" id="5_sword"]
+[ext_resource type="AnimationNodeBlendTree" path="res://resources/player/player_animation_tree.tres" id="6_tree"]
+[ext_resource type="Script" path="res://scripts/combat/sword_trail.gd" id="7_trail"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_skin"]
 render_priority = 0
@@ -23,8 +25,15 @@ bone_idx = 34
 [node name="Sword" parent="Skeleton3D/RightHandAttachment" instance=ExtResource("5_sword")]
 transform = Transform3D(-0.4063486, 0.9089339, 0.093382664, 0.91132915, 0.41054958, -0.03046821, -0.066031806, 0.07272168, -0.99516404, 0.0026307218, 0.04235795, 0.017037489)
 
+[node name="SwordTrail" type="MeshInstance3D" parent="Skeleton3D/RightHandAttachment/Sword"]
+script = ExtResource("7_trail")
+
 [node name="AnimationPlayer" parent="." index="1"]
 libraries = {
 &"": ExtResource("4_anims")
 }
-autoplay = &"Idle"
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = ExtResource("6_tree")
+anim_player = NodePath("../AnimationPlayer")
+callback_mode_process = 0

@@ -22,16 +22,44 @@ extends Resource
 ## How quickly the character turns to face its movement direction.
 @export var turn_speed: float = 14.0
 
-@export_group("Dodge")
+@export_group("Dodge Roll")
 @export var dodge_stamina_cost: float = 25.0
-@export var dodge_speed: float = 11.0
-## The roll is timed in frames of its (future) animation, at this rate.
-@export var dodge_frame_rate: float = 30.0
-@export var dodge_frames: int = 12
-## Invulnerable on frames dodge_iframe_first..dodge_iframe_last (0-based, inclusive).
-## Frames outside that window can still be hit.
-@export var dodge_iframe_first: int = 2
-@export var dodge_iframe_last: int = 7
+## How far one roll carries the player (m).
+@export var roll_distance: float = 4.4
+## Travel speed during the roll (m/s). The roll lasts roll_distance / roll_speed
+## seconds (0.4s at the defaults) and the Roll animation is stretched to fit.
+@export var roll_speed: float = 11.0
+## I-frames are counted in frames of the 12-frame Roll animation, so they scale
+## with the roll's duration (at 0.4s one frame is ~33ms). The player can't be hit
+## from frame roll_iframe_start (0-based) for roll_iframe_frames frames; the rest
+## of the roll is vulnerable. The clip's tumble spans frames 2-8.
+@export_range(0, 12) var roll_iframe_start: int = 2
+@export_range(0, 12) var roll_iframe_frames: int = 6
+
+@export_group("Gun Mode")
+## Real seconds for time to ease from normal speed down to gun_slow_time_scale
+## after entering gun mode.
+@export var gun_slowdown_time: float = 1.0
+## How slow the world runs at the end of the slowdown (Engine.time_scale).
+@export_range(0.0, 1.0) var gun_slow_time_scale: float = 0.05
+## After the slowdown, pause the world entirely (only the player, camera and HUD
+## keep running) so the shot can be planned. Off: stay at gun_slow_time_scale.
+@export var gun_pause_after_slowdown: bool = true
+## Real seconds of bullet time before stamina starts draining (queued shots
+## still cost their weapon's shot_energy_cost). Long for testing; lower it later.
+@export var gun_drain_delay: float = 10.0
+## Stamina drained per real second after the delay. When it runs out, the shot
+## queue executes on its own.
+@export var gun_energy_drain: float = 20.0
+## Mouse travel (pixels, sideways) that moves the gun-mode cursor to the next
+## enemy on that side of the screen.
+@export var gun_mouse_switch_distance: float = 60.0
+## Most shots that can be queued in one bullet time.
+@export_range(1, 8) var gun_max_queued_shots: int = 4
+## Seconds between queued shots as they fire.
+@export var gun_shot_interval: float = 0.3
+## Real seconds holding the gun after the last shot before drawing the sword again.
+@export var gun_fire_recovery: float = 0.35
 
 @export_group("Block")
 @export var block_move_speed: float = 2.5

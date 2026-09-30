@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3]
+[gd_scene load_steps=29 format=3]
 
 [ext_resource type="Script" path="res://scripts/enemy/enemy.gd" id="1_enemy"]
 [ext_resource type="Shader" path="res://shaders/ps1.gdshader" id="2_ps1"]
@@ -16,6 +16,7 @@
 [ext_resource type="Script" path="res://scripts/enemy/states/recover.gd" id="14_recover"]
 [ext_resource type="Script" path="res://scripts/enemy/states/stagger.gd" id="15_stagger"]
 [ext_resource type="Script" path="res://scripts/enemy/states/dead.gd" id="16_dead"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_health_bar.tscn" id="99_health_bar"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_body"]
 render_priority = 0
@@ -137,3 +138,6 @@ script = ExtResource("15_stagger")
 
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("16_dead")
+
+[node name="HealthBar" parent="." instance=ExtResource("99_health_bar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0)

@@ -18,6 +18,11 @@
 [ext_resource type="Script" path="res://scripts/player/states/hit_stun.gd" id="16_hit_stun"]
 [ext_resource type="Script" path="res://scripts/player/states/dead.gd" id="17_dead"]
 [ext_resource type="Script" path="res://scripts/ui/command_menu.gd" id="18_menu"]
+[ext_resource type="Script" path="res://scripts/player/states/gun_aim.gd" id="19_gun_aim"]
+[ext_resource type="PackedScene" path="res://scenes/player_hud.tscn" id="20_player_hud"]
+[ext_resource type="Script" path="res://scripts/combat/range_dome.gd" id="21_range_dome"]
+[ext_resource type="PackedScene" path="res://scenes/player_health_bar.tscn" id="99_health_bar"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="98_pause"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -34,6 +39,13 @@ albedo_color = Color(1, 0.6, 0.2, 0.35)
 [sub_resource type="BoxMesh" id="BoxMesh_hitbox"]
 material = SubResource("StandardMaterial3D_debug")
 size = Vector3(1.2, 1.2, 1.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_swing"]
+size = Vector3(2.4, 0.6, 1.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_swing"]
+material = SubResource("StandardMaterial3D_debug")
+size = Vector3(2.4, 0.6, 1.5)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
 radius = 0.45
@@ -76,6 +88,20 @@ shape = SubResource("BoxShape3D_hitbox")
 
 [node name="DebugMesh" type="MeshInstance3D" parent="Facing/Hitbox" unique_id=1630489511]
 mesh = SubResource("BoxMesh_hitbox")
+
+[node name="SwingHitbox" type="Area3D" parent="Facing"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.75)
+collision_layer = 0
+collision_mask = 16
+monitoring = false
+monitorable = false
+script = ExtResource("4_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/SwingHitbox"]
+shape = SubResource("BoxShape3D_swing")
+
+[node name="DebugMesh" type="MeshInstance3D" parent="Facing/SwingHitbox"]
+mesh = SubResource("BoxMesh_swing")
 
 [node name="Hurtbox" type="Area3D" parent="." unique_id=1919024979]
 collision_layer = 8
@@ -139,6 +165,19 @@ script = ExtResource("16_hit_stun")
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("17_dead")
 
+[node name="GunAim" type="Node" parent="StateMachine"]
+script = ExtResource("19_gun_aim")
+
 [node name="CommandMenu" type="CanvasLayer" parent="."]
 layer = 10
 script = ExtResource("18_menu")
+
+[node name="PlayerHud" parent="." instance=ExtResource("20_player_hud")]
+
+[node name="RangeDome" type="MeshInstance3D" parent="."]
+script = ExtResource("21_range_dome")
+
+[node name="HealthBar" parent="." instance=ExtResource("99_health_bar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
+
+[node name="PauseMenu" parent="." instance=ExtResource("98_pause")]

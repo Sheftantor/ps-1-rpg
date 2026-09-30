@@ -12,6 +12,7 @@ const HEAVY_ATTACK: StringName = &"HeavyAttack"
 const BLOCK: StringName = &"Block"
 const HIT_STUN: StringName = &"HitStun"
 const DEAD: StringName = &"Dead"
+const GUN_AIM: StringName = &"GunAim"
 
 var player: Player:
 	get:
@@ -66,6 +67,18 @@ func try_neutral_action() -> bool:
 				return true
 		Player.ACTION_ITEM:
 			player.use_item(player.consume_buffer() as ItemStack)
+		Player.ACTION_INTERACT:
+			player.consume_buffer()
+			player.interact()
+		Player.ACTION_GUN:
+			player.consume_buffer()
+			if player.gun == null:
+				player.hud.flash_message("NO WEAPON")
+			elif player.stamina.current <= 0.0:
+				player.hud.flash_message("NO ENERGY")
+			else:
+				transition_to(GUN_AIM)
+				return true
 	if player.wants_block():
 		transition_to(BLOCK)
 		return true

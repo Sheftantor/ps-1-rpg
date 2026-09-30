@@ -3,6 +3,8 @@ extends Node
 ## Hit points for a character. The owner calls setup() with its stats' max health.
 
 signal changed(current: int, maximum: int)
+## A hit landed for `amount` (the hit's damage, even if less health was left).
+signal damaged(amount: int)
 signal died
 
 @export var max_health: int = 100
@@ -35,5 +37,7 @@ func take_damage(amount: int) -> void:
 		return
 	current = maxi(current - amount, 0)
 	changed.emit(current, max_health)
+	if amount > 0:
+		damaged.emit(amount)
 	if is_dead:
 		died.emit()

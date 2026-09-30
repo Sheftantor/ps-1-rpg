@@ -27,6 +27,14 @@ static func ensure_defaults() -> void:
 	_bind(&"attack_heavy", [_mouse(MOUSE_BUTTON_RIGHT), _button(JOY_BUTTON_Y)])
 	_bind(&"block", [_key(KEY_Q), _button(JOY_BUTTON_LEFT_SHOULDER)])
 	_bind(&"lock_on", [_key(KEY_TAB), _mouse(MOUSE_BUTTON_MIDDLE), _button(JOY_BUTTON_RIGHT_STICK)])
+	_bind(&"interact", [_key(KEY_E), _button(JOY_BUTTON_DPAD_DOWN)])
+	# Draw the gun and enter the time-stop targeting mode (again to back out).
+	_bind(&"gun_mode", [_key(KEY_CTRL), _axis(JOY_AXIS_TRIGGER_LEFT, 1.0)])
+	# Move the lock between nearby enemies (gun-mode cursor, or sword lock-on).
+	_bind(&"target_next", [_mouse(MOUSE_BUTTON_WHEEL_DOWN), _button(JOY_BUTTON_DPAD_RIGHT)])
+	_bind(&"target_prev", [_mouse(MOUSE_BUTTON_WHEEL_UP), _button(JOY_BUTTON_DPAD_LEFT)])
+	# Gun mode: take a target back off the shot queue.
+	_bind(&"gun_undo", [_key(KEY_R), _button(JOY_BUTTON_DPAD_UP)])
 
 	# Command menu. Hold to open; while it's open the player ignores gameplay
 	# input, so sharing keys/buttons with movement and actions is fine.
@@ -36,6 +44,7 @@ static func ensure_defaults() -> void:
 	_bind(&"menu_confirm", [_key(KEY_ENTER), _key(KEY_SPACE), _button(JOY_BUTTON_A)])
 	_bind(&"menu_cancel", [_key(KEY_BACKSPACE), _button(JOY_BUTTON_B)])
 
+	_bind(&"pause", [_key(KEY_ESCAPE), _button(JOY_BUTTON_START)])
 	_bind(&"debug_hurt", [_key(KEY_K), _button(JOY_BUTTON_BACK)])
 
 

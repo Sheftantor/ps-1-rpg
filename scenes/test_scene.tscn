@@ -2,11 +2,12 @@
 
 [ext_resource type="PackedScene" uid="uid://1gh1uj6b4gct" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="2_ps1"]
-[ext_resource type="Script" uid="uid://bn2gcman2e170" path="res://scripts/debug/debug_hud.gd" id="3_hud"]
 [ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="4_7ddre"]
 [ext_resource type="PackedScene" uid="uid://0b5xe2irdfvq" path="res://Import/basement.glb" id="5_qjeyg"]
 [ext_resource type="PackedScene" path="res://scenes/city_map.tscn" id="6_wtsjf"]
 [ext_resource type="PackedScene" path="res://scenes/city_kit/sidewalk.tscn" id="7_rnaij"]
+[ext_resource type="PackedScene" path="res://scenes/pickup.tscn" id="8_pickup"]
+[ext_resource type="Resource" uid="uid://b722as2rwrfg5" path="res://resources/weapons/pistol.tres" id="9_pistol"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -66,15 +67,6 @@ shape = SubResource("BoxShape3D_ground")
 [node name="Player" parent="." unique_id=1209444035 instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 
-[node name="DebugHUD" type="CanvasLayer" parent="." unique_id=2055951171]
-script = ExtResource("3_hud")
-
-[node name="Label" type="Label" parent="DebugHUD" unique_id=2123353520]
-offset_left = 12.0
-offset_top = 8.0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
-
 [node name="Enemy" parent="." unique_id=1094493194 instance=ExtResource("4_7ddre")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.670521, 0, -6.6944394)
 
@@ -93,3 +85,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.207267, 0.1500001, 5.28902)
 
 [node name="Enemy3" parent="." unique_id=355887847 instance=ExtResource("4_7ddre")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.061545, 2.3841858e-07, 1.1796532)
+
+[node name="PistolPickup" parent="." unique_id=764631996 instance=ExtResource("8_pickup")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 1)
+weapon = ExtResource("9_pistol")

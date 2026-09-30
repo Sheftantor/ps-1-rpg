@@ -1,0 +1,125 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_menu"]
+[ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://textures/ui/psx/pause_title.png" id="3_title"]
+[ext_resource type="Texture2D" path="res://textures/ui/psx/menu_resume.png" id="4_resume"]
+[ext_resource type="Texture2D" path="res://textures/ui/psx/menu_resume_selected.png" id="5_resume_selected"]
+[ext_resource type="Texture2D" path="res://textures/ui/psx/menu_exit.png" id="6_exit"]
+[ext_resource type="Texture2D" path="res://textures/ui/psx/menu_exit_selected.png" id="7_exit_selected"]
+[ext_resource type="Texture2D" path="res://textures/ui/psx/text_block.png" id="8_block"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_block"]
+content_margin_left = 28.0
+content_margin_top = 20.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+texture = ExtResource("8_block")
+texture_margin_left = 24.0
+texture_margin_top = 24.0
+texture_margin_right = 24.0
+texture_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_focus"]
+
+[node name="PauseMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 20
+script = ExtResource("1_menu")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+
+[node name="Backdrop" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.72)
+
+[node name="Title" type="TextureRect" parent="Root"]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 56.0
+offset_right = 397.0
+offset_bottom = 104.0
+texture = ExtResource("3_title")
+
+[node name="Menu" type="VBoxContainer" parent="Root"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 150.0
+offset_right = 432.0
+offset_bottom = 310.0
+theme_override_constants/separation = 8
+
+[node name="Resume" type="TextureButton" parent="Root/Menu"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_focus")
+texture_normal = ExtResource("4_resume")
+texture_hover = ExtResource("5_resume_selected")
+texture_focused = ExtResource("5_resume_selected")
+
+[node name="Exit" type="TextureButton" parent="Root/Menu"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_focus")
+texture_normal = ExtResource("6_exit")
+texture_hover = ExtResource("7_exit_selected")
+texture_focused = ExtResource("7_exit_selected")
+
+[node name="Panels" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -720.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="Controls" type="PanelContainer" parent="Root/Panels"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_block")
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panels/Controls"]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="Root/Panels/Controls/VBox"]
+layout_mode = 2
+theme_type_variation = &"HudStatLabel"
+text = "CONTROLS"
+
+[node name="Text" type="Label" parent="Root/Panels/Controls/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "WASD  MOVE"
+
+[node name="Status" type="PanelContainer" parent="Root/Panels"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_block")
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panels/Status"]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="Root/Panels/Status/VBox"]
+layout_mode = 2
+theme_type_variation = &"HudStatLabel"
+text = "STATUS"
+
+[node name="Text" type="Label" parent="Root/Panels/Status/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "PLAYER  HP 100/100"
