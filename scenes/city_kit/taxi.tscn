@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/city_kit/car.tscn" id="1_car"]
+[ext_resource type="Material" path="res://resources/materials/city/taxi_yellow.tres" id="2_yellow"]
+
+[node name="Taxi" instance=ExtResource("1_car")]
+
+[node name="Body" parent="." index="0"]
+material = ExtResource("2_yellow")
+
+[node name="Cabin" parent="." index="1"]
+material = ExtResource("2_yellow")
+
+[node name="RoofSign" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.68, -0.2)
+size = Vector3(0.6, 0.16, 0.25)
+material = ExtResource("2_yellow")

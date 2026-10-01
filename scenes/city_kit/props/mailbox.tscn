@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/paint_blue.tres" id="1_42u37"]
+[ext_resource type="Material" path="res://resources/materials/city/door_dark.tres" id="2_lfslw"]
+
+[node name="Mailbox" type="CSGCombiner3D" unique_id=1215093270]
+use_collision = true
+
+[node name="Body" type="CSGBox3D" parent="." unique_id=1426041111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0)
+size = Vector3(0.55, 0.65, 0.5)
+material = ExtResource("1_42u37")
+
+[node name="Dome" type="CSGCylinder3D" parent="." unique_id=830630149]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.04, 0)
+radius = 0.275
+height = 0.5
+material = ExtResource("1_42u37")
+
+[node name="Slot" type="CSGBox3D" parent="." unique_id=1573649157]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0.255)
+size = Vector3(0.3, 0.04, 0.02)
+material = ExtResource("2_lfslw")
+
+[node name="Leg0" type="CSGBox3D" parent="." unique_id=220434653]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.2, 0.19)
+size = Vector3(0.06, 0.4, 0.06)
+material = ExtResource("1_42u37")
+
+[node name="Leg1" type="CSGBox3D" parent="." unique_id=33250327]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.2, 0.19)
+size = Vector3(0.06, 0.4, 0.06)
+material = ExtResource("1_42u37")
+
+[node name="Leg2" type="CSGBox3D" parent="." unique_id=1189877807]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.2, -0.19)
+size = Vector3(0.06, 0.4, 0.06)
+material = ExtResource("1_42u37")
+
+[node name="Leg3" type="CSGBox3D" parent="." unique_id=1961869554]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.2, -0.19)
+size = Vector3(0.06, 0.4, 0.06)
+material = ExtResource("1_42u37")

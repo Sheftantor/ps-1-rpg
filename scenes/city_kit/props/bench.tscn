@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/wood_water_tower.tres" id="1_h0gh7"]
+[ext_resource type="Material" path="res://resources/materials/city/metal_gray.tres" id="2_1wiwi"]
+
+[node name="Bench" type="CSGCombiner3D" unique_id=182801523]
+use_collision = true
+
+[node name="Seat0" type="CSGBox3D" parent="." unique_id=1022473580]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -0.16)
+size = Vector3(1.8, 0.05, 0.13)
+material = ExtResource("1_h0gh7")
+
+[node name="Seat1" type="CSGBox3D" parent="." unique_id=109650938]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+size = Vector3(1.8, 0.05, 0.13)
+material = ExtResource("1_h0gh7")
+
+[node name="Seat2" type="CSGBox3D" parent="." unique_id=641964551]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.16)
+size = Vector3(1.8, 0.05, 0.13)
+material = ExtResource("1_h0gh7")
+
+[node name="Back0" type="CSGBox3D" parent="." unique_id=890257712]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.62, -0.27)
+size = Vector3(1.8, 0.12, 0.04)
+material = ExtResource("1_h0gh7")
+
+[node name="Back1" type="CSGBox3D" parent="." unique_id=1082498664]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -0.27)
+size = Vector3(1.8, 0.12, 0.04)
+material = ExtResource("1_h0gh7")
+
+[node name="Frame-1" type="CSGBox3D" parent="." unique_id=1004242277]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.45, -0.04)
+size = Vector3(0.06, 0.9, 0.5)
+material = ExtResource("2_1wiwi")
+
+[node name="Frame1" type="CSGBox3D" parent="." unique_id=338787790]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.45, -0.04)
+size = Vector3(0.06, 0.9, 0.5)
+material = ExtResource("2_1wiwi")

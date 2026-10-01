@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="PS1-RPG"
-run/main_scene="uid://cxu7koee2sadi"
+run/main_scene="res://scenes/test_plaza.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -45,6 +45,10 @@ folder_colors={
 "res://textures/": "blue"
 }
 
+[gui]
+
+theme/custom="res://resources/ui/hud_theme.tres"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
@@ -63,7 +67,3 @@ ps1_affine_strength={
 "type": "float",
 "value": 1.0
 }
-
-[gui]
-
-theme/custom="res://resources/ui/hud_theme.tres"

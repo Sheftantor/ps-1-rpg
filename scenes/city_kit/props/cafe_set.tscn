@@ -1,0 +1,72 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/sign_red.tres" id="1_uq3ch"]
+[ext_resource type="Material" path="res://resources/materials/city/metal_gray.tres" id="2_4pmrg"]
+
+[node name="CafeSet" type="CSGCombiner3D" unique_id=99190860]
+use_collision = true
+
+[node name="Top" type="CSGCylinder3D" parent="." unique_id=2067022840]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, 0)
+radius = 0.4
+height = 0.04
+material = ExtResource("1_uq3ch")
+
+[node name="Stem" type="CSGCylinder3D" parent="." unique_id=1519712792]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36, 0)
+radius = 0.04
+height = 0.72
+sides = 5
+material = ExtResource("2_4pmrg")
+
+[node name="Foot" type="CSGCylinder3D" parent="." unique_id=1254472111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
+radius = 0.25
+height = 0.03
+sides = 6
+material = ExtResource("2_4pmrg")
+
+[node name="Seat0" type="CSGBox3D" parent="." unique_id=696614278]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.75)
+size = Vector3(0.42, 0.04, 0.42)
+material = ExtResource("1_uq3ch")
+
+[node name="Back0" type="CSGBox3D" parent="." unique_id=1297845503]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66, 0.95)
+size = Vector3(0.42, 0.4, 0.04)
+material = ExtResource("1_uq3ch")
+
+[node name="Legs0" type="CSGBox3D" parent="." unique_id=28924413]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.215, 0.75)
+size = Vector3(0.36, 0.43, 0.36)
+material = ExtResource("2_4pmrg")
+
+[node name="Seat1" type="CSGBox3D" parent="." unique_id=1524214068]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 0.649519, 0.45, -0.375)
+size = Vector3(0.42, 0.04, 0.42)
+material = ExtResource("1_uq3ch")
+
+[node name="Back1" type="CSGBox3D" parent="." unique_id=1571287971]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 0.8227241, 0.66, -0.475)
+size = Vector3(0.42, 0.4, 0.04)
+material = ExtResource("1_uq3ch")
+
+[node name="Legs1" type="CSGBox3D" parent="." unique_id=197766840]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 0.649519, 0.215, -0.375)
+size = Vector3(0.36, 0.43, 0.36)
+material = ExtResource("2_4pmrg")
+
+[node name="Seat2" type="CSGBox3D" parent="." unique_id=1094489031]
+transform = Transform3D(-0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, -0.4999999, -0.649519, 0.45, -0.375)
+size = Vector3(0.42, 0.04, 0.42)
+material = ExtResource("1_uq3ch")
+
+[node name="Back2" type="CSGBox3D" parent="." unique_id=2075905408]
+transform = Transform3D(-0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, -0.4999999, -0.8227241, 0.66, -0.475)
+size = Vector3(0.42, 0.4, 0.04)
+material = ExtResource("1_uq3ch")
+
+[node name="Legs2" type="CSGBox3D" parent="." unique_id=1839422157]
+transform = Transform3D(-0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, -0.4999999, -0.649519, 0.215, -0.375)
+size = Vector3(0.36, 0.43, 0.36)
+material = ExtResource("2_4pmrg")

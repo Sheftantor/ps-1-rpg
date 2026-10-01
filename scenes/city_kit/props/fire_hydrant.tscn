@@ -1,0 +1,46 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/hydrant_red.tres" id="1_fwbt1"]
+[ext_resource type="Material" path="res://resources/materials/city/metal_gray.tres" id="2_idapb"]
+
+[node name="FireHydrant" type="CSGCombiner3D" unique_id=586949899]
+use_collision = true
+
+[node name="Base" type="CSGCylinder3D" parent="." unique_id=1414925442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+radius = 0.2
+height = 0.08
+material = ExtResource("1_fwbt1")
+
+[node name="Barrel" type="CSGCylinder3D" parent="." unique_id=1035735551]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+radius = 0.15
+height = 0.55
+material = ExtResource("1_fwbt1")
+
+[node name="Bonnet" type="CSGCylinder3D" parent="." unique_id=680728672]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.68, 0)
+radius = 0.12
+height = 0.12
+material = ExtResource("1_fwbt1")
+
+[node name="Nut" type="CSGCylinder3D" parent="." unique_id=466802045]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.77, 0)
+radius = 0.04
+height = 0.06
+sides = 5
+material = ExtResource("2_idapb")
+
+[node name="NozzleL" type="CSGCylinder3D" parent="." unique_id=445828407]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0.45, 0)
+radius = 0.06
+height = 0.4
+sides = 6
+material = ExtResource("1_fwbt1")
+
+[node name="NozzleF" type="CSGCylinder3D" parent="." unique_id=1413140155]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.42, 0.17)
+radius = 0.07
+height = 0.12
+sides = 6
+material = ExtResource("1_fwbt1")

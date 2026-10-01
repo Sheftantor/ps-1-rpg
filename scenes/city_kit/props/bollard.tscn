@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/metal_gray.tres" id="1_vlpc3"]
+
+[node name="Bollard" type="CSGCombiner3D" unique_id=725213327]
+use_collision = true
+
+[node name="Post" type="CSGCylinder3D" parent="." unique_id=282779293]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+radius = 0.14
+height = 0.9
+material = ExtResource("1_vlpc3")
+
+[node name="Cap" type="CSGCylinder3D" parent="." unique_id=1838097086]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.92, 0)
+radius = 0.16
+height = 0.06
+material = ExtResource("1_vlpc3")

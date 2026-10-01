@@ -1,0 +1,27 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/paint_green_dark.tres" id="1_poius"]
+[ext_resource type="Material" path="res://resources/materials/city/metal_gray.tres" id="2_c31k8"]
+[ext_resource type="Material" path="res://resources/materials/city/paint_white.tres" id="3_xep8w"]
+
+[node name="TrashCan" type="CSGCombiner3D" unique_id=922052345]
+use_collision = true
+
+[node name="Basket" type="CSGCylinder3D" parent="." unique_id=213687484]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.425, 0)
+radius = 0.3
+height = 0.85
+material = ExtResource("1_poius")
+
+[node name="Rim" type="CSGCylinder3D" parent="." unique_id=175974711]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+radius = 0.32
+height = 0.06
+material = ExtResource("2_c31k8")
+
+[node name="Trash" type="CSGCylinder3D" parent="." unique_id=1560466266]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.84, 0)
+radius = 0.27
+height = 0.05
+sides = 6
+material = ExtResource("3_xep8w")
