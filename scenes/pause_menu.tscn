@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_menu"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
@@ -8,6 +8,8 @@
 [ext_resource type="Texture2D" path="res://textures/ui/psx/menu_exit.png" id="6_exit"]
 [ext_resource type="Texture2D" path="res://textures/ui/psx/menu_exit_selected.png" id="7_exit_selected"]
 [ext_resource type="Texture2D" path="res://textures/ui/psx/text_block.png" id="8_block"]
+[ext_resource type="LabelSettings" path="res://resources/ui/menu_header.tres" id="9_header"]
+[ext_resource type="LabelSettings" path="res://resources/ui/menu_label.tres" id="10_label"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_block"]
 content_margin_left = 28.0
@@ -75,7 +77,7 @@ texture_normal = ExtResource("6_exit")
 texture_hover = ExtResource("7_exit_selected")
 texture_focused = ExtResource("7_exit_selected")
 
-[node name="Panels" type="VBoxContainer" parent="Root"]
+[node name="Info" type="PanelContainer" parent="Root"]
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
@@ -87,39 +89,37 @@ offset_right = -40.0
 offset_bottom = -40.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_constants/separation = 16
-
-[node name="Controls" type="PanelContainer" parent="Root/Panels"]
-layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_block")
 
-[node name="VBox" type="VBoxContainer" parent="Root/Panels/Controls"]
+[node name="Scroll" type="ScrollContainer" parent="Root/Info"]
 layout_mode = 2
+horizontal_scroll_mode = 0
 
-[node name="Header" type="Label" parent="Root/Panels/Controls/VBox"]
+[node name="Content" type="VBoxContainer" parent="Root/Info/Scroll"]
 layout_mode = 2
-theme_type_variation = &"HudStatLabel"
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ControlsHeader" type="Label" parent="Root/Info/Scroll/Content"]
+layout_mode = 2
 text = "CONTROLS"
+label_settings = ExtResource("9_header")
 
-[node name="Text" type="Label" parent="Root/Panels/Controls/VBox"]
+[node name="Controls" type="VBoxContainer" parent="Root/Info/Scroll/Content"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "WASD  MOVE"
+theme_override_constants/separation = 6
 
-[node name="Status" type="PanelContainer" parent="Root/Panels"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxTexture_block")
-
-[node name="VBox" type="VBoxContainer" parent="Root/Panels/Status"]
+[node name="Spacer" type="Control" parent="Root/Info/Scroll/Content"]
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 
-[node name="Header" type="Label" parent="Root/Panels/Status/VBox"]
+[node name="StatusHeader" type="Label" parent="Root/Info/Scroll/Content"]
 layout_mode = 2
-theme_type_variation = &"HudStatLabel"
-text = "STATUS"
+text = "ENEMIES"
+label_settings = ExtResource("9_header")
 
-[node name="Text" type="Label" parent="Root/Panels/Status/VBox"]
+[node name="Status" type="Label" parent="Root/Info/Scroll/Content"]
+autowrap_mode = 3
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
 text = "PLAYER  HP 100/100"
+label_settings = ExtResource("10_label")

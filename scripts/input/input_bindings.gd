@@ -43,11 +43,14 @@ static func ensure_defaults() -> void:
 	_bind(&"interact", [_key(KEY_E), _button(JOY_BUTTON_DPAD_DOWN)])
 	# Draw the gun and enter the time-stop targeting mode (again to back out).
 	_bind(&"gun_mode", [_key(KEY_CTRL), _axis(JOY_AXIS_TRIGGER_LEFT, 1.0)])
-	# Move the lock between nearby enemies (gun-mode cursor, or sword lock-on).
-	_bind(&"target_next", [_mouse(MOUSE_BUTTON_WHEEL_DOWN), _button(JOY_BUTTON_DPAD_RIGHT)])
-	_bind(&"target_prev", [_mouse(MOUSE_BUTTON_WHEEL_UP), _button(JOY_BUTTON_DPAD_LEFT)])
+	# Move the lock between nearby enemies (gun-mode cursor, or melee lock-on). On a
+	# gamepad it's a right-stick flick: the camera is locked whenever this applies.
+	_bind(&"target_next", [_mouse(MOUSE_BUTTON_WHEEL_DOWN), _axis(JOY_AXIS_RIGHT_X, 1.0)])
+	_bind(&"target_prev", [_mouse(MOUSE_BUTTON_WHEEL_UP), _axis(JOY_AXIS_RIGHT_X, -1.0)])
 	# Gun mode: take a target back off the shot queue.
-	_bind(&"gun_undo", [_key(KEY_R), _button(JOY_BUTTON_DPAD_UP)])
+	_bind(&"gun_undo", [_key(KEY_R), _button(JOY_BUTTON_DPAD_LEFT)])
+	# Player stats and gear screen.
+	_bind(&"status_menu", [_key(KEY_C), _button(JOY_BUTTON_DPAD_UP)])
 
 	# Items: use the selected one, or step the selection to the next.
 	_bind(&"use_item", [_key(KEY_F), _button(JOY_BUTTON_RIGHT_SHOULDER)])
@@ -60,14 +63,20 @@ static func ensure_defaults() -> void:
 ## Short on-screen name for the first binding of `action` on the given device
 ## ("LMB", "SHIFT", "X", "RB"...), or "?" if it has none there.
 static func label(action: StringName, gamepad: bool) -> String:
+	var event := event_for(action, gamepad)
+	return event_label(event) if event != null else "?"
+
+
+## The first event bound to `action` for gamepad or keyboard/mouse, or null.
+static func event_for(action: StringName, gamepad: bool) -> InputEvent:
 	ensure_defaults()
 	if not InputMap.has_action(action):
-		return "?"
+		return null
 	for event: InputEvent in InputMap.action_get_events(action):
 		var is_pad := event is InputEventJoypadButton or event is InputEventJoypadMotion
 		if is_pad == gamepad:
-			return event_label(event)
-	return "?"
+			return event
+	return null
 
 
 static func event_label(event: InputEvent) -> String:

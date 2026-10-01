@@ -22,8 +22,10 @@ const ACTION_INTERACT: StringName = &"interact"
 const ACTION_GUN: StringName = &"gun_mode"
 ## Gun mode: take a queued target back off the shot queue.
 const ACTION_GUN_UNDO: StringName = &"gun_undo"
+## Opens the player stats and gear screen.
+const ACTION_STATUS: StringName = &"status_menu"
 const BUTTON_ACTIONS: Array[StringName] = [ACTION_LIGHT, ACTION_HEAVY, ACTION_DODGE, ACTION_JUMP, ACTION_INTERACT, ACTION_GUN,
-		ACTION_GUN_UNDO]
+		ACTION_GUN_UNDO, ACTION_STATUS]
 
 const NO_COLOR: Color = Color(0.0, 0.0, 0.0, 0.0)
 const HIT_FLASH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.85)
@@ -52,7 +54,7 @@ const TREE_JUMP_ARMS: StringName = &"parameters/JumpArms/blend_amount"
 const TREE_AIM: StringName = &"parameters/AimBlend/blend_amount"
 ## How fast the upper body raises/lowers the gun (blend per second).
 const AIM_BLEND_SPEED: float = 8.0
-## Where the sheathed sword rides while the gun is out, in Facing space: grip at
+## Where the sheathed melee weapon rides while the gun is out, in Facing space: grip at
 ## the left hip, blade angled down and back.
 const SHEATH_OFFSET: Vector3 = Vector3(-0.22, 0.95, 0.08)
 const SHEATH_BLADE_DIR: Vector3 = Vector3(0.0, -0.75, 0.66)
@@ -106,7 +108,7 @@ var _hit_flash_timer: float = 0.0
 var _hit_flash_color: Color = HIT_FLASH_COLOR
 var _debug_hit: AttackData
 var _air_time: float = 0.0
-## Every mesh on the model (body and sword), for hit/state flashes.
+## Every mesh on the model (body and weapons), for hit/state flashes.
 var _flash_meshes: Array[GeometryInstance3D] = []
 ## The action clip last started in a one-shot slot, its playback position (clip
 ## seconds, tracked here because the tree doesn't expose it) and speed.
@@ -117,13 +119,17 @@ var _action_speed: float = 1.0
 var _action_slot: int = 0
 ## Whether the current airborne stretch started with a jump (not a ledge drop).
 var _jumped: bool = false
-## Secondary weapon slot (the sword is always the primary). Null until a gun is picked up.
+## Primary weapon (bat, sword...), from the loadout.
+var melee_weapon: MeleeWeaponData = null
+## Secondary weapon slot (the melee weapon is always the primary). Null until a gun is picked up.
 var gun: WeaponData = null
+## Worn armour by slot, from the loadout; empty slots are absent.
+var armor: Dictionary[ArmorData.Slot, ArmorData] = {}
 var _gun_model: Node3D = null
 var _aim_amount: float = 0.0
 var _aim_target: float = 0.0
-var _sword_holder: Node3D = null
-var _sword_hand_transform: Transform3D
+var _melee_holder: Node3D = null
+var _melee_hand_transform: Transform3D
 var _hip_attachment: BoneAttachment3D = null
 
 @onready var health: Health = $Health
@@ -136,9 +142,10 @@ var _hip_attachment: BoneAttachment3D = null
 @onready var _facing: Node3D = $Facing
 @onready var _anim: AnimationPlayer = $Facing/Model/AnimationPlayer
 @onready var _anim_tree: AnimationTree = $Facing/Model/AnimationTree
-@onready var _sword_trail: SwordTrail = $Facing/Model/Skeleton3D/RightHandAttachment/Sword/SwordTrail
-@onready var _sword: Node3D = $Facing/Model/Skeleton3D/RightHandAttachment/Sword
+@onready var _weapon_trail: WeaponTrail = $Facing/Model/Skeleton3D/RightHandAttachment/MeleeWeapon/WeaponTrail
+@onready var _melee: Node3D = $Facing/Model/Skeleton3D/RightHandAttachment/MeleeWeapon
 @onready var hud: PlayerHud = $PlayerHud
+@onready var status_menu: StatusMenu = $StatusMenu
 @onready var _range_dome: RangeDome = $RangeDome
 @onready var _hurtbox: Hurtbox = $Hurtbox
 @onready var _camera_rig: Node3D = $CameraRig
@@ -156,6 +163,7 @@ func _ready() -> void:
 
 	for stack: ItemStack in loadout.inventory:
 		inventory.append(stack.duplicate() as ItemStack)
+	_equip_from_loadout()
 
 	_debug_hit = AttackData.new()
 	_debug_hit.display_name = "Debug hit"
@@ -163,11 +171,11 @@ func _ready() -> void:
 	_debug_hit.knockback = debug_hit_knockback
 
 	for node: Node in $Facing/Model.find_children("*", "GeometryInstance3D"):
-		if node != _sword_trail:
+		if node != _weapon_trail:
 			_flash_meshes.append(node as GeometryInstance3D)
-	_sword_holder = _sword.get_parent()
-	_sword_hand_transform = _sword.transform
-	hud.set_weapon("Sword")
+	_melee_holder = _melee.get_parent()
+	_melee_hand_transform = _melee.transform
+	hud.set_weapon(melee_name())
 	health.changed.connect(hud.set_health)
 	stamina.changed.connect(hud.set_stamina)
 	hud.set_health(health.current, health.max_health)
@@ -188,7 +196,7 @@ func _exit_tree() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if PauseMenu.is_open:
+	if PauseMenu.is_open or StatusMenu.is_open:
 		return
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		# First click only recaptures the mouse; it shouldn't also attack.
@@ -230,7 +238,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	# Gun mode keeps the player processing through pauses; the pause menu stops it.
-	if PauseMenu.is_open:
+	if PauseMenu.is_open or StatusMenu.is_open:
 		return
 	_tick_timers(delta)
 	_validate_lock_target()
@@ -420,7 +428,7 @@ func _toggle_lock_on() -> void:
 
 
 ## Mouse wheel / D-pad: moves the gun-mode cursor, or while locked on with the
-## sword, moves the lock to the next enemy in lock-on range (nearest first).
+## melee weapon, moves the lock to the next enemy in lock-on range (nearest first).
 func _cycle_target(step: int) -> void:
 	if state_machine.current_name() == PlayerState.GUN_AIM:
 		state_machine.current.cycle_target(step)
@@ -559,6 +567,42 @@ func _update_visuals() -> void:
 
 # --- Weapons & pickups ------------------------------------------------------------
 
+## Takes the melee weapon, gun and armour from the loadout and puts the melee
+## weapon's model in the hand mount (replacing the scene's placeholder).
+func _equip_from_loadout() -> void:
+	melee_weapon = loadout.melee_weapon
+	if gun == null:
+		gun = loadout.gun
+	var slots := {
+		ArmorData.Slot.SHIRT: loadout.shirt, ArmorData.Slot.NECK: loadout.neck, ArmorData.Slot.ARMS: loadout.arms,
+		ArmorData.Slot.BELT: loadout.belt, ArmorData.Slot.PANTS: loadout.pants, ArmorData.Slot.SHOES: loadout.shoes,
+	}
+	for slot: ArmorData.Slot in slots:
+		if slots[slot] != null:
+			armor[slot] = slots[slot]
+	if melee_weapon != null and melee_weapon.model != null:
+		var placeholder := _melee.get_node_or_null(^"Model")
+		if placeholder != null:
+			_melee.remove_child(placeholder)
+			placeholder.queue_free()
+		var model: Node3D = melee_weapon.model.instantiate()
+		model.name = &"Model"
+		_melee.add_child(model)
+		_melee.move_child(model, 0)
+
+
+func melee_name() -> String:
+	return melee_weapon.display_name if melee_weapon != null else "Unarmed"
+
+
+## Total defense of the worn armour.
+func armor_defense() -> int:
+	var total := 0
+	for piece: ArmorData in armor.values():
+		total += piece.defense
+	return total
+
+
 ## Collects the nearest pickup in reach (interact input).
 func interact() -> void:
 	var pickup := nearest_pickup()
@@ -603,57 +647,57 @@ func nearest_pickup() -> Pickup:
 
 func _update_pickup_prompt() -> void:
 	var pickup := nearest_pickup() if current_state().name != PlayerState.GUN_AIM else null
-	hud.set_prompt("[%s] PICK UP %s" % [hud.key_label(&"interact"), pickup.display_name().to_upper()] if pickup != null else "")
+	hud.set_interact(ACTION_INTERACT, pickup.interact_verb if pickup != null else "")
 
 
-## Gun mode: sheathes the sword at the hip and puts the gun in the sword hand,
+## Gun mode: sheathes the melee weapon at the hip and puts the gun in its hand,
 ## or the reverse. The upper body blends to/from the aim pose.
 func set_gun_drawn(drawn: bool) -> void:
 	if drawn and gun != null:
 		if _gun_model == null:
 			_gun_model = gun.model.instantiate()
-			_sword_holder.add_child(_gun_model)
-			# Built in the sword's grip convention, so it shares the sword's mount.
-			_gun_model.transform = _sword_hand_transform
+			_melee_holder.add_child(_gun_model)
+			# Built in the melee weapon's grip convention, so it shares its mount.
+			_gun_model.transform = _melee_hand_transform
 			for node: Node in _gun_model.find_children("*", "GeometryInstance3D"):
 				_flash_meshes.append(node as GeometryInstance3D)
 		_gun_model.visible = true
-		_sheathe_sword(true)
+		_sheathe_melee(true)
 		_aim_target = 1.0
 		hud.set_weapon(gun.display_name)
 		_range_dome.show_range(gun.effective_range)
 	else:
 		if _gun_model != null:
 			_gun_model.visible = false
-		_sheathe_sword(false)
+		_sheathe_melee(false)
 		_aim_target = 0.0
-		hud.set_weapon("Sword")
+		hud.set_weapon(melee_name())
 		_range_dome.hide_range()
 
 
-func _sheathe_sword(sheathed: bool) -> void:
+func _sheathe_melee(sheathed: bool) -> void:
 	if not sheathed:
-		if _sword.get_parent() != _sword_holder:
-			_sword.reparent(_sword_holder, false)
-			_sword.transform = _sword_hand_transform
+		if _melee.get_parent() != _melee_holder:
+			_melee.reparent(_melee_holder, false)
+			_melee.transform = _melee_hand_transform
 		return
 	if _hip_attachment == null:
 		_hip_attachment = BoneAttachment3D.new()
 		_hip_attachment.bone_name = "mixamorig_Hips"
 		$Facing/Model/Skeleton3D.add_child(_hip_attachment)
-	var sword_scale := _sword.global_basis.get_scale()
-	_sword.reparent(_hip_attachment)
+	var melee_scale := _melee.global_basis.get_scale()
+	_melee.reparent(_hip_attachment)
 	# Placed in world space once; from then on it rides along with the hips.
 	var blade := _facing.global_basis * SHEATH_BLADE_DIR.normalized()
 	var edge := (_facing.global_basis.z - blade * _facing.global_basis.z.dot(blade)).normalized()
-	_sword.global_transform = Transform3D(Basis(edge, blade, edge.cross(blade)).scaled_local(sword_scale),
+	_melee.global_transform = Transform3D(Basis(edge, blade, edge.cross(blade)).scaled_local(melee_scale),
 			_facing.global_transform * SHEATH_OFFSET)
 
 
 ## Resolves one shot at `target` (or straight ahead with none): a ray from the
 ## player's chest to the target's chest. Walls and props block it; other enemies
 ## don't, so a queued shot lands on the enemy that was locked. The hit goes
-## through the enemy's Hurtbox like a sword hit, at full damage within the gun's
+## through the enemy's Hurtbox like a melee hit, at full damage within the gun's
 ## effective range and reduced beyond it.
 func fire_gun(target: Enemy) -> void:
 	_play_action(ANIM_AIM_FIRE, 1.0)
@@ -794,7 +838,7 @@ func _update_animation(delta: float) -> void:
 	if _action_playing and not current_state().drives_animation():
 		_stop_actions()
 	# Visual only: the blade streak follows each attack clip's trail frames.
-	_sword_trail.emitting = _action_frame_state(&"trail_frames") == 1
+	_weapon_trail.emitting = _action_frame_state(&"trail_frames") == 1
 	_aim_amount = move_toward(_aim_amount, _aim_target, AIM_BLEND_SPEED * delta)
 	_anim_tree.set(TREE_AIM, _aim_amount)
 	_update_air_layer()

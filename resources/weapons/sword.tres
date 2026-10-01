@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="MeleeWeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/melee_weapon_data.gd" id="1_melee"]
+[ext_resource type="PackedScene" path="res://scenes/sword.tscn" id="2_model"]
+
+[resource]
+script = ExtResource("1_melee")
+display_name = "Sword"
+model = ExtResource("2_model")

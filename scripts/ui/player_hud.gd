@@ -20,7 +20,6 @@ extends CanvasLayer
 ## Whether key labels show gamepad buttons; follows the last device used.
 var using_gamepad: bool = false
 
-var _hint: String = ""
 var _message_timer: float = 0.0
 var _slots: Array[Control] = []
 
@@ -40,6 +39,10 @@ var _slots: Array[Control] = []
 }
 @onready var _item_name: Label = $Root/Keybinds/ItemRow/Name
 @onready var _prompt: Label = $Root/Prompt
+## Interact prompt: an InputIcon for the bound input plus a one-word verb.
+@onready var _interact: Control = $Root/Interact
+@onready var _interact_icon: InputIcon = $Root/Interact/Icon
+@onready var _interact_verb: Label = $Root/Interact/Verb
 @onready var _targeting: Control = $Root/Targeting
 @onready var _links: TargetLinks = $Root/Targeting/Links
 @onready var _reticle: TargetReticle = $Root/Targeting/Reticle
@@ -48,12 +51,14 @@ var _slots: Array[Control] = []
 @onready var _mode_label: Label = $Root/Targeting/ModeLabel
 @onready var _queue_row: HBoxContainer = $Root/Targeting/QueueRow
 @onready var _slot_template: Control = $Root/Targeting/QueueRow/SlotTemplate
+@onready var _gun_prompts: HBoxContainer = $Root/Targeting/Prompts
 
 
 func _ready() -> void:
 	_targeting.visible = false
 	_slot_template.visible = false
 	_prompt.text = ""
+	_interact.visible = false
 	_refresh_keybinds()
 
 
@@ -80,13 +85,16 @@ func key_label(action: StringName) -> String:
 func _refresh_keybinds() -> void:
 	for action: StringName in _keybind_rows:
 		(_keybind_rows[action].get_node("Key") as Label).text = key_label(action)
+	_interact_icon.gamepad = using_gamepad
+	if _targeting.visible:
+		_build_gun_prompts()
 
 
 func _process(delta: float) -> void:
 	if _message_timer > 0.0:
 		_message_timer -= delta
 		if _message_timer <= 0.0:
-			_prompt.text = _hint
+			_prompt.text = ""
 
 
 ## Top-left stat block; connected to Health.changed / Stamina.changed.
@@ -116,11 +124,15 @@ func set_item(item_text: String) -> void:
 	_keybind_rows[&"next_item"].visible = not item_text.is_empty()
 
 
-## Standing hint (e.g. a pickup in reach); a flash_message() temporarily covers it.
-func set_prompt(text: String) -> void:
-	_hint = text
-	if _message_timer <= 0.0:
-		_prompt.text = text
+## Shows the interact prompt while something interactable is in reach: the icon
+## of whatever is bound to `action` on the current device, and a one-word verb
+## ("PICKUP", "OPEN", "TALK"). An empty verb hides it.
+func set_interact(action: StringName, verb: String) -> void:
+	_interact.visible = not verb.is_empty()
+	if verb.is_empty():
+		return
+	_interact_icon.action = action
+	_interact_verb.text = verb.to_upper()
 
 
 func flash_message(text: String) -> void:
@@ -132,6 +144,35 @@ func flash_message(text: String) -> void:
 func show_targeting(shown: bool) -> void:
 	_targeting.visible = shown
 	_keybinds.visible = not shown
+	if shown:
+		_build_gun_prompts()
+
+
+## Gun-mode prompt row: [action, word] pairs, each shown as the bound input's
+## icon (current device) and one word.
+const GUN_PROMPTS: Array = [
+	[&"attack_light", "LOCK"], [&"target_next", "SWITCH"], [&"gun_undo", "UNDO"],
+	[&"attack_heavy", "EXECUTE"], [&"gun_mode", "CANCEL"],
+]
+
+
+func _build_gun_prompts() -> void:
+	for child in _gun_prompts.get_children():
+		child.queue_free()
+	for i in GUN_PROMPTS.size():
+		var pair := HBoxContainer.new()
+		pair.add_theme_constant_override(&"separation", 8)
+		var icon := InputIcon.new()
+		icon.gamepad = using_gamepad
+		icon.press_phase = -0.15 * i
+		icon.action = GUN_PROMPTS[i][0]
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		pair.add_child(icon)
+		var word := Label.new()
+		word.text = GUN_PROMPTS[i][1]
+		word.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		pair.add_child(word)
+		_gun_prompts.add_child(pair)
 
 
 func set_mode_text(text: String) -> void:

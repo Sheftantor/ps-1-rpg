@@ -1,12 +1,14 @@
-[gd_resource type="Theme" load_steps=3 format=3]
+[gd_resource type="Theme" load_steps=2 format=3]
 
-[ext_resource type="FontFile" uid="uid://cgbjatqrhx5wq" path="res://Import/MGS1 HUD.ttf" id="1_font"]
-[ext_resource type="FontVariation" path="res://resources/ui/hud_font_bold.tres" id="2_bold"]
+[ext_resource type="FontVariation" path="res://resources/ui/hud_font_bold.tres" id="1_bold"]
 
 [resource]
-default_font = ExtResource("1_font")
-default_font_size = 26
+default_font = ExtResource("1_bold")
+default_font_size = 30
+Label/colors/font_color = Color(1, 1, 1, 1)
+Label/colors/font_outline_color = Color(0, 0, 0, 1)
+Label/constants/outline_size = 10
 HudStatLabel/base_type = &"Label"
 HudStatLabel/colors/font_color = Color(0.93, 0.94, 0.96, 1)
 HudStatLabel/font_sizes/font_size = 30
-HudStatLabel/fonts/font = ExtResource("2_bold")
+HudStatLabel/fonts/font = ExtResource("1_bold")

@@ -1,6 +1,6 @@
-class_name SwordTrail
+class_name WeaponTrail
 extends MeshInstance3D
-## Purely visual swing streak. Child of a weapon: while `emitting`, it samples the
+## Purely visual swing streak. Child of a weapon (or its mount): while `emitting`, it samples the
 ## blade's base and tip every frame and draws a glowing ribbon through the
 ## samples, each fading out over `lifetime`. No collision, and nothing to do with
 ## hit detection.

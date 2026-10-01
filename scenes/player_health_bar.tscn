@@ -4,8 +4,8 @@
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
 [ext_resource type="Texture2D" path="res://resources/ui/player_health_under.tres" id="3_background"]
 [ext_resource type="Texture2D" path="res://resources/ui/player_health_fill.tres" id="4_gradient"]
-[ext_resource type="LabelSettings" path="res://resources/ui/damage_number.tres" id="5_number"]
-[ext_resource type="LabelSettings" path="res://resources/ui/health_value.tres" id="6_value"]
+[ext_resource type="LabelSettings" path="res://resources/ui/player_damage_number.tres" id="5_number"]
+[ext_resource type="LabelSettings" path="res://resources/ui/player_health_value.tres" id="6_value"]
 
 [node name="PlayerHealthBar" type="Node3D"]
 script = ExtResource("1_bar")
@@ -19,7 +19,7 @@ texture_filter = 1
 [node name="Canvas" type="SubViewport" parent="."]
 disable_3d = true
 transparent_bg = true
-size = Vector2i(440, 130)
+size = Vector2i(440, 170)
 render_target_update_mode = 4
 
 [node name="Root" type="Control" parent="Canvas"]
@@ -35,9 +35,9 @@ theme = ExtResource("2_theme")
 [node name="Bar" type="TextureProgressBar" parent="Canvas/Root"]
 layout_mode = 0
 offset_left = 175.0
-offset_top = 86.0
+offset_top = 116.0
 offset_right = 265.0
-offset_bottom = 100.0
+offset_bottom = 130.0
 mouse_filter = 2
 value = 100.0
 nine_patch_stretch = true
@@ -47,9 +47,9 @@ texture_progress = ExtResource("4_gradient")
 [node name="HealthValue" type="Label" parent="Canvas/Root"]
 layout_mode = 0
 offset_left = 275.0
-offset_top = 58.0
+offset_top = 80.0
 offset_right = 440.0
-offset_bottom = 128.0
+offset_bottom = 166.0
 text = "100"
 label_settings = ExtResource("6_value")
 vertical_alignment = 1
@@ -57,10 +57,10 @@ vertical_alignment = 1
 [node name="DamageNumber" type="Label" parent="Canvas/Root"]
 visible = false
 layout_mode = 0
-offset_left = 120.0
-offset_top = 4.0
-offset_right = 320.0
-offset_bottom = 78.0
+offset_left = 90.0
+offset_top = 0.0
+offset_right = 350.0
+offset_bottom = 108.0
 text = "25"
 label_settings = ExtResource("5_number")
 horizontal_alignment = 1

@@ -1,0 +1,112 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/status_menu.gd" id="1_menu"]
+[ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://textures/ui/psx/text_block.png" id="3_block"]
+[ext_resource type="LabelSettings" path="res://resources/ui/menu_header.tres" id="4_header"]
+[ext_resource type="Script" path="res://scripts/ui/input_icon.gd" id="5_icon"]
+[ext_resource type="LabelSettings" path="res://resources/ui/prompt_label.tres" id="6_prompt"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_block"]
+content_margin_left = 28.0
+content_margin_top = 20.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+texture = ExtResource("3_block")
+texture_margin_left = 24.0
+texture_margin_top = 24.0
+texture_margin_right = 24.0
+texture_margin_bottom = 24.0
+
+[node name="StatusMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 20
+script = ExtResource("1_menu")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+
+[node name="Backdrop" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.72)
+
+[node name="Title" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 36.0
+offset_right = 456.0
+offset_bottom = 106.0
+text = "STATUS"
+label_settings = ExtResource("4_header")
+
+[node name="Panels" type="HBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 110.0
+offset_right = -48.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+
+[node name="Stats" type="PanelContainer" parent="Root/Panels"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_block")
+
+[node name="Content" type="VBoxContainer" parent="Root/Panels/Stats"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Gear" type="PanelContainer" parent="Root/Panels"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.4
+theme_override_styles/panel = SubResource("StyleBoxTexture_block")
+
+[node name="Content" type="VBoxContainer" parent="Root/Panels/Gear"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Hint" type="HBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -84.0
+offset_right = 200.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Icon" type="Control" parent="Root/Hint"]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("5_icon")
+action = &"status_menu"
+pixel_scale = 4
+
+[node name="Close" type="Label" parent="Root/Hint"]
+layout_mode = 2
+text = "CLOSE"
+label_settings = ExtResource("6_prompt")
+vertical_alignment = 1

@@ -1,0 +1,11 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3]
+
+[ext_resource type="FontVariation" path="res://resources/ui/hud_font_bold.tres" id="1_font"]
+
+[resource]
+font = ExtResource("1_font")
+font_size = 28
+font_color = Color(1, 1, 1, 1)
+shadow_size = 0
+shadow_color = Color(0.21, 0.2, 0.21, 1)
+shadow_offset = Vector2(2, 2)

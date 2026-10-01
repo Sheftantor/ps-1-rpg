@@ -6,6 +6,10 @@
 [ext_resource type="Script" uid="uid://dgmf2wf00pke0" path="res://scripts/commands/item_stack.gd" id="4_stack"]
 [ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="5_attack"]
 [ext_resource type="Texture2D" uid="uid://6tmdds36eimp" path="res://icon.svg" id="6_icon"]
+[ext_resource type="Resource" path="res://resources/weapons/bat.tres" id="20_bat"]
+[ext_resource type="Resource" path="res://resources/armor/wool_sweater.tres" id="21_shirt"]
+[ext_resource type="Resource" path="res://resources/armor/jeans.tres" id="22_pants"]
+[ext_resource type="Resource" path="res://resources/armor/leather_shoes.tres" id="23_shoes"]
 
 [sub_resource type="Resource" id="Resource_potion"]
 script = ExtResource("3_item")
@@ -66,3 +70,7 @@ attack = SubResource("Resource_dash_attack")
 script = ExtResource("1_loadout")
 skills = Array[ExtResource("2_skill")]([SubResource("Resource_rising"), SubResource("Resource_dash")])
 inventory = Array[ExtResource("4_stack")]([SubResource("Resource_potion_stack"), SubResource("Resource_tonic_stack")])
+melee_weapon = ExtResource("20_bat")
+shirt = ExtResource("21_shirt")
+pants = ExtResource("22_pants")
+shoes = ExtResource("23_shoes")

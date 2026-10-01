@@ -6,6 +6,8 @@ extends Node3D
 
 @export var weapon: WeaponData
 @export var item: ItemStack
+## One word for the interact prompt (shown next to the interact button icon).
+@export var interact_verb: String = "PICKUP"
 @export var radius: float = 1.6
 ## Scale of the displayed model. Weapon models are built in the character rig's
 ## units (the player model is scaled 1.8x), so they need enlarging to read here.
