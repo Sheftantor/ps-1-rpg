@@ -17,7 +17,6 @@
 [ext_resource type="Script" path="res://scripts/player/states/block.gd" id="15_block"]
 [ext_resource type="Script" path="res://scripts/player/states/hit_stun.gd" id="16_hit_stun"]
 [ext_resource type="Script" path="res://scripts/player/states/dead.gd" id="17_dead"]
-[ext_resource type="Script" path="res://scripts/ui/command_menu.gd" id="18_menu"]
 [ext_resource type="Script" path="res://scripts/player/states/gun_aim.gd" id="19_gun_aim"]
 [ext_resource type="PackedScene" path="res://scenes/player_hud.tscn" id="20_player_hud"]
 [ext_resource type="Script" path="res://scripts/combat/range_dome.gd" id="21_range_dome"]
@@ -169,10 +168,6 @@ script = ExtResource("17_dead")
 
 [node name="GunAim" type="Node" parent="StateMachine"]
 script = ExtResource("19_gun_aim")
-
-[node name="CommandMenu" type="CanvasLayer" parent="."]
-layer = 10
-script = ExtResource("18_menu")
 
 [node name="PlayerHud" parent="." instance=ExtResource("20_player_hud")]
 

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="PS1-RPG"
-run/main_scene="uid://cxu7koee2sadi"
+run/main_scene="res://scenes/tutorial.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

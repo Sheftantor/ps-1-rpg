@@ -1,7 +1,8 @@
 class_name PlayerHud
 extends CanvasLayer
 ## Player HUD: top-left health and stamina bars with values, current-weapon
-## indicator, pickup prompt and short messages, plus the gun-mode targeting
+## indicator, the bottom-left keybind panel (light / strong attack, use / next
+## item, with the binding for the last-used device), pickup prompt and short messages, plus the gun-mode targeting
 ## overlay (connector web, reticle with target and range-state labels, mode
 ## label, queued-shot slots, action prompts). Structure and logic only: layout,
 ## colors and fonts live in res://scenes/player_hud.tscn and
@@ -16,6 +17,9 @@ extends CanvasLayer
 ## Queue slot and reticle label for queued targets, numbered in queue order.
 @export var queued_format: String = "ENEMY %s"
 
+## Whether key labels show gamepad buttons; follows the last device used.
+var using_gamepad: bool = false
+
 var _hint: String = ""
 var _message_timer: float = 0.0
 var _slots: Array[Control] = []
@@ -25,6 +29,16 @@ var _slots: Array[Control] = []
 @onready var _stamina_value: Label = $Root/Stats/StaminaRow/Value
 @onready var _stamina_bar: Range = $Root/Stats/StaminaBar
 @onready var _weapon_label: Label = $Root/WeaponLabel
+@onready var _keybinds: Control = $Root/Keybinds
+## Rows of the keybind panel: each has a Key label (filled from the input map)
+## and a Name label. ItemRow's Name shows the selected item.
+@onready var _keybind_rows: Dictionary = {
+	&"attack_light": $Root/Keybinds/LightRow,
+	&"attack_heavy": $Root/Keybinds/StrongRow,
+	&"use_item": $Root/Keybinds/ItemRow,
+	&"next_item": $Root/Keybinds/NextItemRow,
+}
+@onready var _item_name: Label = $Root/Keybinds/ItemRow/Name
 @onready var _prompt: Label = $Root/Prompt
 @onready var _targeting: Control = $Root/Targeting
 @onready var _links: TargetLinks = $Root/Targeting/Links
@@ -40,6 +54,32 @@ func _ready() -> void:
 	_targeting.visible = false
 	_slot_template.visible = false
 	_prompt.text = ""
+	_refresh_keybinds()
+
+
+## Switches the key labels between keyboard/mouse and gamepad as either is used.
+func _input(event: InputEvent) -> void:
+	var gamepad := using_gamepad
+	if event is InputEventJoypadButton:
+		gamepad = true
+	elif event is InputEventJoypadMotion:
+		if absf((event as InputEventJoypadMotion).axis_value) > 0.5:
+			gamepad = true
+	elif event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
+		gamepad = false
+	if gamepad != using_gamepad:
+		using_gamepad = gamepad
+		_refresh_keybinds()
+
+
+## Short name of the key/button bound to `action` on the current device.
+func key_label(action: StringName) -> String:
+	return InputBindings.label(action, using_gamepad)
+
+
+func _refresh_keybinds() -> void:
+	for action: StringName in _keybind_rows:
+		(_keybind_rows[action].get_node("Key") as Label).text = key_label(action)
 
 
 func _process(delta: float) -> void:
@@ -68,6 +108,14 @@ func set_weapon(weapon_name: String) -> void:
 	_weapon_label.text = weapon_name.to_upper()
 
 
+## Keybind panel item row: the item use_item spends ("POTION X3"); empty hides
+## the item rows.
+func set_item(item_text: String) -> void:
+	_item_name.text = item_text.to_upper()
+	_keybind_rows[&"use_item"].visible = not item_text.is_empty()
+	_keybind_rows[&"next_item"].visible = not item_text.is_empty()
+
+
 ## Standing hint (e.g. a pickup in reach); a flash_message() temporarily covers it.
 func set_prompt(text: String) -> void:
 	_hint = text
@@ -80,8 +128,10 @@ func flash_message(text: String) -> void:
 	_message_timer = message_time
 
 
+## Gun mode has its own prompt row (and its queue sits where the keybind panel is).
 func show_targeting(shown: bool) -> void:
 	_targeting.visible = shown
+	_keybinds.visible = not shown
 
 
 func set_mode_text(text: String) -> void:

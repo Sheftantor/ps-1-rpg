@@ -15,4 +15,4 @@ func physics_update(delta: float) -> void:
 	enemy.move_horizontal(Vector3.ZERO, enemy.stats.stagger_friction, delta)
 	_timer -= delta
 	if _timer <= 0.0:
-		transition_to(REPOSITION)
+		transition_to(IDLE if enemy.stats.passive else REPOSITION)

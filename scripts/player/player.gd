@@ -8,13 +8,14 @@ extends CharacterBody3D
 ## The body itself never rotates: CameraRig holds the camera yaw (movement is
 ## relative to it) and Facing turns the mesh and hitbox toward movement/target.
 
-## Buffered action names. Direct input and command-menu picks both go through
-## buffer_action(), so choosing Attack from the menu is the same as pressing it.
+## Buffered action names. Inputs go through buffer_action() so a press made
+## mid-swing or mid-roll still happens once the player is free to act.
 const ACTION_LIGHT: StringName = &"attack_light"
 const ACTION_HEAVY: StringName = &"attack_heavy"
 const ACTION_DODGE: StringName = &"dodge"
 const ACTION_JUMP: StringName = &"jump"
 const ACTION_SKILL: StringName = &"skill"
+## Uses the selected inventory item (payload: its ItemStack); the use_item input.
 const ACTION_ITEM: StringName = &"item"
 const ACTION_INTERACT: StringName = &"interact"
 ## Draw the gun into time-stop targeting (GunAim), or back out of it.
@@ -87,6 +88,8 @@ const FALL_ANIM_DELAY: float = 0.12
 var lock_target: Enemy = null
 ## The player's copy of loadout.inventory; items are spent from this.
 var inventory: Array[ItemStack] = []
+## Index into inventory of the item use_item spends; next_item steps it.
+var selected_item: int = 0
 ## Set by states each tick for their visual cue (wind-up, i-frames, guard).
 var state_flash: Color = NO_COLOR
 ## What happened to the last incoming hit, for the debug HUD.
@@ -126,7 +129,6 @@ var _hip_attachment: BoneAttachment3D = null
 @onready var health: Health = $Health
 @onready var stamina: Stamina = $Stamina
 @onready var state_machine: StateMachine = $StateMachine
-@onready var command_menu: CommandMenu = $CommandMenu
 ## Strong attacks and skills use `hitbox`; the basic (horizontal) swing uses
 ## `swing_hitbox`, a wide flat band along the swipe, opened on the clip's hit frames.
 @onready var hitbox: Hitbox = $Facing/Hitbox
@@ -154,10 +156,6 @@ func _ready() -> void:
 
 	for stack: ItemStack in loadout.inventory:
 		inventory.append(stack.duplicate() as ItemStack)
-	command_menu.setup(loadout.skills, inventory, can_use_command)
-	command_menu.attack_selected.connect(buffer_action.bind(ACTION_LIGHT, null))
-	command_menu.skill_selected.connect(func(skill: SkillData) -> void: buffer_action(ACTION_SKILL, skill))
-	command_menu.item_selected.connect(func(stack: ItemStack) -> void: buffer_action(ACTION_ITEM, stack))
 
 	_debug_hit = AttackData.new()
 	_debug_hit.display_name = "Debug hit"
@@ -174,6 +172,7 @@ func _ready() -> void:
 	stamina.changed.connect(hud.set_stamina)
 	hud.set_health(health.current, health.max_health)
 	hud.set_stamina(stamina.current, stamina.maximum)
+	_refresh_item_hud()
 	# The action slots' clips are swapped at runtime, so use a private copy of the tree.
 	_anim_tree.tree_root = _anim_tree.tree_root.duplicate(true)
 	_anim_tree.active = true
@@ -216,8 +215,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		_cycle_target(1)
 	elif event.is_action_pressed(&"target_prev"):
 		_cycle_target(-1)
-	elif not command_menu.is_open:
-		# While the menu is open it owns the buttons (they double as menu controls).
+	elif event.is_action_pressed(&"next_item"):
+		cycle_item(1)
+	elif event.is_action_pressed(&"use_item"):
+		var stack := selected_item_stack()
+		if stack != null:
+			buffer_action(ACTION_ITEM, stack)
+	else:
 		for action: StringName in BUTTON_ACTIONS:
 			if event.is_action_pressed(action):
 				buffer_action(action)
@@ -287,7 +291,7 @@ func can_dodge() -> bool:
 
 
 func wants_block() -> bool:
-	return not command_menu.is_open and Input.is_action_pressed(&"block")
+	return Input.is_action_pressed(&"block")
 
 
 ## Spends the skill's stamina and enters its state. Returns false if it can't.
@@ -311,15 +315,27 @@ func use_item(stack: ItemStack) -> void:
 	stack.count -= 1
 	if stack.count <= 0:
 		inventory.erase(stack)
+	_refresh_item_hud()
 
 
-## For the command menu: whether a SkillData/ItemStack entry can be picked now.
-func can_use_command(entry: Resource) -> bool:
-	if entry is SkillData:
-		return stamina.has((entry as SkillData).stamina_cost)
-	if entry is ItemStack:
-		return (entry as ItemStack).count > 0
-	return true
+## The item use_item spends, or null with an empty inventory.
+func selected_item_stack() -> ItemStack:
+	if inventory.is_empty():
+		return null
+	selected_item = clampi(selected_item, 0, inventory.size() - 1)
+	return inventory[selected_item]
+
+
+func cycle_item(step: int) -> void:
+	if inventory.is_empty():
+		return
+	selected_item = posmod(selected_item + step, inventory.size())
+	_refresh_item_hud()
+
+
+func _refresh_item_hud() -> void:
+	var stack := selected_item_stack()
+	hud.set_item("%s x%d" % [stack.item.display_name, stack.count] if stack != null else "")
 
 
 ## Faces the lock target, or the held direction, at the start of an attack.
@@ -346,8 +362,6 @@ func _tick_timers(delta: float) -> void:
 # --- Damage ---------------------------------------------------------------------
 
 func _on_hit_received(attack: AttackData, source: Node3D) -> void:
-	# Caught browsing: nothing pauses for the menu, and a hit knocks you out of it.
-	command_menu.close()
 	var push := _knockback_direction(source) * attack.knockback
 
 	var guard_broken := false
@@ -395,8 +409,6 @@ func _on_died() -> void:
 	hitbox.deactivate()
 	swing_hitbox.deactivate()
 	lock_target = null
-	command_menu.close()
-	command_menu.enabled = false
 	state_machine.transition_to(PlayerState.DEAD)
 	get_tree().create_timer(RESPAWN_DELAY).timeout.connect(get_tree().reload_current_scene)
 
@@ -480,11 +492,8 @@ func _update_lock_on_camera(delta: float) -> void:
 
 # --- Movement helpers (used by states) --------------------------------------------
 
-## Camera-relative input direction on the XZ plane (length 0..1). Zero while the
-## command menu is open, since the stick is navigating it.
+## Camera-relative input direction on the XZ plane (length 0..1).
 func get_move_direction() -> Vector3:
-	if command_menu.is_open:
-		return Vector3.ZERO
 	var input := Input.get_vector(&"move_left", &"move_right", &"move_forward", &"move_back")
 	var direction := _camera_rig.global_basis * Vector3(input.x, 0.0, input.y)
 	direction.y = 0.0
@@ -572,8 +581,10 @@ func add_item(stack: ItemStack) -> void:
 	for held: ItemStack in inventory:
 		if held.item == stack.item:
 			held.count += stack.count
+			_refresh_item_hud()
 			return
 	inventory.append(stack.duplicate() as ItemStack)
+	_refresh_item_hud()
 
 
 func nearest_pickup() -> Pickup:
@@ -592,7 +603,7 @@ func nearest_pickup() -> Pickup:
 
 func _update_pickup_prompt() -> void:
 	var pickup := nearest_pickup() if current_state().name != PlayerState.GUN_AIM else null
-	hud.set_prompt("[E] PICK UP %s" % pickup.display_name().to_upper() if pickup != null else "")
+	hud.set_prompt("[%s] PICK UP %s" % [hud.key_label(&"interact"), pickup.display_name().to_upper()] if pickup != null else "")
 
 
 ## Gun mode: sheathes the sword at the hip and puts the gun in the sword hand,

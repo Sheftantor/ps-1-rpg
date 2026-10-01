@@ -11,6 +11,9 @@ extends Resource
 @export var turn_speed: float = 8.0
 
 @export_group("Awareness")
+## Training dummy: never engages the player, and goes back to standing still
+## after a stagger.
+@export var passive: bool = false
 @export var detection_radius: float = 12.0
 ## Gives up and returns to idle beyond this distance.
 @export var lose_interest_radius: float = 22.0

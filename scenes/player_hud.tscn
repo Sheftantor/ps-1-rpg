@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="1_hud"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
@@ -19,6 +19,16 @@ content_margin_left = 6.0
 content_margin_top = 6.0
 content_margin_right = 6.0
 content_margin_bottom = 4.0
+bg_color = Color(0, 0, 0, 0.55)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.9, 0.9, 0.9, 0.8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_key"]
+content_margin_left = 4.0
+content_margin_right = 4.0
 bg_color = Color(0, 0, 0, 0.55)
 border_width_left = 1
 border_width_top = 1
@@ -111,6 +121,92 @@ offset_bottom = -16.0
 grow_vertical = 0
 text = "SWORD"
 vertical_alignment = 1
+
+[node name="Keybinds" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -176.0
+offset_right = 320.0
+offset_bottom = -60.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 2
+alignment = 2
+
+[node name="LightRow" type="HBoxContainer" parent="Root/Keybinds"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Key" type="Label" parent="Root/Keybinds/LightRow"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_key")
+text = "LMB"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="Root/Keybinds/LightRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "LIGHT ATTACK"
+
+[node name="StrongRow" type="HBoxContainer" parent="Root/Keybinds"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Key" type="Label" parent="Root/Keybinds/StrongRow"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_key")
+text = "RMB"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="Root/Keybinds/StrongRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "STRONG ATTACK"
+
+[node name="ItemRow" type="HBoxContainer" parent="Root/Keybinds"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Key" type="Label" parent="Root/Keybinds/ItemRow"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_key")
+text = "F"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="Root/Keybinds/ItemRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "POTION X3"
+
+[node name="NextItemRow" type="HBoxContainer" parent="Root/Keybinds"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Key" type="Label" parent="Root/Keybinds/NextItemRow"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_key")
+text = "G"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="Root/Keybinds/NextItemRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "NEXT ITEM"
 
 [node name="Prompt" type="Label" parent="Root"]
 layout_mode = 1

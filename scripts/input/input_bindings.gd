@@ -6,6 +6,19 @@ extends RefCounted
 
 const ALL_DEVICES: int = -1
 
+const MOUSE_NAMES: Dictionary = {
+	MOUSE_BUTTON_LEFT: "LMB", MOUSE_BUTTON_RIGHT: "RMB", MOUSE_BUTTON_MIDDLE: "MMB",
+	MOUSE_BUTTON_WHEEL_UP: "WHEEL UP", MOUSE_BUTTON_WHEEL_DOWN: "WHEEL DOWN",
+}
+const PAD_BUTTON_NAMES: Dictionary = {
+	JOY_BUTTON_A: "A", JOY_BUTTON_B: "B", JOY_BUTTON_X: "X", JOY_BUTTON_Y: "Y",
+	JOY_BUTTON_LEFT_SHOULDER: "LB", JOY_BUTTON_RIGHT_SHOULDER: "RB",
+	JOY_BUTTON_LEFT_STICK: "LS", JOY_BUTTON_RIGHT_STICK: "RS",
+	JOY_BUTTON_BACK: "BACK", JOY_BUTTON_START: "START",
+	JOY_BUTTON_DPAD_UP: "D-UP", JOY_BUTTON_DPAD_DOWN: "D-DOWN",
+	JOY_BUTTON_DPAD_LEFT: "D-LEFT", JOY_BUTTON_DPAD_RIGHT: "D-RIGHT",
+}
+
 static var _initialized: bool = false
 
 
@@ -36,16 +49,48 @@ static func ensure_defaults() -> void:
 	# Gun mode: take a target back off the shot queue.
 	_bind(&"gun_undo", [_key(KEY_R), _button(JOY_BUTTON_DPAD_UP)])
 
-	# Command menu. Hold to open; while it's open the player ignores gameplay
-	# input, so sharing keys/buttons with movement and actions is fine.
-	_bind(&"command_menu", [_key(KEY_F), _button(JOY_BUTTON_RIGHT_SHOULDER)])
-	_bind(&"menu_up", [_key(KEY_UP), _key(KEY_W), _button(JOY_BUTTON_DPAD_UP), _axis(JOY_AXIS_LEFT_Y, -1.0)])
-	_bind(&"menu_down", [_key(KEY_DOWN), _key(KEY_S), _button(JOY_BUTTON_DPAD_DOWN), _axis(JOY_AXIS_LEFT_Y, 1.0)])
-	_bind(&"menu_confirm", [_key(KEY_ENTER), _key(KEY_SPACE), _button(JOY_BUTTON_A)])
-	_bind(&"menu_cancel", [_key(KEY_BACKSPACE), _button(JOY_BUTTON_B)])
+	# Items: use the selected one, or step the selection to the next.
+	_bind(&"use_item", [_key(KEY_F), _button(JOY_BUTTON_RIGHT_SHOULDER)])
+	_bind(&"next_item", [_key(KEY_G), _axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)])
 
 	_bind(&"pause", [_key(KEY_ESCAPE), _button(JOY_BUTTON_START)])
 	_bind(&"debug_hurt", [_key(KEY_K), _button(JOY_BUTTON_BACK)])
+
+
+## Short on-screen name for the first binding of `action` on the given device
+## ("LMB", "SHIFT", "X", "RB"...), or "?" if it has none there.
+static func label(action: StringName, gamepad: bool) -> String:
+	ensure_defaults()
+	if not InputMap.has_action(action):
+		return "?"
+	for event: InputEvent in InputMap.action_get_events(action):
+		var is_pad := event is InputEventJoypadButton or event is InputEventJoypadMotion
+		if is_pad == gamepad:
+			return event_label(event)
+	return "?"
+
+
+static func event_label(event: InputEvent) -> String:
+	if event is InputEventKey:
+		var key := event as InputEventKey
+		var code := key.physical_keycode if key.physical_keycode != KEY_NONE else key.keycode
+		return OS.get_keycode_string(code).to_upper()
+	if event is InputEventMouseButton:
+		return MOUSE_NAMES.get((event as InputEventMouseButton).button_index, "MOUSE")
+	if event is InputEventJoypadButton:
+		return PAD_BUTTON_NAMES.get((event as InputEventJoypadButton).button_index, "PAD")
+	if event is InputEventJoypadMotion:
+		var motion := event as InputEventJoypadMotion
+		match motion.axis:
+			JOY_AXIS_TRIGGER_LEFT:
+				return "LT"
+			JOY_AXIS_TRIGGER_RIGHT:
+				return "RT"
+			JOY_AXIS_LEFT_X, JOY_AXIS_LEFT_Y:
+				return "L STICK"
+			JOY_AXIS_RIGHT_X, JOY_AXIS_RIGHT_Y:
+				return "R STICK"
+	return "?"
 
 
 static func _bind(action: StringName, events: Array[InputEvent]) -> void:

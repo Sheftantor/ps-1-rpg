@@ -1,8 +1,8 @@
 class_name SkillData
 extends Resource
-## A command-menu skill. Picking it spends stamina and sends the player into
-## `state` with {"attack": attack} as the transition message (HeavyAttack uses
-## that attack in place of the regular heavy).
+## A skill. Buffering it as ACTION_SKILL (no input is bound to that yet) spends
+## stamina and sends the player into `state` with {"attack": attack} as the
+## transition message (HeavyAttack uses that attack in place of the regular heavy).
 
 @export var display_name: String = ""
 @export var icon: Texture2D
