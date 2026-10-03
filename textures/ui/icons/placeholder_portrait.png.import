@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwekh83x5k43v"
-path="res://.godot/imported/asphalt_plain.png-4b7a14878f83a643aa54f85c894d73e4.ctex"
+uid="uid://dkl3dod8hq5cm"
+path="res://.godot/imported/placeholder_portrait.png-53cb99bffa6d13e032e539eae487e2e5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/city/asphalt_plain.png"
-dest_files=["res://.godot/imported/asphalt_plain.png-4b7a14878f83a643aa54f85c894d73e4.ctex"]
+source_file="res://textures/ui/icons/placeholder_portrait.png"
+dest_files=["res://.godot/imported/placeholder_portrait.png-53cb99bffa6d13e032e539eae487e2e5.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -31,10 +31,10 @@ process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2
 process/channel_remap/alpha=3
-process/fix_alpha_border=false
+process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

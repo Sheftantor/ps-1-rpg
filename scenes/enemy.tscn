@@ -26,7 +26,6 @@ shader_parameter/uv_scale = Vector2(1, 1)
 shader_parameter/checker_size = 8.0
 shader_parameter/checker_color = Color(0.7, 0.7, 0.7, 1)
 shader_parameter/snap_resolution = 240.0
-shader_parameter/affine_strength = 1.0
 shader_parameter/color_depth = 32.0
 shader_parameter/dithering = true
 

@@ -175,7 +175,6 @@ func _ready() -> void:
 			_flash_meshes.append(node as GeometryInstance3D)
 	_melee_holder = _melee.get_parent()
 	_melee_hand_transform = _melee.transform
-	hud.set_weapon(melee_name())
 	health.changed.connect(hud.set_health)
 	stamina.changed.connect(hud.set_stamina)
 	hud.set_health(health.current, health.max_health)
@@ -341,9 +340,10 @@ func cycle_item(step: int) -> void:
 	_refresh_item_hud()
 
 
+## Redraws the HUD loadout row (weapons and inventory) after anything in it changes.
 func _refresh_item_hud() -> void:
-	var stack := selected_item_stack()
-	hud.set_item("%s x%d" % [stack.item.display_name, stack.count] if stack != null else "")
+	selected_item_stack()  # Clamps selected_item.
+	hud.set_loadout(melee_weapon, gun, inventory, selected_item)
 
 
 ## Faces the lock target, or the held direction, at the start of an attack.
@@ -495,7 +495,17 @@ func _update_lock_on_camera(delta: float) -> void:
 	if to_target.length_squared() > 0.01:
 		var yaw := atan2(-to_target.x, -to_target.z)
 		_camera_rig.rotation.y = lerp_angle(_camera_rig.rotation.y, yaw, weight)
-	_spring_arm.rotation.x = lerpf(_spring_arm.rotation.x, deg_to_rad(stats.lock_on_pitch_degrees), weight)
+	_spring_arm.rotation.x = lerpf(_spring_arm.rotation.x, _lock_on_pitch(), weight)
+
+
+## The usual lock-on pitch, tilted up just enough to keep a target above the
+## player (flying, on a ledge) inside the top of the frame.
+func _lock_on_pitch() -> float:
+	var pitch := deg_to_rad(stats.lock_on_pitch_degrees)
+	var to_target := aim_point(lock_target) - _camera_rig.global_position
+	var elevation := atan2(to_target.y, Vector2(to_target.x, to_target.z).length())
+	var half_view := deg_to_rad(camera().fov * 0.5 - stats.lock_on_view_margin_degrees)
+	return clampf(maxf(pitch, elevation - half_view), -deg_to_rad(pitch_limit_degrees), deg_to_rad(pitch_limit_degrees))
 
 
 # --- Movement helpers (used by states) --------------------------------------------
@@ -508,8 +518,9 @@ func get_move_direction() -> Vector3:
 	return direction.normalized() * input.length()
 
 
-## Accelerates toward the held direction at speed and turns to face the lock
-## target, or (if turn_to_move) the movement direction.
+## Accelerates toward the held direction at speed. With turn_to_move the player
+## turns to face where they run, locked on or not (lock-on only pivots the
+## camera); without it (blocking) they face the lock target, if any.
 func locomote(delta: float, speed: float, turn_to_move: bool = true) -> void:
 	var move_dir := get_move_direction()
 	var rate: float
@@ -521,10 +532,11 @@ func locomote(delta: float, speed: float, turn_to_move: bool = true) -> void:
 		rate = stats.deceleration
 	move_horizontal(move_dir * speed, rate, delta)
 
-	if lock_target != null:
+	if turn_to_move:
+		if move_dir != Vector3.ZERO:
+			face_toward(move_dir, delta)
+	elif lock_target != null:
 		face_toward(lock_target.global_position - global_position, delta)
-	elif turn_to_move and move_dir != Vector3.ZERO:
-		face_toward(move_dir, delta)
 
 
 func forward() -> Vector3:
@@ -614,6 +626,7 @@ func interact() -> void:
 			_gun_model.queue_free()
 			_gun_model = null
 		hud.flash_message("GOT %s" % gun.display_name.to_upper())
+		_refresh_item_hud()
 	elif pickup.item != null:
 		add_item(pickup.item)
 		hud.flash_message("GOT %s" % pickup.display_name().to_upper())
@@ -664,14 +677,14 @@ func set_gun_drawn(drawn: bool) -> void:
 		_gun_model.visible = true
 		_sheathe_melee(true)
 		_aim_target = 1.0
-		hud.set_weapon(gun.display_name)
+		hud.set_gun_drawn(true)
 		_range_dome.show_range(gun.effective_range)
 	else:
 		if _gun_model != null:
 			_gun_model.visible = false
 		_sheathe_melee(false)
 		_aim_target = 0.0
-		hud.set_weapon(melee_name())
+		hud.set_gun_drawn(false)
 		_range_dome.hide_range()
 
 

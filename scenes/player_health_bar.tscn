@@ -9,6 +9,7 @@
 
 [node name="PlayerHealthBar" type="Node3D"]
 script = ExtResource("1_bar")
+scale_with_distance = false
 
 [node name="Display" type="Sprite3D" parent="."]
 pixel_size = 0.0018

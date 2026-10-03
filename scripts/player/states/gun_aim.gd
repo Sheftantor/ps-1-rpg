@@ -51,7 +51,7 @@ func enter(_msg: Dictionary) -> void:
 	player.set_gun_drawn(true)
 	_refresh_targets()
 	_cursor = _previous_lock if _previous_lock in _targets else (_targets[0] if not _targets.is_empty() else null)
-	player.hud.set_queue(0)
+	player.hud.set_queue([])
 	player.hud.show_targeting(true)
 
 
@@ -62,7 +62,7 @@ func exit() -> void:
 	player.consume_buffer()
 	player.process_mode = Node.PROCESS_MODE_INHERIT
 	player.set_gun_drawn(false)
-	player.hud.set_queue(0)
+	player.hud.set_queue([])
 	player.hud.show_targeting(false)
 	var keep_lock := is_instance_valid(_previous_lock) and _previous_lock.is_alive()
 	player.lock_target = _previous_lock if keep_lock else null
@@ -263,7 +263,10 @@ func _update_hud() -> void:
 			hud.set_mode_text("EXECUTE")
 		Phase.RECOVERING:
 			hud.set_mode_text("")
-	hud.set_queue(queue.size())
+	var portraits: Array[Texture2D] = []
+	for enemy in queue:
+		portraits.append(enemy.stats.portrait if is_instance_valid(enemy) else null)
+	hud.set_queue(portraits)
 	var points: Array[Vector3] = []
 	for enemy in _targets:
 		points.append(player.aim_point(enemy))

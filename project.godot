@@ -27,6 +27,9 @@ dock_revealed=true
 
 [display]
 
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
@@ -62,8 +65,4 @@ rendering_device/driver.windows="d3d12"
 ps1_snap_resolution={
 "type": "float",
 "value": 240.0
-}
-ps1_affine_strength={
-"type": "float",
-"value": 1.0
 }

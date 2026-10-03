@@ -14,7 +14,6 @@
 [sub_resource type="Resource" id="Resource_potion"]
 script = ExtResource("3_item")
 display_name = "Potion"
-icon = ExtResource("6_icon")
 heal_amount = 40
 
 [sub_resource type="Resource" id="Resource_potion_stack"]
@@ -25,7 +24,6 @@ count = 3
 [sub_resource type="Resource" id="Resource_tonic"]
 script = ExtResource("3_item")
 display_name = "Tonic"
-icon = ExtResource("6_icon")
 stamina_restore = 100.0
 
 [sub_resource type="Resource" id="Resource_tonic_stack"]

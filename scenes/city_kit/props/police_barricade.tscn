@@ -1,0 +1,75 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/materials/city/paint_blue.tres" id="1_blue"]
+[ext_resource type="Material" path="res://resources/materials/city/paint_white.tres" id="2_white"]
+[ext_resource type="FontFile" uid="uid://cgbjatqrhx5wq" path="res://Import/MGS1 HUD.ttf" id="3_font"]
+
+[node name="PoliceBarricade" type="CSGCombiner3D" unique_id=795425564]
+use_collision = true
+
+[node name="Rail" type="CSGBox3D" parent="." unique_id=423946139]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.98, 0)
+size = Vector3(2.4, 0.26, 0.06)
+material = ExtResource("1_blue")
+
+[node name="EndCapL" type="CSGBox3D" parent="." unique_id=947876999]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.16, 0.98, 0)
+size = Vector3(0.08, 0.26, 0.07)
+material = ExtResource("2_white")
+
+[node name="EndCapR" type="CSGBox3D" parent="." unique_id=1497871144]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.16, 0.98, 0)
+size = Vector3(0.08, 0.26, 0.07)
+material = ExtResource("2_white")
+
+[node name="LegLF" type="CSGBox3D" parent="." unique_id=203694312]
+transform = Transform3D(1, 0, 0, 0, 0.978148, 0.207912, 0, -0.207912, 0.978148, -0.95, 0.5, 0.11)
+size = Vector3(0.07, 1.05, 0.07)
+material = ExtResource("1_blue")
+
+[node name="LegLB" type="CSGBox3D" parent="." unique_id=255555737]
+transform = Transform3D(1, 0, 0, 0, 0.978148, -0.207912, 0, 0.207912, 0.978148, -0.95, 0.5, -0.11)
+size = Vector3(0.07, 1.05, 0.07)
+material = ExtResource("1_blue")
+
+[node name="LegRF" type="CSGBox3D" parent="." unique_id=1863673106]
+transform = Transform3D(1, 0, 0, 0, 0.978148, 0.207912, 0, -0.207912, 0.978148, 0.95, 0.5, 0.11)
+size = Vector3(0.07, 1.05, 0.07)
+material = ExtResource("1_blue")
+
+[node name="LegRB" type="CSGBox3D" parent="." unique_id=1250797845]
+transform = Transform3D(1, 0, 0, 0, 0.978148, -0.207912, 0, 0.207912, 0.978148, 0.95, 0.5, -0.11)
+size = Vector3(0.07, 1.05, 0.07)
+material = ExtResource("1_blue")
+
+[node name="BraceL" type="CSGBox3D" parent="." unique_id=302142728]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0.45, 0)
+size = Vector3(0.05, 0.05, 0.3)
+material = ExtResource("1_blue")
+
+[node name="BraceR" type="CSGBox3D" parent="." unique_id=885310972]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 0.45, 0)
+size = Vector3(0.05, 0.05, 0.3)
+material = ExtResource("1_blue")
+
+[node name="TextFront" type="Label3D" parent="." unique_id=1351527726]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.98, 0.032)
+pixel_size = 0.003
+shaded = true
+texture_filter = 0
+modulate = Color(0.92, 0.92, 0.9, 1)
+text = "POLICE LINE  DO NOT CROSS"
+font = ExtResource("3_font")
+font_size = 32
+outline_size = 0
+
+[node name="TextBack" type="Label3D" parent="." unique_id=224551738]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.98, -0.032)
+pixel_size = 0.003
+shaded = true
+texture_filter = 0
+modulate = Color(0.92, 0.92, 0.9, 1)
+text = "POLICE LINE  DO NOT CROSS"
+font = ExtResource("3_font")
+font_size = 32
+outline_size = 0

@@ -4,6 +4,7 @@ extends Resource
 ## animation yet).
 
 @export var display_name: String = ""
-@export var icon: Texture2D
+## Square picture for the HUD loadout row and status screen. Defaults to a placeholder.
+@export var icon: Texture2D = preload("res://textures/ui/icons/placeholder_item.png")
 @export var heal_amount: int = 0
 @export var stamina_restore: float = 0.0

@@ -4,7 +4,7 @@
 [ext_resource type="Material" path="res://resources/materials/city/road_asphalt.tres" id="2_u1h40"]
 [ext_resource type="Material" path="res://resources/materials/city/road_one_way.tres" id="3_2yyc3"]
 [ext_resource type="Material" path="res://resources/materials/city/sidewalk_concrete.tres" id="4_b8ddm"]
-[ext_resource type="Material" path="res://resources/materials/city/paint_white.tres" id="5_x157p"]
+[ext_resource type="Material" path="res://resources/materials/city/road_marking_white.tres" id="5_x157p"]
 [ext_resource type="Script" path="res://scripts/city/city_building.gd" id="6_ns402"]
 [ext_resource type="Material" path="res://resources/materials/city/metal_gray.tres" id="7_lk1rj"]
 [ext_resource type="Shader" path="res://shaders/ps1.gdshader" id="8_0dhpf"]
@@ -35,6 +35,13 @@
 [ext_resource type="Resource" path="res://resources/weapons/pistol.tres" id="37_ltbyx"]
 [ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="38_onum3"]
 [ext_resource type="Resource" path="res://resources/enemies/passive_target_stats.tres" id="41_wuovx"]
+[ext_resource type="PackedScene" path="res://scenes/city_kit/props/police_barricade.tscn" id="42_barricade"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bound_ew"]
+size = Vector3(2, 20, 92)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bound_ns"]
+size = Vector3(130.8, 20, 2)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xq67f"]
 render_priority = 0
@@ -1517,6 +1524,119 @@ material = ExtResource("30_j0nfq")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, -24)
 size = Vector3(2.6, 4.9, 2.6)
 material = ExtResource("30_j0nfq")
+
+[node name="Barricades" type="Node3D" parent="." unique_id=2053574602]
+
+[node name="WestNorth0" parent="Barricades" unique_id=1302102035 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.006649, 0.000000, 0.999978, 0.000000, 1.000000, 0.000000, -0.999978, 0.000000, -0.006649, -61.50, 0.15, -44.00)
+
+[node name="WestNorth1" parent="Barricades" unique_id=1777652994 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.049807, 0.000000, 0.998759, 0.000000, 1.000000, 0.000000, -0.998759, 0.000000, 0.049807, -61.50, 0, -40.60)
+
+[node name="WestNorth2" parent="Barricades" unique_id=1190580830 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.004796, 0.000000, 0.999988, 0.000000, 1.000000, 0.000000, -0.999988, 0.000000, -0.004796, -61.50, 0, -38.00)
+
+[node name="WestNorth3" parent="Barricades" unique_id=507811516 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.049553, 0.000000, 0.998771, 0.000000, 1.000000, 0.000000, -0.998771, 0.000000, 0.049553, -61.50, 0, -35.40)
+
+[node name="WestNorth4" parent="Barricades" unique_id=1199315425 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.044015, 0.000000, 0.999031, 0.000000, 1.000000, 0.000000, -0.999031, 0.000000, -0.044015, -61.50, 0.15, -32.00)
+
+[node name="WestSouth0" parent="Barricades" unique_id=1418466550 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.003384, 0.000000, 0.999994, 0.000000, 1.000000, 0.000000, -0.999994, 0.000000, -0.003384, -61.50, 0.15, 28.00)
+
+[node name="WestSouth1" parent="Barricades" unique_id=302128585 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.040896, 0.000000, 0.999163, 0.000000, 1.000000, 0.000000, -0.999163, 0.000000, 0.040896, -61.50, 0, 31.40)
+
+[node name="WestSouth2" parent="Barricades" unique_id=404502734 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.007457, 0.000000, 0.999972, 0.000000, 1.000000, 0.000000, -0.999972, 0.000000, -0.007457, -61.50, 0, 34.00)
+
+[node name="WestSouth3" parent="Barricades" unique_id=1838698399 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.057122, 0.000000, 0.998367, 0.000000, 1.000000, 0.000000, -0.998367, 0.000000, -0.057122, -61.50, 0, 36.60)
+
+[node name="WestSouth4" parent="Barricades" unique_id=1462476977 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.054480, 0.000000, 0.998515, 0.000000, 1.000000, 0.000000, -0.998515, 0.000000, 0.054480, -61.50, 0.15, 40.00)
+
+[node name="EastNorth0" parent="Barricades" unique_id=950747065 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.063922, 0.000000, 0.997955, 0.000000, 1.000000, 0.000000, -0.997955, 0.000000, -0.063922, 61.50, 0.15, -44.00)
+
+[node name="EastNorth1" parent="Barricades" unique_id=1504287947 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.064847, 0.000000, 0.997895, 0.000000, 1.000000, 0.000000, -0.997895, 0.000000, 0.064847, 61.50, 0, -40.60)
+
+[node name="EastNorth2" parent="Barricades" unique_id=1496016796 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.033353, 0.000000, 0.999444, 0.000000, 1.000000, 0.000000, -0.999444, 0.000000, 0.033353, 61.50, 0, -38.00)
+
+[node name="EastNorth3" parent="Barricades" unique_id=132213826 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.047805, 0.000000, 0.998857, 0.000000, 1.000000, 0.000000, -0.998857, 0.000000, -0.047805, 61.50, 0, -35.40)
+
+[node name="EastNorth4" parent="Barricades" unique_id=235645637 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.046298, 0.000000, 0.998928, 0.000000, 1.000000, 0.000000, -0.998928, 0.000000, 0.046298, 61.50, 0.15, -32.00)
+
+[node name="EastSouth0" parent="Barricades" unique_id=508469125 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.061460, 0.000000, 0.998110, 0.000000, 1.000000, 0.000000, -0.998110, 0.000000, -0.061460, 61.50, 0.15, 28.00)
+
+[node name="EastSouth1" parent="Barricades" unique_id=1387670034 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.052972, 0.000000, 0.998596, 0.000000, 1.000000, 0.000000, -0.998596, 0.000000, 0.052972, 61.50, 0, 31.40)
+
+[node name="EastSouth2" parent="Barricades" unique_id=1096291671 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.065566, 0.000000, 0.997848, 0.000000, 1.000000, 0.000000, -0.997848, 0.000000, -0.065566, 61.50, 0, 34.00)
+
+[node name="EastSouth3" parent="Barricades" unique_id=1369075729 instance=ExtResource("42_barricade")]
+transform = Transform3D(-0.024252, 0.000000, 0.999706, 0.000000, 1.000000, 0.000000, -0.999706, 0.000000, -0.024252, 61.50, 0, 36.60)
+
+[node name="EastSouth4" parent="Barricades" unique_id=1214810544 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.047794, 0.000000, 0.998857, 0.000000, 1.000000, 0.000000, -0.998857, 0.000000, 0.047794, 61.50, 0.15, 40.00)
+
+[node name="SouthGap0" parent="Barricades" unique_id=731685690 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.999309, 0.000000, -0.037182, 0.000000, 1.000000, 0.000000, 0.037182, 0.000000, 0.999309, 43.30, 0.15, 41.30)
+
+[node name="SouthGap1" parent="Barricades" unique_id=1522599543 instance=ExtResource("42_barricade")]
+transform = Transform3D(1.000000, 0.000000, -0.000032, 0.000000, 1.000000, 0.000000, 0.000032, 0.000000, 1.000000, 45.90, 0.15, 41.30)
+
+[node name="SouthGap2" parent="Barricades" unique_id=1506175816 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.998322, 0.000000, -0.057914, 0.000000, 1.000000, 0.000000, 0.057914, 0.000000, 0.998322, 48.50, 0.15, 41.30)
+
+[node name="SouthGap3" parent="Barricades" unique_id=1283838445 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.999520, 0.000000, -0.030969, 0.000000, 1.000000, 0.000000, 0.030969, 0.000000, 0.999520, 51.10, 0.15, 41.30)
+
+[node name="SouthGap4" parent="Barricades" unique_id=1904349165 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.997606, 0.000000, 0.069156, 0.000000, 1.000000, 0.000000, -0.069156, 0.000000, 0.997606, 53.70, 0.15, 41.30)
+
+[node name="SouthGap5" parent="Barricades" unique_id=645449555 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.998307, 0.000000, -0.058163, 0.000000, 1.000000, 0.000000, 0.058163, 0.000000, 0.998307, 56.30, 0.15, 41.30)
+
+[node name="SouthGap6" parent="Barricades" unique_id=593203763 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.999667, 0.000000, -0.025789, 0.000000, 1.000000, 0.000000, 0.025789, 0.000000, 0.999667, 58.90, 0.15, 41.30)
+
+[node name="NorthCorner0" parent="Barricades" unique_id=163891757 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.999998, 0.000000, 0.001799, 0.000000, 1.000000, 0.000000, -0.001799, 0.000000, 0.999998, -59.60, 0.15, -45.50)
+
+[node name="NorthCorner1" parent="Barricades" unique_id=1745590712 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.998200, 0.000000, -0.059972, 0.000000, 1.000000, 0.000000, 0.059972, 0.000000, 0.998200, -57.00, 0.15, -45.50)
+
+[node name="NorthCorner2" parent="Barricades" unique_id=331505394 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.998502, 0.000000, -0.054716, 0.000000, 1.000000, 0.000000, 0.054716, 0.000000, 0.998502, 57.00, 0.15, -45.50)
+
+[node name="NorthCorner3" parent="Barricades" unique_id=930031501 instance=ExtResource("42_barricade")]
+transform = Transform3D(0.998829, 0.000000, 0.048373, 0.000000, 1.000000, 0.000000, -0.048373, 0.000000, 0.998829, 59.60, 0.15, -45.50)
+
+[node name="Boundary" type="StaticBody3D" parent="." unique_id=1730492861]
+
+[node name="West" type="CollisionShape3D" parent="Boundary" unique_id=1730492862]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63.4, 10, -2)
+shape = SubResource("BoxShape3D_bound_ew")
+
+[node name="East" type="CollisionShape3D" parent="Boundary" unique_id=1730492863]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63.4, 10, -2)
+shape = SubResource("BoxShape3D_bound_ew")
+
+[node name="North" type="CollisionShape3D" parent="Boundary" unique_id=1730492864]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -47)
+shape = SubResource("BoxShape3D_bound_ns")
+
+[node name="South" type="CollisionShape3D" parent="Boundary" unique_id=1730492865]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 43)
+shape = SubResource("BoxShape3D_bound_ns")
 
 [node name="Player" parent="." unique_id=454185796 instance=ExtResource("31_bk1m6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 26)

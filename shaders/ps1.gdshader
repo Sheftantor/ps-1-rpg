@@ -1,4 +1,4 @@
-// PS1-style surface shader: vertex snapping, affine texture mapping and
+// PS1-style surface shader: vertex snapping, perspective-correct texture mapping and
 // per-vertex (Gouraud) lighting. Reduced color depth and dithering happen on
 // the whole frame in res://scripts/rendering/ps1_post_effect.gd.
 shader_type spatial;

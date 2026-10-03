@@ -4,6 +4,8 @@ extends Resource
 ## the primary). Fired from gun mode's time-stop targeting (GunAim state).
 
 @export var display_name: String = ""
+## Square picture for the HUD loadout row and status screen. Defaults to a placeholder.
+@export var icon: Texture2D = preload("res://textures/ui/icons/placeholder_gun.png")
 ## Model shown in the hand while drawn and spinning on the ground as a pickup.
 @export var model: PackedScene
 ## Damage and knockback of one shot, delivered through the target's Hurtbox

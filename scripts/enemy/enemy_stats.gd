@@ -3,6 +3,8 @@ extends Resource
 ## Tunable enemy numbers. Edit res://resources/enemies/*.tres in the inspector.
 
 @export var max_health: int = 80
+## Face shown in gun mode's target queue slots. Defaults to a generic placeholder.
+@export var portrait: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
 
 @export_group("Movement")
 @export var move_speed: float = 3.5

@@ -1,8 +1,9 @@
 class_name StatusMenu
 extends CanvasLayer
 ## Player stats and gear screen on the status_menu input (C / D-pad up): health,
-## stamina, defense and stat points, the melee weapon and gun, and the six armour
-## slots (shirt, neck, arms, belt, pants, shoes). Pauses the game while open;
+## stamina, defense and stat points, the melee weapon and gun and the carried
+## items as square icon slots (names on hover), and the six armour slots
+## (shirt, neck, arms, belt, pants, shoes). Pauses the game while open;
 ## status_menu or pause closes it. Rows are built from the player's live data
 ## each time it opens; layout and styling live in res://scenes/status_menu.tscn.
 
@@ -19,6 +20,8 @@ const SLOT_NAMES := {
 const EMPTY := "-"
 ## Width of the left-hand name column (pixels).
 const NAME_WIDTH := 220
+## Side length of the weapon and item icon slots (pixels).
+const ICON_SLOT_SIZE := 72.0
 
 var _was_paused: bool = false
 
@@ -80,8 +83,22 @@ func _build(player: Player) -> void:
 	_row(_stats, "STAT POINTS", str(player.stats.stat_points))
 
 	_section(_gear, "WEAPONS")
-	_row(_gear, "MELEE", player.melee_name().to_upper())
-	_row(_gear, "GUN", player.gun.display_name.to_upper() if player.gun != null else EMPTY)
+	var weapons := _slot_row(_gear)
+	var melee := _icon_slot(weapons)
+	if player.melee_weapon != null:
+		melee.show_icon(player.melee_weapon.icon, player.melee_weapon.display_name)
+	else:
+		melee.show_empty("Unarmed")
+	var gun := _icon_slot(weapons)
+	if player.gun != null:
+		gun.show_icon(player.gun.icon, player.gun.display_name)
+	else:
+		gun.show_empty("No gun")
+	if not player.inventory.is_empty():
+		_section(_gear, "ITEMS")
+		var items := _slot_row(_gear)
+		for stack: ItemStack in player.inventory:
+			_icon_slot(items).show_icon(stack.item.icon, stack.item.display_name, stack.count)
 	_section(_gear, "ARMOR")
 	for slot: ArmorData.Slot in SLOT_NAMES:
 		var piece: ArmorData = player.armor.get(slot)
@@ -96,6 +113,21 @@ func _section(box: VBoxContainer, title: String) -> void:
 	label.text = title
 	label.label_settings = SECTION_SETTINGS
 	box.add_child(label)
+
+
+func _slot_row(box: VBoxContainer) -> HFlowContainer:
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override(&"h_separation", 8)
+	row.add_theme_constant_override(&"v_separation", 8)
+	box.add_child(row)
+	return row
+
+
+func _icon_slot(row: HFlowContainer) -> IconSlot:
+	var slot := IconSlot.new()
+	slot.set_slot_size(ICON_SLOT_SIZE)
+	row.add_child(slot)
+	return slot
 
 
 func _row(box: VBoxContainer, name_text: String, value_text: String) -> void:

@@ -1,9 +1,7 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/floating_health_bar.gd" id="1_bar"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" path="res://resources/ui/bar_background.tres" id="3_background"]
-[ext_resource type="Texture2D" path="res://resources/ui/health_bar_gradient.tres" id="4_gradient"]
 [ext_resource type="LabelSettings" path="res://resources/ui/damage_number.tres" id="5_number"]
 [ext_resource type="LabelSettings" path="res://resources/ui/health_value.tres" id="6_value"]
 
@@ -11,8 +9,10 @@
 script = ExtResource("1_bar")
 
 [node name="Display" type="Sprite3D" parent="."]
+render_priority = 10
 pixel_size = 0.0022
 billboard = 1
+no_depth_test = true
 fixed_size = true
 texture_filter = 1
 
@@ -32,26 +32,15 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("2_theme")
 
-[node name="Bar" type="TextureProgressBar" parent="Canvas/Root"]
-layout_mode = 0
-offset_left = 170.0
-offset_top = 96.0
-offset_right = 270.0
-offset_bottom = 116.0
-mouse_filter = 2
-value = 100.0
-nine_patch_stretch = true
-texture_under = ExtResource("3_background")
-texture_progress = ExtResource("4_gradient")
-
 [node name="HealthValue" type="Label" parent="Canvas/Root"]
 layout_mode = 0
-offset_left = 280.0
+offset_left = 120.0
 offset_top = 66.0
-offset_right = 440.0
+offset_right = 320.0
 offset_bottom = 146.0
 text = "80"
 label_settings = ExtResource("6_value")
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DamageNumber" type="Label" parent="Canvas/Root"]

@@ -2,7 +2,7 @@ extends Node
 ## Autoload that applies the PS1 look to the whole game:
 ## - puts the PS1 post-process compositor on whichever camera is active, and
 ## - swaps plain StandardMaterial3Ds (e.g. imported .glb models) for the PS1
-##   shader as they enter the tree, so they get vertex snapping and affine warping.
+##   shader as they enter the tree, so they get vertex snapping and PS1 lighting.
 ## Set metadata "ps1_keep_materials" = true on a node to opt it (and its children) out.
 
 const COMPOSITOR: Compositor = preload("res://resources/rendering/ps1_compositor.tres")

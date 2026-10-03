@@ -1,10 +1,9 @@
 // Shared body of the PS1 surface shaders (ps1.gdshader, ps1_double_sided.gdshader).
-// Snap/affine strength are global uniforms (Project Settings > Shader Globals).
+// Snap resolution is a global uniform (Project Settings > Shader Globals).
+// Texture mapping is perspective-correct (no PS1 affine warping).
 
 // Virtual vertical resolution that vertices snap to. Lower = more jitter.
 global uniform float ps1_snap_resolution;
-// 0 = perspective-correct UVs, 1 = full affine warping.
-global uniform float ps1_affine_strength;
 
 // Per-instance flash (hit flash, attack telegraphs) set from script with
 // set_instance_shader_parameter(&"flash_color", color). Alpha is strength.
@@ -14,12 +13,18 @@ instance uniform vec4 tint : source_color = vec4(1.0);
 
 group_uniforms surface;
 uniform vec4 albedo_color : source_color = vec4(1.0);
-uniform sampler2D albedo_texture : source_color, filter_nearest, repeat_enable, hint_default_white;
+// Mipmapped textures pick their mip for the low virtual resolution (see
+// ps1_texture_bias()); textures imported without mipmaps stay pure point-sampled.
+uniform sampler2D albedo_texture : source_color, filter_nearest_mipmap, repeat_enable, hint_default_white;
 uniform vec2 uv_scale = vec2(1.0);
 uniform vec2 uv_offset = vec2(0.0);
 // Ignore mesh UVs and project the texture onto each face from object-space
 // position, so uv_scale is tiles per meter and modular pieces tile seamlessly.
 uniform bool box_projection = false;
+// Lock vertices to the virtual-resolution grid (PS1 wobble). Off for big flat
+// ground (roads, sidewalks, road markings): its few huge triangles make the
+// whole surface slide in steps, and coplanar layers snap apart and z-fight.
+uniform bool vertex_snap = true;
 // Fake wet-pavement sheen: brightens toward sheen_color at grazing view angles.
 uniform float wet_sheen : hint_range(0.0, 2.0) = 0.0;
 uniform vec4 sheen_color : source_color = vec4(0.3, 0.32, 0.38, 1.0);
@@ -42,8 +47,14 @@ uniform vec4 window_cool_color : source_color = vec4(0.5, 0.6, 0.64, 1.0);
 uniform float window_cool_ratio : hint_range(0.0, 1.0) = 0.3;
 uniform float window_energy : hint_range(0.0, 8.0) = 1.0;
 
-varying vec3 affine_uv;
 varying flat vec3 object_origin;
+
+// The post effect keeps one screen pixel per virtual pixel, so sample textures
+// as if rendering at the virtual resolution; otherwise detail finer than a
+// virtual pixel (thin lane lines) flickers in and out as the camera moves.
+float ps1_texture_bias(vec2 viewport_size) {
+	return log2(max(1.0, viewport_size.y / ps1_snap_resolution));
+}
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
@@ -64,21 +75,17 @@ void vertex() {
 	object_origin = MODEL_MATRIX[3].xyz;
 
 	vec4 clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
-	if (clip.w > 0.0) {
+	if (vertex_snap && clip.w > 0.0) {
 		vec2 grid = vec2(ps1_snap_resolution * VIEWPORT_SIZE.x / VIEWPORT_SIZE.y, ps1_snap_resolution) * 0.5;
 		clip.xy = round(clip.xy / clip.w * grid) / grid * clip.w;
 	}
 	POSITION = clip;
-
-	// Pre-multiplying by w and dividing it back out per-fragment cancels
-	// the GPU's perspective correction, giving screen-space (affine) UVs.
-	affine_uv = vec3(UV * clip.w, clip.w);
 }
 
 void fragment() {
-	vec2 uv = mix(UV, affine_uv.xy / affine_uv.z, ps1_affine_strength);
+	vec2 uv = UV;
 
-	vec4 albedo_tex = texture(albedo_texture, uv);
+	vec4 albedo_tex = texture(albedo_texture, uv, ps1_texture_bias(VIEWPORT_SIZE));
 	vec3 color = albedo_color.rgb * albedo_tex.rgb * tint.rgb;
 	if (checker_size > 0.0) {
 		vec2 cell = floor(uv * checker_size);

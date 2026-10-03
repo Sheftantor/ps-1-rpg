@@ -90,3 +90,7 @@ extends Resource
 @export var lock_on_break_range: float = 20.0
 @export var lock_on_camera_speed: float = 8.0
 @export var lock_on_pitch_degrees: float = -20.0
+## When the target is above the player, the lock-on camera tilts up (past
+## lock_on_pitch_degrees) until the target is at least this far inside the top
+## of the screen. It isn't centered, just kept in view.
+@export var lock_on_view_margin_degrees: float = 12.0
