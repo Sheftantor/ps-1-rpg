@@ -2,7 +2,7 @@
 class_name PS1PostEffect
 extends CompositorEffect
 ## Whole-frame PS1 framebuffer look: low virtual resolution with nearest-neighbor
-## upscaling, reduced color depth and ordered dithering. Runs on the 3D image only,
+## upscaling, reduced color depth (no dithering). Runs on the 3D image only,
 ## so 2D UI stays crisp. Applied to every camera by the PS1Renderer autoload.
 
 const SHADER_PATH := "res://shaders/ps1_post.glsl"
@@ -12,7 +12,6 @@ const SHADER_PATH := "res://shaders/ps1_post.glsl"
 @export_range(120, 720) var virtual_height: int = 240
 @export var pixelate: bool = true
 @export_range(0, 256) var color_levels: int = 32
-@export_range(0.0, 1.0) var dither_strength: float = 1.0
 
 var _rd: RenderingDevice
 var _shader: RID
@@ -52,7 +51,7 @@ func _render_callback(callback_type: int, render_data: RenderData) -> void:
 
 	var block := maxi(1, roundi(float(size.y) / virtual_height)) if pixelate else 1
 	var push_constant := PackedFloat32Array([
-		size.x, size.y, block, color_levels, dither_strength, 0.0, 0.0, 0.0,
+		size.x, size.y, block, color_levels, 0.0, 0.0, 0.0, 0.0,
 	]).to_byte_array()
 	var blocks := Vector2i(ceili(float(size.x) / block), ceili(float(size.y) / block))
 

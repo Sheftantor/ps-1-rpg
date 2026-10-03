@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://b134nsxh5ksou" path="res://scripts/commands/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+display_name = "Potion"
+description = "A small vial of medicine. Patches you up mid-fight."
+heal_amount = 40

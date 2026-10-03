@@ -17,3 +17,9 @@ extends Resource
 @export var belt: ArmorData
 @export var pants: ArmorData
 @export var shoes: ArmorData
+@export_subgroup("Accessories")
+@export var ring_1: ArmorData
+@export var ring_2: ArmorData
+@export var trinket_1: ArmorData
+@export var trinket_2: ArmorData
+@export var charm: ArmorData

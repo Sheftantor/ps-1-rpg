@@ -7,6 +7,13 @@ extends Resource
 ## Unspent level-up points. Nothing spends them yet.
 @export var stat_points: int = 0
 
+@export_group("Attributes")
+## Shown on the status screen. Not yet wired into combat, stealth or dialogue.
+@export var strength: int = 10
+@export var agility: int = 10
+@export var stealth: int = 5
+@export var memes: int = 5
+
 @export_group("Stamina")
 ## Per second, once regeneration resumes.
 @export var stamina_regen: float = 35.0

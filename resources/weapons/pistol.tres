@@ -13,6 +13,7 @@ knockback = 4.0
 [resource]
 script = ExtResource("1_weapon")
 display_name = "Pistol"
+description = "Standard 9mm sidearm. Freeze time with gun mode and queue your shots."
 model = ExtResource("3_model")
 shot = SubResource("Resource_shot")
 effective_range = 5.0

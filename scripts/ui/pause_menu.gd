@@ -41,6 +41,7 @@ const SECTIONS: Array = [
 	["OTHER", [
 		[[&"interact"], "INTERACT"],
 		[[&"status_menu"], "STATUS & GEAR"],
+		[[&"inventory"], "INVENTORY"],
 		[[&"pause"], "PAUSE"],
 		[[&"debug_hurt"], "HURT SELF (DEBUG)"],
 	]],
@@ -71,8 +72,8 @@ func _exit_tree() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# The status screen takes the pause input to close itself.
-	if StatusMenu.is_open:
+	# Other menus take the pause input to close themselves.
+	if not is_open and GameMenus.any_open():
 		return
 	if event.is_action_pressed(&"pause"):
 		if is_open:

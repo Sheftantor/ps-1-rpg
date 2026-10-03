@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/status_menu.gd" id="1_menu"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
@@ -6,17 +6,58 @@
 [ext_resource type="LabelSettings" path="res://resources/ui/menu_header.tres" id="4_header"]
 [ext_resource type="Script" path="res://scripts/ui/input_icon.gd" id="5_icon"]
 [ext_resource type="LabelSettings" path="res://resources/ui/prompt_label.tres" id="6_prompt"]
+[ext_resource type="PackedScene" path="res://scenes/player_model.tscn" id="7_model"]
+[ext_resource type="Compositor" path="res://resources/rendering/ps1_compositor.tres" id="8_ps1"]
+[ext_resource type="Material" path="res://resources/materials/city/stone_trim.tres" id="9_stone"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_block"]
 content_margin_left = 28.0
-content_margin_top = 20.0
+content_margin_top = 22.0
 content_margin_right = 28.0
-content_margin_bottom = 24.0
+content_margin_bottom = 22.0
 texture = ExtResource("3_block")
 texture_margin_left = 24.0
 texture_margin_top = 24.0
 texture_margin_right = 24.0
 texture_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_inset"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0.03, 0.04, 0.07, 0.85)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.36, 0.4, 0.52, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bubble"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+bg_color = Color(0.06, 0.07, 0.12, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.85, 0.35, 1)
+
+[sub_resource type="Environment" id="Environment_stage"]
+background_mode = 1
+background_color = Color(0.1, 0.12, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.75, 0.78, 0.9, 1)
+ambient_light_energy = 0.8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pedestal"]
+top_radius = 0.6
+bottom_radius = 0.7
+height = 0.08
+radial_segments = 10
+rings = 1
 
 [node name="StatusMenu" type="CanvasLayer"]
 process_mode = 3
@@ -50,53 +91,18 @@ offset_bottom = 106.0
 text = "STATUS"
 label_settings = ExtResource("4_header")
 
-[node name="Panels" type="HBoxContainer" parent="Root"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 48.0
-offset_top = 110.0
-offset_right = -48.0
-offset_bottom = -100.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 24
-
-[node name="Stats" type="PanelContainer" parent="Root/Panels"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxTexture_block")
-
-[node name="Content" type="VBoxContainer" parent="Root/Panels/Stats"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Gear" type="PanelContainer" parent="Root/Panels"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.4
-theme_override_styles/panel = SubResource("StyleBoxTexture_block")
-
-[node name="Content" type="VBoxContainer" parent="Root/Panels/Gear"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
 [node name="Hint" type="HBoxContainer" parent="Root"]
 layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -200.0
-offset_top = -84.0
-offset_right = 200.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -400.0
+offset_top = 36.0
+offset_right = -56.0
+offset_bottom = 100.0
+grow_horizontal = 0
 theme_override_constants/separation = 14
-alignment = 1
+alignment = 2
 
 [node name="Icon" type="Control" parent="Root/Hint"]
 layout_mode = 2
@@ -110,3 +116,139 @@ layout_mode = 2
 text = "CLOSE"
 label_settings = ExtResource("6_prompt")
 vertical_alignment = 1
+
+[node name="Frame" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 170.0
+offset_top = 36.0
+offset_right = 170.0
+offset_bottom = 36.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_block")
+
+[node name="Layout" type="VBoxContainer" parent="Root/Frame"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Gear" type="HBoxContainer" parent="Root/Frame/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MainSlots" type="VBoxContainer" parent="Root/Frame/Layout/Gear"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ModelFrame" type="PanelContainer" parent="Root/Frame/Layout/Gear"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_inset")
+
+[node name="ModelView" type="SubViewportContainer" parent="Root/Frame/Layout/Gear/ModelFrame"]
+custom_minimum_size = Vector2(440, 448)
+layout_mode = 2
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="Root/Frame/Layout/Gear/ModelFrame/ModelView"]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(440, 448)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport"]
+environment = SubResource("Environment_stage")
+
+[node name="Camera" type="Camera3D" parent="Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport"]
+transform = Transform3D(1, 0, 0, 0, 0.997, 0.077, 0, -0.077, 0.997, 0, 1.3, 5.2)
+compositor = ExtResource("8_ps1")
+fov = 26.0
+
+[node name="Key" type="DirectionalLight3D" parent="Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport"]
+transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 0, 3, 0)
+light_color = Color(1, 0.95, 0.85, 1)
+light_energy = 1.3
+
+[node name="Rim" type="OmniLight3D" parent="Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2.2, -1.6)
+light_color = Color(0.55, 0.7, 1, 1)
+light_energy = 2.0
+omni_range = 5.0
+
+[node name="Pedestal" type="MeshInstance3D" parent="Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
+mesh = SubResource("CylinderMesh_pedestal")
+surface_material_override/0 = ExtResource("9_stone")
+
+[node name="Turntable" type="Node3D" parent="Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport"]
+
+[node name="Model" parent="Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport/Turntable" instance=ExtResource("7_model")]
+transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 0, 0, 0)
+
+[node name="Accessories" type="VBoxContainer" parent="Root/Frame/Layout/Gear"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Weapons" type="HBoxContainer" parent="Root/Frame/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Description" type="PanelContainer" parent="Root/Frame/Layout"]
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_inset")
+
+[node name="Lines" type="VBoxContainer" parent="Root/Frame/Layout/Description"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Title" type="Label" parent="Root/Frame/Layout/Description/Lines"]
+layout_mode = 2
+text = "GEAR"
+
+[node name="Body" type="Label" parent="Root/Frame/Layout/Description/Lines"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+text = "-"
+autowrap_mode = 3
+
+[node name="Stats" type="HBoxContainer" parent="Root/Frame/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Combat" type="PanelContainer" parent="Root/Frame/Layout/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_inset")
+
+[node name="Rows" type="VBoxContainer" parent="Root/Frame/Layout/Stats/Combat"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Spirit" type="PanelContainer" parent="Root/Frame/Layout/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_inset")
+
+[node name="Rows" type="VBoxContainer" parent="Root/Frame/Layout/Stats/Spirit"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Bubble" type="PanelContainer" parent="Root"]
+visible = false
+top_level = true
+layout_mode = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bubble")
+
+[node name="Text" type="Label" parent="Root/Bubble"]
+layout_mode = 2
+text = "SLOT"
+
+[node name="Tail" type="Polygon2D" parent="Root/Bubble"]
+color = Color(1, 0.85, 0.35, 1)
+polygon = PackedVector2Array(0, -10, 0, 10, -14, 0)

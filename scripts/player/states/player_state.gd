@@ -74,6 +74,10 @@ func try_neutral_action() -> bool:
 			player.consume_buffer()
 			player.status_menu.open()
 			return true
+		Player.ACTION_INVENTORY:
+			player.consume_buffer()
+			player.inventory_menu.open()
+			return true
 		Player.ACTION_GUN:
 			player.consume_buffer()
 			if player.gun == null:

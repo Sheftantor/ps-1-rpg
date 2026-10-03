@@ -51,6 +51,8 @@ static func ensure_defaults() -> void:
 	_bind(&"gun_undo", [_key(KEY_R), _button(JOY_BUTTON_DPAD_LEFT)])
 	# Player stats and gear screen.
 	_bind(&"status_menu", [_key(KEY_C), _button(JOY_BUTTON_DPAD_UP)])
+	# Inventory screen (the bag).
+	_bind(&"inventory", [_key(KEY_I), _button(JOY_BUTTON_DPAD_RIGHT)])
 
 	# Items: use the selected one, or step the selection to the next.
 	_bind(&"use_item", [_key(KEY_F), _button(JOY_BUTTON_RIGHT_SHOULDER)])

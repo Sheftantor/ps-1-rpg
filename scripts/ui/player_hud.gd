@@ -1,8 +1,8 @@
 class_name PlayerHud
 extends CanvasLayer
 ## Player HUD: top-left health and stamina bars with values, the bottom-left
-## loadout row (square icon slots: melee weapon, gun, then each inventory item
-## with its count, the selected one highlighted), the keybind panel above it
+## loadout window (LoadoutPanel: both weapons, then the carried items with the
+## selected one under the cursor), the keybind panel above it
 ## (light / strong attack, use / next item, with the binding for the last-used device), pickup prompt and short messages, plus the gun-mode targeting
 ## overlay (connector web, reticle with target and range-state labels, mode
 ## label, queued-shot portrait slots centered under it, action prompts). Structure and logic only: layout,
@@ -19,20 +19,18 @@ extends CanvasLayer
 @export var queued_format: String = "ENEMY %s"
 
 # Typed by path so the HUD loads before the editor has registered the class_name.
-const CommandMenuScript := preload("res://scripts/ui/command_menu.gd")
+const LoadoutPanelScript := preload("res://scripts/ui/loadout_panel.gd")
 ## Queue slot portrait for an enemy whose stats have none.
 const PORTRAIT_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
-## Side length of the loadout row's square slots (pixels).
-const LOADOUT_SLOT_SIZE := 52.0
+## Gap between the loadout window and the keybind panel above it (pixels).
+const KEYBIND_GAP := 10.0
 
 ## Whether key labels show gamepad buttons; follows the last device used.
 var using_gamepad: bool = false
 
 var _message_timer: float = 0.0
 var _gun_drawn: bool = false
-var _melee_slot: IconSlot = null
-var _gun_slot: IconSlot = null
-# Last set_loadout() arguments, for the command menu.
+# Last set_loadout() arguments, redrawn when the drawn weapon changes.
 var _melee: MeleeWeaponData = null
 var _gun: WeaponData = null
 var _inventory: Array[ItemStack] = []
@@ -43,8 +41,7 @@ var _slots: Array[Control] = []
 @onready var _health_bar: Range = $Root/Stats/HealthBar
 @onready var _stamina_value: Label = $Root/Stats/StaminaRow/Value
 @onready var _stamina_bar: Range = $Root/Stats/StaminaBar
-@onready var _loadout: HBoxContainer = $Root/Loadout
-@onready var _command_menu: CommandMenuScript = $Root/CommandMenu
+@onready var _loadout: LoadoutPanelScript = $Root/LoadoutPanel
 @onready var _keybinds: Control = $Root/Keybinds
 ## Rows of the keybind panel: each has a Key label (filled from the input map)
 ## and a Name label. ItemRow's Name shows the selected item.
@@ -128,67 +125,31 @@ func _set_stat(bar: Range, value_label: Label, current: float, maximum: float) -
 	value_label.text = "%d/%d" % [roundi(current), roundi(maximum)]
 
 
-## Bottom-left loadout row: melee weapon and gun slots, a gap, then one slot
-## per inventory stack with its count; `selected_item` (the one use_item
-## spends) is highlighted. An empty inventory hides the use/next item keybinds.
+## Bottom-left loadout window: both weapons, then the carried items with
+## `selected_item` (the one use_item spends) under the cursor. An empty
+## inventory hides the use/next item keybinds.
 func set_loadout(melee: MeleeWeaponData, gun: WeaponData, inventory: Array[ItemStack], selected_item: int) -> void:
 	_melee = melee
 	_gun = gun
 	_inventory = inventory
 	_selected_item = selected_item
-	for child in _loadout.get_children():
-		_loadout.remove_child(child)
-		child.queue_free()
-	_melee_slot = _add_loadout_slot()
-	if melee != null:
-		_melee_slot.show_icon(melee.icon, melee.display_name)
-	else:
-		_melee_slot.show_empty("Unarmed")
-	_gun_slot = _add_loadout_slot()
-	if gun != null:
-		_gun_slot.show_icon(gun.icon, gun.display_name)
-	else:
-		_gun_slot.show_empty("No gun")
-	set_gun_drawn(_gun_drawn)
-	if not inventory.is_empty():
-		var gap := Control.new()
-		gap.custom_minimum_size.x = 10.0
-		gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_loadout.add_child(gap)
-	for i in inventory.size():
-		var stack := inventory[i]
-		_add_loadout_slot().show_icon(stack.item.icon, stack.item.display_name, stack.count, i == selected_item)
 	_keybind_rows[&"use_item"].visible = not inventory.is_empty()
 	_keybind_rows[&"next_item"].visible = not inventory.is_empty()
+	_refresh_loadout()
 
 
-## Highlights the weapon in hand: the gun slot in gun mode, else the melee slot.
+## Lights the weapon in hand: the gun in gun mode, else the melee weapon.
 func set_gun_drawn(drawn: bool) -> void:
 	_gun_drawn = drawn
-	if _melee_slot != null and _melee_slot.tooltip_text != "Unarmed":
-		_melee_slot.set_selected(not drawn)
-	if _gun_slot != null and drawn:
-		_gun_slot.set_selected(true)
-	_refresh_command_menu()
+	_refresh_loadout()
 
 
-## Bottom-right command list: the weapon in hand, then the items with the
-## selected one under the cursor.
-func _refresh_command_menu() -> void:
-	if _gun_drawn and _gun != null:
-		_command_menu.set_entries(_gun.icon, _gun.display_name, _inventory, _selected_item)
-	elif _melee != null:
-		_command_menu.set_entries(_melee.icon, _melee.display_name, _inventory, _selected_item)
-	else:
-		_command_menu.set_entries(null, "Unarmed", _inventory, _selected_item)
-
-
-func _add_loadout_slot() -> IconSlot:
-	var slot := IconSlot.new()
-	slot.set_slot_size(LOADOUT_SLOT_SIZE)
-	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_loadout.add_child(slot)
-	return slot
+func _refresh_loadout() -> void:
+	_loadout.set_entries(_melee, _gun, _gun_drawn, _inventory, _selected_item)
+	# The keybind panel sits just above the window, which grows with the item count.
+	var height := _keybinds.offset_bottom - _keybinds.offset_top
+	_keybinds.offset_bottom = _loadout.offset_top - KEYBIND_GAP
+	_keybinds.offset_top = _keybinds.offset_bottom - height
 
 
 ## Shows the interact prompt while something interactable is in reach: the icon

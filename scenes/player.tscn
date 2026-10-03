@@ -23,6 +23,9 @@
 [ext_resource type="PackedScene" path="res://scenes/player_health_bar.tscn" id="99_health_bar"]
 [ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="98_pause"]
 [ext_resource type="PackedScene" path="res://scenes/status_menu.tscn" id="97_status"]
+[ext_resource type="PackedScene" path="res://scenes/inventory_menu.tscn" id="96_inventory"]
+[ext_resource type="PackedScene" path="res://scenes/loot_window.tscn" id="95_loot"]
+[ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -181,3 +184,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
 [node name="PauseMenu" parent="." instance=ExtResource("98_pause")]
 
 [node name="StatusMenu" parent="." instance=ExtResource("97_status")]
+
+[node name="InventoryMenu" parent="." instance=ExtResource("96_inventory")]
+
+[node name="LootWindow" parent="." instance=ExtResource("95_loot")]
+
+[node name="BlobShadow" type="MeshInstance3D" parent="."]
+script = ExtResource("98_blob_shadow")

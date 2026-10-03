@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/enemy/states/stagger.gd" id="15_stagger"]
 [ext_resource type="Script" path="res://scripts/enemy/states/dead.gd" id="16_dead"]
 [ext_resource type="PackedScene" path="res://scenes/enemy_health_bar.tscn" id="99_health_bar"]
+[ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_body"]
 render_priority = 0
@@ -25,9 +26,6 @@ shader_parameter/albedo_color = Color(0.45, 0.3, 0.7, 1)
 shader_parameter/uv_scale = Vector2(1, 1)
 shader_parameter/checker_size = 8.0
 shader_parameter/checker_color = Color(0.7, 0.7, 0.7, 1)
-shader_parameter/snap_resolution = 240.0
-shader_parameter/color_depth = 32.0
-shader_parameter/dithering = true
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
 material = SubResource("ShaderMaterial_body")
@@ -142,3 +140,6 @@ script = ExtResource("16_dead")
 
 [node name="HealthBar" parent="." instance=ExtResource("99_health_bar")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0)
+
+[node name="BlobShadow" type="MeshInstance3D" parent="."]
+script = ExtResource("98_blob_shadow")

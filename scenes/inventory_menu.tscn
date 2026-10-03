@@ -1,0 +1,149 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/inventory_menu.gd" id="1_menu"]
+[ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
+[ext_resource type="LabelSettings" path="res://resources/ui/menu_header.tres" id="3_header"]
+[ext_resource type="LabelSettings" path="res://resources/ui/menu_section.tres" id="4_section"]
+[ext_resource type="Script" path="res://scripts/ui/input_icon.gd" id="5_icon"]
+[ext_resource type="LabelSettings" path="res://resources/ui/prompt_label.tres" id="6_prompt"]
+[ext_resource type="StyleBox" path="res://resources/ui/window_template.tres" id="7_window"]
+[ext_resource type="StyleBox" path="res://resources/ui/window_inset.tres" id="8_inset"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bubble"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+bg_color = Color(0.06, 0.06, 0.07, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.85, 0.35, 1)
+
+[node name="InventoryMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 20
+script = ExtResource("1_menu")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+
+[node name="Backdrop" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Title" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 36.0
+offset_right = 556.0
+offset_bottom = 106.0
+text = "INVENTORY"
+label_settings = ExtResource("3_header")
+
+[node name="Hint" type="HBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -400.0
+offset_top = 36.0
+offset_right = -56.0
+offset_bottom = 100.0
+grow_horizontal = 0
+theme_override_constants/separation = 14
+alignment = 2
+
+[node name="Icon" type="Control" parent="Root/Hint"]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("5_icon")
+action = &"inventory"
+pixel_scale = 4
+
+[node name="Close" type="Label" parent="Root/Hint"]
+layout_mode = 2
+text = "CLOSE"
+label_settings = ExtResource("6_prompt")
+vertical_alignment = 1
+
+[node name="Window" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("7_window")
+
+[node name="Layout" type="VBoxContainer" parent="Root/Window"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="WeaponsTitle" type="Label" parent="Root/Window/Layout"]
+layout_mode = 2
+text = "WEAPONS"
+label_settings = ExtResource("4_section")
+
+[node name="Weapons" type="HBoxContainer" parent="Root/Window/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BagTitle" type="Label" parent="Root/Window/Layout"]
+layout_mode = 2
+text = "BAG"
+label_settings = ExtResource("4_section")
+
+[node name="Bag" type="GridContainer" parent="Root/Window/Layout"]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 8
+
+[node name="Description" type="PanelContainer" parent="Root/Window/Layout"]
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+theme_override_styles/panel = ExtResource("8_inset")
+
+[node name="Lines" type="VBoxContainer" parent="Root/Window/Layout/Description"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Title" type="Label" parent="Root/Window/Layout/Description/Lines"]
+layout_mode = 2
+text = "BAG"
+
+[node name="Body" type="Label" parent="Root/Window/Layout/Description/Lines"]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+text = "-"
+autowrap_mode = 3
+
+[node name="Bubble" type="PanelContainer" parent="Root"]
+visible = false
+top_level = true
+layout_mode = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bubble")
+
+[node name="Text" type="Label" parent="Root/Bubble"]
+layout_mode = 2
+text = "SLOT"
+
+[node name="Tail" type="Polygon2D" parent="Root/Bubble"]
+color = Color(1, 0.85, 0.35, 1)
+polygon = PackedVector2Array(0, -10, 0, 10, -14, 0)

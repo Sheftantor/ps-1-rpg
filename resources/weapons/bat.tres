@@ -6,4 +6,5 @@
 [resource]
 script = ExtResource("1_melee")
 display_name = "Bat"
+description = "A dented aluminium bat. Slow to stop, quick to start a fight."
 model = ExtResource("2_model")

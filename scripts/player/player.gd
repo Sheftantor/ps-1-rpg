@@ -24,8 +24,10 @@ const ACTION_GUN: StringName = &"gun_mode"
 const ACTION_GUN_UNDO: StringName = &"gun_undo"
 ## Opens the player stats and gear screen.
 const ACTION_STATUS: StringName = &"status_menu"
+## Opens the inventory screen.
+const ACTION_INVENTORY: StringName = &"inventory"
 const BUTTON_ACTIONS: Array[StringName] = [ACTION_LIGHT, ACTION_HEAVY, ACTION_DODGE, ACTION_JUMP, ACTION_INTERACT, ACTION_GUN,
-		ACTION_GUN_UNDO, ACTION_STATUS]
+		ACTION_GUN_UNDO, ACTION_STATUS, ACTION_INVENTORY]
 
 const NO_COLOR: Color = Color(0.0, 0.0, 0.0, 0.0)
 const HIT_FLASH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.85)
@@ -146,6 +148,8 @@ var _hip_attachment: BoneAttachment3D = null
 @onready var _melee: Node3D = $Facing/Model/Skeleton3D/RightHandAttachment/MeleeWeapon
 @onready var hud: PlayerHud = $PlayerHud
 @onready var status_menu: StatusMenu = $StatusMenu
+@onready var inventory_menu: InventoryMenu = $InventoryMenu
+@onready var loot_window: LootWindow = $LootWindow
 @onready var _range_dome: RangeDome = $RangeDome
 @onready var _hurtbox: Hurtbox = $Hurtbox
 @onready var _camera_rig: Node3D = $CameraRig
@@ -195,7 +199,7 @@ func _exit_tree() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if PauseMenu.is_open or StatusMenu.is_open:
+	if GameMenus.any_open():
 		return
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		# First click only recaptures the mouse; it shouldn't also attack.
@@ -237,7 +241,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	# Gun mode keeps the player processing through pauses; the pause menu stops it.
-	if PauseMenu.is_open or StatusMenu.is_open:
+	if GameMenus.any_open():
 		return
 	_tick_timers(delta)
 	_validate_lock_target()
@@ -588,6 +592,9 @@ func _equip_from_loadout() -> void:
 	var slots := {
 		ArmorData.Slot.SHIRT: loadout.shirt, ArmorData.Slot.NECK: loadout.neck, ArmorData.Slot.ARMS: loadout.arms,
 		ArmorData.Slot.BELT: loadout.belt, ArmorData.Slot.PANTS: loadout.pants, ArmorData.Slot.SHOES: loadout.shoes,
+		ArmorData.Slot.RING_1: loadout.ring_1, ArmorData.Slot.RING_2: loadout.ring_2,
+		ArmorData.Slot.TRINKET_1: loadout.trinket_1, ArmorData.Slot.TRINKET_2: loadout.trinket_2,
+		ArmorData.Slot.CHARM: loadout.charm,
 	}
 	for slot: ArmorData.Slot in slots:
 		if slots[slot] != null:
@@ -615,22 +622,28 @@ func armor_defense() -> int:
 	return total
 
 
-## Collects the nearest pickup in reach (interact input).
+## Opens the loot window on the nearest sack in reach (interact input).
 func interact() -> void:
 	var pickup := nearest_pickup()
-	if pickup == null:
-		return
-	if pickup.weapon != null:
-		gun = pickup.weapon
+	if pickup != null:
+		loot_window.open(pickup)
+
+
+## Takes one entry out of a loot sack: a weapon goes in the gun slot, items
+## into the inventory. Called by the loot window.
+func take_loot(pickup: Pickup, entry: Resource) -> void:
+	if entry is WeaponData:
+		gun = entry as WeaponData
 		if _gun_model != null:
 			_gun_model.queue_free()
 			_gun_model = null
 		hud.flash_message("GOT %s" % gun.display_name.to_upper())
 		_refresh_item_hud()
-	elif pickup.item != null:
-		add_item(pickup.item)
-		hud.flash_message("GOT %s" % pickup.display_name().to_upper())
-	pickup.queue_free()
+	elif entry is ItemStack:
+		var stack := entry as ItemStack
+		add_item(stack)
+		hud.flash_message("GOT %s X%d" % [stack.item.display_name.to_upper(), stack.count])
+	pickup.remove(entry)
 
 
 ## Adds loot to the inventory, stacking onto a slot holding the same item.

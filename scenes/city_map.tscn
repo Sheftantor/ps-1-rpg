@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Environment" path="res://resources/rendering/city_night_environment.tres" id="1_ufokl"]
+[ext_resource type="Environment" path="res://resources/rendering/city_day_environment.tres" id="1_ufokl"]
 [ext_resource type="Compositor" path="res://resources/rendering/ps1_compositor.tres" id="2_dib7t"]
 [ext_resource type="MeshLibrary" path="res://resources/city/city_kit_mesh_library.tres" id="3_m0ahl"]
 [ext_resource type="Script" path="res://scripts/city/city_building.gd" id="4_y67ky"]
@@ -12,10 +12,11 @@
 environment = ExtResource("1_ufokl")
 compositor = ExtResource("2_dib7t")
 
-[node name="Moonlight" type="DirectionalLight3D" parent="." unique_id=789194870]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=789194870]
 transform = Transform3D(0.81915206, 0.46984634, -0.32898995, 0, 0.57357645, 0.81915206, 0.57357645, -0.6710101, 0.46984634, 0, 0, 0)
-light_color = Color(0.55, 0.62, 0.8, 1)
-light_energy = 0.22
+light_color = Color(1, 0.95, 0.84, 1)
+light_energy = 1.5
+shadow_enabled = true
 
 [node name="Ground" type="GridMap" parent="." unique_id=2130274416]
 mesh_library = ExtResource("3_m0ahl")

@@ -5,5 +5,6 @@
 [resource]
 script = ExtResource("1_armor")
 display_name = "Wool Sweater"
+description = "Thick cable-knit wool. Warm, and takes the edge off a hit."
 slot = 0
 defense = 2

@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" path="res://textures/ui/enemy_silhouette.png" id="7_silhouette"]
 [ext_resource type="Script" path="res://scripts/ui/input_icon.gd" id="8_input_icon"]
 [ext_resource type="LabelSettings" path="res://resources/ui/prompt_label.tres" id="9_prompt"]
-[ext_resource type="Script" path="res://scripts/ui/command_menu.gd" id="10_command_menu"]
+[ext_resource type="Script" path="res://scripts/ui/loadout_panel.gd" id="10_loadout_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stat_background"]
 bg_color = Color(0, 0, 0, 0.55)
@@ -112,34 +112,18 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_stamina_fill")
 value = 100.0
 show_percentage = false
 
-[node name="Loadout" type="HBoxContainer" parent="Root"]
+[node name="LoadoutPanel" type="Control" parent="Root"]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 32.0
-offset_top = -84.0
-offset_right = 632.0
-offset_bottom = -32.0
-grow_vertical = 0
-mouse_filter = 2
-theme_override_constants/separation = 6
-
-[node name="CommandMenu" type="Control" parent="Root"]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -352.0
 offset_top = -260.0
-offset_right = -32.0
+offset_right = 532.0
 offset_bottom = -32.0
-grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
-script = ExtResource("10_command_menu")
+script = ExtResource("10_loadout_panel")
 
 [node name="Keybinds" type="VBoxContainer" parent="Root"]
 layout_mode = 1
