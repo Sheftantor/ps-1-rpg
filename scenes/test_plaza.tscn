@@ -1578,6 +1578,7 @@ transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3, 
 
 [node name="GruntBleachersTop" parent="Enemies" unique_id=611003186 instance=ExtResource("41_ifbtb")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 2.9, -9.8)
+patrol_area = Vector2(4, 0)
 
 [node name="GruntShed" parent="Enemies" unique_id=937673001 instance=ExtResource("41_ifbtb")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3, 0.15, -19)

@@ -7,6 +7,8 @@ extends Resource
 @export var damage: int = 10
 ## Horizontal push applied to whoever gets hit (m/s).
 @export var knockback: float = 3.0
+## Scales the victim's hit stun (player: PlayerStats.hit_stun_time).
+@export var hit_stun_multiplier: float = 1.0
 ## Forward speed of the attacker while the attack is winding up and active (m/s).
 @export var lunge_speed: float = 0.0
 
@@ -33,3 +35,9 @@ extends Resource
 @export var telegraph_pulse_amount: float = 0.1
 ## Pulses per second while telegraphing.
 @export var telegraph_pulse_rate: float = 4.0
+## Model clip for the wind-up and swing. Empty = no animation; the hitbox then
+## stays live for active_time.
+@export var animation: StringName = &""
+## Seconds into `animation` (at normal speed) where the hitbox is live. The
+## telegraph plays the clip up to x; the attack plays x..y.
+@export var hit_window: Vector2 = Vector2.ZERO

@@ -6,6 +6,7 @@ var _timer: float = 0.0
 
 func enter(msg: Dictionary) -> void:
 	_timer = player.stats.guard_break_stun_time if msg.get("guard_break", false) else player.stats.hit_stun_time
+	_timer *= msg.get("stun_scale", 1.0)
 	player.set_horizontal_velocity(msg.get("knockback", Vector3.ZERO))
 
 

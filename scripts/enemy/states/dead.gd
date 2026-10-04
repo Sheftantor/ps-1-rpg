@@ -10,6 +10,7 @@ func enter(msg: Dictionary) -> void:
 	enemy.hurtbox.set_deferred(&"monitorable", false)
 	enemy.set_deferred(&"collision_layer", 0)
 	enemy.set_horizontal_velocity(msg.get("knockback", Vector3.ZERO))
+	enemy.model.freeze()
 	var tween := enemy.create_tween()
 	tween.tween_property(enemy.facing, ^"scale", Vector3.ONE * 0.05, SHRINK_TIME)
 	tween.tween_callback(enemy.queue_free)
@@ -17,6 +18,10 @@ func enter(msg: Dictionary) -> void:
 
 func can_be_staggered() -> bool:
 	return false
+
+
+func drives_animation() -> bool:
+	return true
 
 
 func physics_update(delta: float) -> void:

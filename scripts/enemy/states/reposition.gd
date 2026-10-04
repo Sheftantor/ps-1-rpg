@@ -1,7 +1,7 @@
 extends EnemyState
 ## Circles the player at medium range, periodically asking for the attack turn.
 ## Holding the turn, it picks an attack and telegraphs if already in range,
-## otherwise approaches first.
+## otherwise approaches first. Asks sooner the further an escalation chain runs.
 
 var _strafe_sign: float = 1.0
 var _decision_timer: float = 0.0
@@ -11,7 +11,7 @@ var _flip_timer: float = 0.0
 func enter(_msg: Dictionary) -> void:
 	var stats := enemy.stats
 	_strafe_sign = 1.0 if randf() < 0.5 else -1.0
-	_decision_timer = randf_range(stats.reposition_time_min, stats.reposition_time_max)
+	_decision_timer = randf_range(stats.reposition_time_min, stats.reposition_time_max) / enemy.attack_speed()
 	_flip_timer = randf_range(stats.strafe_flip_time_min, stats.strafe_flip_time_max)
 
 

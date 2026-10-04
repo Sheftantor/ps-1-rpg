@@ -394,7 +394,8 @@ func _on_hit_received(attack: AttackData, source: Node3D) -> void:
 		return
 	_clear_buffer()
 	_post_hit_timer = stats.post_hit_invulnerability
-	state_machine.transition_to(PlayerState.HIT_STUN, {"knockback": push, "guard_break": guard_broken})
+	state_machine.transition_to(PlayerState.HIT_STUN, {"knockback": push, "guard_break": guard_broken,
+			"stun_scale": attack.hit_stun_multiplier})
 
 
 func _debug_hurt() -> void:

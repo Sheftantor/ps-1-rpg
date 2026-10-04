@@ -1,7 +1,7 @@
-[gd_scene load_steps=29 format=3]
+[gd_scene load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://scripts/enemy/enemy.gd" id="1_enemy"]
-[ext_resource type="Shader" path="res://shaders/ps1.gdshader" id="2_ps1"]
+[ext_resource type="PackedScene" path="res://scenes/mincer_model.tscn" id="2_model"]
 [ext_resource type="Resource" path="res://resources/enemies/grunt_stats.tres" id="3_stats"]
 [ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
 [ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
@@ -16,34 +16,16 @@
 [ext_resource type="Script" path="res://scripts/enemy/states/recover.gd" id="14_recover"]
 [ext_resource type="Script" path="res://scripts/enemy/states/stagger.gd" id="15_stagger"]
 [ext_resource type="Script" path="res://scripts/enemy/states/dead.gd" id="16_dead"]
+[ext_resource type="Script" path="res://scripts/enemy/states/balance_loss.gd" id="17_balance_loss"]
 [ext_resource type="PackedScene" path="res://scenes/enemy_health_bar.tscn" id="99_health_bar"]
 [ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_body"]
-render_priority = 0
-shader = ExtResource("2_ps1")
-shader_parameter/albedo_color = Color(0.45, 0.3, 0.7, 1)
-shader_parameter/uv_scale = Vector2(1, 1)
-shader_parameter/checker_size = 8.0
-shader_parameter/checker_color = Color(0.7, 0.7, 0.7, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
-material = SubResource("ShaderMaterial_body")
-radius = 0.45
-height = 1.9
-radial_segments = 12
-rings = 4
-
-[sub_resource type="BoxMesh" id="BoxMesh_nose"]
-material = SubResource("ShaderMaterial_body")
-size = Vector3(0.22, 0.14, 0.24)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.45
 height = 1.9
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
-size = Vector3(1.2, 1.2, 1.4)
+size = Vector3(1.8, 1.7, 1.4)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_debug"]
 transparency = 1
@@ -52,7 +34,7 @@ albedo_color = Color(1, 0.15, 0.15, 0.35)
 
 [sub_resource type="BoxMesh" id="BoxMesh_hitbox"]
 material = SubResource("StandardMaterial3D_debug")
-size = Vector3(1.2, 1.2, 1.4)
+size = Vector3(1.8, 1.7, 1.4)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
 radius = 0.5
@@ -72,16 +54,11 @@ shape = SubResource("CapsuleShape3D_body")
 
 [node name="Facing" type="Node3D" parent="."]
 
-[node name="Body" type="MeshInstance3D" parent="Facing"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
-mesh = SubResource("CapsuleMesh_body")
-
-[node name="Nose" type="MeshInstance3D" parent="Facing/Body"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -0.42)
-mesh = SubResource("BoxMesh_nose")
+[node name="Model" parent="Facing" instance=ExtResource("2_model")]
+transform = Transform3D(-2, 0, 0, 0, 2, 0, 0, 0, -2, 0, 0, 0)
 
 [node name="Hitbox" type="Area3D" parent="Facing"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, -1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, -1)
 collision_layer = 0
 collision_mask = 8
 monitoring = false
@@ -134,6 +111,9 @@ script = ExtResource("14_recover")
 
 [node name="Stagger" type="Node" parent="StateMachine"]
 script = ExtResource("15_stagger")
+
+[node name="BalanceLoss" type="Node" parent="StateMachine"]
+script = ExtResource("17_balance_loss")
 
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("16_dead")

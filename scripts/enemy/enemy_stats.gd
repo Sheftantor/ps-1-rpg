@@ -22,6 +22,13 @@ extends Resource
 ## Length of the "spotted you" beat before engaging.
 @export var aware_time: float = 0.6
 
+@export_group("Patrol")
+## Shambling speed while wandering its patrol area (Enemy.patrol_area).
+@export var patrol_speed: float = 0.65
+## Pause at each patrol point (s).
+@export var patrol_pause_min: float = 0.2
+@export var patrol_pause_max: float = 1.2
+
 @export_group("Reposition")
 ## Circling distance while waiting for a turn to attack (m).
 @export var preferred_distance: float = 4.5
@@ -44,3 +51,26 @@ extends Resource
 @export var attack_token_cooldown: float = 0.9
 @export var stagger_time: float = 0.4
 @export var stagger_friction: float = 18.0
+
+@export_group("Escalation")
+## Attacks finished in a row without the player landing a hit. The last one
+## costs the enemy its balance (BalanceLoss state).
+@export_range(1, 10) var escalation_chain_length: int = 4
+## Extra playback speed per attack already in the chain (0.25 = +25% each).
+## Also shortens the telegraph, recovery and wait between attacks.
+@export var escalation_speed_step: float = 0.25
+## First attack in the chain (1-based) whose swing gets random arm jitter.
+@export_range(1, 10) var jitter_start_attack: int = 2
+## Arm jitter on that attack (degrees); grows by this much per attack after it.
+@export var jitter_degrees_per_attack: float = 7.0
+## The chain is dropped if the enemy goes this long without finishing an attack.
+@export var escalation_chain_timeout: float = 6.0
+## How many attacks at the top of the chain hit harder.
+@export_range(0, 10) var top_attack_count: int = 1
+## Knockback and player hit-stun multipliers for those top attacks (applied on
+## top of the attack's own knockback / hit_stun_multiplier).
+@export var top_attack_knockback_multiplier: float = 1.8
+@export var top_attack_hit_stun_multiplier: float = 2.0
+## Stumble after the last attack in the chain: can't attack or move, and is open
+## to punishment like a stagger (hits don't cut it short).
+@export var balance_loss_time: float = 1.5

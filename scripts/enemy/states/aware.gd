@@ -1,18 +1,25 @@
 extends EnemyState
-## Brief "spotted you" beat: stops, turns to the player and blinks before engaging.
+## Brief "spotted you" beat: stops, turns to the player, shifts its weight back
+## and blinks before engaging.
 
 const BLINK_COLOR: Color = Color(1.0, 1.0, 0.7, 0.6)
 const BLINK_INTERVAL: float = 0.1
+const STARTLE_SPEED: float = 1.5
 
 var _timer: float = 0.0
 
 
 func enter(_msg: Dictionary) -> void:
 	_timer = enemy.stats.aware_time
+	enemy.model.play(MincerModel.CLIP_IDLE, STARTLE_SPEED, true)
 
 
 func exit() -> void:
 	enemy.reset_telegraph_visuals()
+
+
+func drives_animation() -> bool:
+	return true
 
 
 func physics_update(delta: float) -> void:
