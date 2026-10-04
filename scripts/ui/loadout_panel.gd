@@ -2,21 +2,22 @@ class_name LoadoutPanel
 extends Control
 ## Bottom-left loadout window, styled after the retro RPG UI template
 ## (res://Import/images (3).jpg): a charcoal rounded window with a light rim and
-## corner studs, holding one row per entry. Each row is a short coloured pill tab
-## (WPN 1, WPN 2, ITEM) beside a longer bar of the same hue with the name,
-## led by the item's icon square (an IconSlot, the same size as the status
+## corner studs, holding one row per entry. Each row is a coloured bar with the
+## name, led by the item's icon square (an IconSlot, the same size as the status
 ## screen's). Rows: the melee weapon, the gun, then the carried items with counts.
 ## The weapon in hand is lit and the other dimmed; the selected item (the one
 ## use_item spends, cycled with next_item) gets the cursor arrow and a bright
 ## rim. Shows at most max_item_rows items, scrolling to keep the selection in
-## view. The window grows upward from its bottom-left corner. PlayerHud fills it
-## through set_entries().
+## view. The window grows upward from its bottom-left corner and is only as wide
+## as its longest name needs. PlayerHud fills it through set_entries(). While
+## drop_handler is set (the loot window is open) it accepts loot dragged onto it.
 
 const FONT: Font = preload("res://resources/ui/hud_font_bold.tres")
 
 @export_range(1, 6) var max_item_rows: int = 3
-@export var font_size: int = 28
-@export var tab_width: float = 104.0
+@export var font_size: int = 32
+## Overall size of the window, scaled from its bottom-left corner.
+@export_range(0.5, 1.5) var ui_scale: float = 0.85
 ## Template palette: charcoal window, light grey rim and studs.
 @export var window_color: Color = Color(0.1, 0.1, 0.11, 0.92)
 @export var rim_color: Color = Color(0.62, 0.64, 0.68, 1.0)
@@ -33,15 +34,36 @@ const FONT: Font = preload("res://resources/ui/hud_font_bold.tres")
 
 ## Rows are as tall as an icon slot, so every icon square matches the status screen.
 const ROW_HEIGHT := IconSlot.SIZE
-const PADDING := 12.0
+## Space inside the window's rim: tight at the sides, roomier top and bottom.
+const PADDING_X := 6.0
+const PADDING_Y := 12.0
 const ROW_GAP := 6.0
 const STUD_SIZE := 6.0
+## Spacing inside a row: between arrow, icon and bar, and the bar's text margins.
+const ROW_SEPARATION := 6.0
+const ARROW_WIDTH := 12.0
+const BAR_MARGIN := 6.0
+const BAR_BORDER := 2.0
+const LABEL_OUTLINE := 8
+
+## Called with the drag data when something is dropped on the window; while
+## it's set the window takes drops (PlayerHud.set_loot_drop_handler).
+var drop_handler: Callable = Callable():
+	set(value):
+		drop_handler = value
+		mouse_filter = Control.MOUSE_FILTER_STOP if value.is_valid() else Control.MOUSE_FILTER_IGNORE
 
 var _rows: VBoxContainer
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Drops arrive while menus have the game paused.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	scale = Vector2(ui_scale, ui_scale)
+	# Keep the bottom-left corner pinned as the window grows upward.
+	resized.connect(func() -> void: pivot_offset = Vector2(0.0, size.y))
+	pivot_offset = Vector2(0.0, size.y)
 	var window := Panel.new()
 	window.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	window.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -61,7 +83,7 @@ func _ready() -> void:
 		stud.anchor_right = corner.x
 		stud.anchor_top = corner.y
 		stud.anchor_bottom = corner.y
-		var inset := Vector2(8, 8)
+		var inset := Vector2(4, 4)
 		stud.offset_left = -inset.x - STUD_SIZE if corner.x > 0 else inset.x
 		stud.offset_top = -inset.y - STUD_SIZE if corner.y > 0 else inset.y
 		stud.offset_right = stud.offset_left + STUD_SIZE
@@ -71,8 +93,10 @@ func _ready() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for side: String in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, int(PADDING))
+	for side: String in ["left", "right"]:
+		margin.add_theme_constant_override("margin_" + side, int(PADDING_X))
+	for side: String in ["top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, int(PADDING_Y))
 	add_child(margin)
 	_rows = VBoxContainer.new()
 	_rows.add_theme_constant_override(&"separation", int(ROW_GAP))
@@ -88,26 +112,48 @@ func set_entries(melee: MeleeWeaponData, gun: WeaponData, gun_drawn: bool, items
 	for child in _rows.get_children():
 		_rows.remove_child(child)
 		child.queue_free()
-	_add_row("WPN 1", melee.icon if melee != null else null, melee.display_name if melee != null else "UNARMED",
+	var names: Array[String] = []
+	names.append(melee.display_name if melee != null else "UNARMED")
+	names.append(gun.display_name if gun != null else "-")
+	_add_row(false, melee.icon if melee != null else null, names[0],
 		melee_color, melee != null and not gun_drawn, false)
-	_add_row("WPN 2", gun.icon if gun != null else null, gun.display_name if gun != null else "-",
+	_add_row(false, gun.icon if gun != null else null, names[1],
 		gun_color, gun != null and gun_drawn, false)
 	var visible_items := mini(items.size(), max_item_rows)
 	var first := clampi(selected - visible_items + 1, 0, maxi(0, items.size() - visible_items))
 	for i in range(first, first + visible_items):
 		var stack := items[i]
-		_add_row("ITEM", stack.item.icon, "%s x%d" % [stack.item.display_name, stack.count],
+		names.append("%s x%d" % [stack.item.display_name, stack.count])
+		_add_row(true, stack.item.icon, names[-1],
 			item_colors[i % item_colors.size()], i == selected, i == selected)
 	var rows := 2 + visible_items
-	var height := rows * ROW_HEIGHT + (rows - 1) * ROW_GAP + PADDING * 2.0
+	var height := rows * ROW_HEIGHT + (rows - 1) * ROW_GAP + PADDING_Y * 2.0
 	offset_top = offset_bottom - height
+	offset_right = offset_left + _width_for(names)
 
 
-func _add_row(tab_text: String, icon: Texture2D, text: String, hue: Color, active: bool, cursor: bool) -> void:
+## Window width that fits the longest name without clipping.
+func _width_for(names: Array[String]) -> float:
+	var text_width := 0.0
+	for text: String in names:
+		text_width = maxf(text_width, FONT.get_string_size(text.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+	var bar := text_width + LABEL_OUTLINE + (BAR_MARGIN + BAR_BORDER) * 2.0
+	return PADDING_X * 2.0 + ARROW_WIDTH + IconSlot.SIZE + ROW_SEPARATION * 2.0 + ceilf(bar)
+
+
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	return drop_handler.is_valid() and data is Dictionary
+
+
+func _drop_data(_at_position: Vector2, data: Variant) -> void:
+	drop_handler.call(data)
+
+
+func _add_row(is_item: bool, icon: Texture2D, text: String, hue: Color, active: bool, cursor: bool) -> void:
 	var shade := 1.0 if active else inactive_dim
 	var line := HBoxContainer.new()
 	line.custom_minimum_size.y = ROW_HEIGHT
-	line.add_theme_constant_override(&"separation", 6)
+	line.add_theme_constant_override(&"separation", int(ROW_SEPARATION))
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rows.add_child(line)
 
@@ -119,33 +165,22 @@ func _add_row(tab_text: String, icon: Texture2D, text: String, hue: Color, activ
 	# The icon square, the same slot the status screen uses.
 	var slot := IconSlot.new()
 	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if icon != null or tab_text == "ITEM":
+	if icon != null or is_item:
 		slot.show_icon(icon, "", 0, cursor)
 	else:
 		slot.show_empty()
 	slot.modulate = Color.WHITE if active else Color(0.7, 0.7, 0.72)
 	line.add_child(slot)
 
-	# Pill tab: the lighter, rounder label on the left of each template command bar.
-	var tab := PanelContainer.new()
-	tab.custom_minimum_size = Vector2(tab_width, ROW_HEIGHT)
-	tab.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var tab_style := _box(hue.lightened(0.25) * Color(shade, shade, shade), int(ROW_HEIGHT * 0.5))
-	tab_style.set_border_width_all(2)
-	tab_style.border_color = (hue.lightened(0.55) if active else hue.darkened(0.3))
-	tab.add_theme_stylebox_override(&"panel", tab_style)
-	tab.add_child(_label(tab_text, shade, HORIZONTAL_ALIGNMENT_CENTER))
-	line.add_child(tab)
-
 	# Bar: the long, darker field holding the icon and name.
 	var bar := PanelContainer.new()
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var bar_style := _box(hue.darkened(0.35) * Color(shade, shade, shade), 6)
-	bar_style.set_border_width_all(2)
+	bar_style.set_border_width_all(int(BAR_BORDER))
 	bar_style.border_color = cursor_color if cursor else hue.darkened(0.6)
-	bar_style.content_margin_left = 10
-	bar_style.content_margin_right = 10
+	bar_style.content_margin_left = BAR_MARGIN
+	bar_style.content_margin_right = BAR_MARGIN
 	bar.add_theme_stylebox_override(&"panel", bar_style)
 	line.add_child(bar)
 	var contents := HBoxContainer.new()
@@ -164,7 +199,7 @@ func _label(text: String, shade: float, align: HorizontalAlignment) -> Label:
 	label.add_theme_font_size_override(&"font_size", font_size)
 	label.add_theme_color_override(&"font_color", text_color if shade >= 1.0 else text_color.darkened(0.35))
 	label.add_theme_color_override(&"font_outline_color", Color.BLACK)
-	label.add_theme_constant_override(&"outline_size", 8)
+	label.add_theme_constant_override(&"outline_size", LABEL_OUTLINE)
 	label.horizontal_alignment = align
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.clip_text = true
@@ -188,7 +223,7 @@ class _Arrow extends Control:
 	var visible_arrow := false
 
 	func _init() -> void:
-		custom_minimum_size = Vector2(12, 0)
+		custom_minimum_size = Vector2(ARROW_WIDTH, 0)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _draw() -> void:

@@ -59,6 +59,13 @@ static func ensure_defaults() -> void:
 	_bind(&"next_item", [_key(KEY_G), _axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)])
 
 	_bind(&"pause", [_key(KEY_ESCAPE), _button(JOY_BUTTON_START)])
+
+	# Menus. Godot's ui_accept / ui_cancel ship with no gamepad buttons, so menus
+	# (focused rows, closing) ignored the pad: give them A and B.
+	_add_events(&"ui_accept", [_button(JOY_BUTTON_A)])
+	_add_events(&"ui_cancel", [_button(JOY_BUTTON_B)])
+	# Loot window: take the row under the cursor (right-click) or with focus (A).
+	_bind(&"loot_take", [_mouse(MOUSE_BUTTON_RIGHT), _button(JOY_BUTTON_A)])
 	_bind(&"debug_hurt", [_key(KEY_K), _button(JOY_BUTTON_BACK)])
 
 
@@ -110,6 +117,16 @@ static func _bind(action: StringName, events: Array[InputEvent]) -> void:
 	InputMap.add_action(action)
 	for event: InputEvent in events:
 		InputMap.action_add_event(action, event)
+
+
+## Adds events to an action that already exists (e.g. a built-in ui_* one),
+## skipping any it already has.
+static func _add_events(action: StringName, events: Array[InputEvent]) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+	for event: InputEvent in events:
+		if not InputMap.action_has_event(action, event):
+			InputMap.action_add_event(action, event)
 
 
 static func _key(key: Key) -> InputEvent:

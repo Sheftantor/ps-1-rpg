@@ -2,8 +2,7 @@ class_name PlayerHud
 extends CanvasLayer
 ## Player HUD: top-left health and stamina bars with values, the bottom-left
 ## loadout window (LoadoutPanel: both weapons, then the carried items with the
-## selected one under the cursor), the keybind panel above it
-## (light / strong attack, use / next item, with the binding for the last-used device), pickup prompt and short messages, plus the gun-mode targeting
+## selected one under the cursor), pickup prompt and short messages, plus the gun-mode targeting
 ## overlay (connector web, reticle with target and range-state labels, mode
 ## label, queued-shot portrait slots centered under it, action prompts). Structure and logic only: layout,
 ## colors and fonts live in res://scenes/player_hud.tscn and
@@ -22,8 +21,6 @@ extends CanvasLayer
 const LoadoutPanelScript := preload("res://scripts/ui/loadout_panel.gd")
 ## Queue slot portrait for an enemy whose stats have none.
 const PORTRAIT_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
-## Gap between the loadout window and the keybind panel above it (pixels).
-const KEYBIND_GAP := 10.0
 
 ## Whether key labels show gamepad buttons; follows the last device used.
 var using_gamepad: bool = false
@@ -42,15 +39,6 @@ var _slots: Array[Control] = []
 @onready var _stamina_value: Label = $Root/Stats/StaminaRow/Value
 @onready var _stamina_bar: Range = $Root/Stats/StaminaBar
 @onready var _loadout: LoadoutPanelScript = $Root/LoadoutPanel
-@onready var _keybinds: Control = $Root/Keybinds
-## Rows of the keybind panel: each has a Key label (filled from the input map)
-## and a Name label. ItemRow's Name shows the selected item.
-@onready var _keybind_rows: Dictionary = {
-	&"attack_light": $Root/Keybinds/LightRow,
-	&"attack_heavy": $Root/Keybinds/StrongRow,
-	&"use_item": $Root/Keybinds/ItemRow,
-	&"next_item": $Root/Keybinds/NextItemRow,
-}
 @onready var _prompt: Label = $Root/Prompt
 ## Interact prompt: an InputIcon for the bound input plus a one-word verb.
 @onready var _interact: Control = $Root/Interact
@@ -96,8 +84,6 @@ func key_label(action: StringName) -> String:
 
 
 func _refresh_keybinds() -> void:
-	for action: StringName in _keybind_rows:
-		(_keybind_rows[action].get_node("Key") as Label).text = key_label(action)
 	_interact_icon.gamepad = using_gamepad
 	if _targeting.visible:
 		_build_gun_prompts()
@@ -126,16 +112,19 @@ func _set_stat(bar: Range, value_label: Label, current: float, maximum: float) -
 
 
 ## Bottom-left loadout window: both weapons, then the carried items with
-## `selected_item` (the one use_item spends) under the cursor. An empty
-## inventory hides the use/next item keybinds.
+## `selected_item` (the one use_item spends) under the cursor.
 func set_loadout(melee: MeleeWeaponData, gun: WeaponData, inventory: Array[ItemStack], selected_item: int) -> void:
 	_melee = melee
 	_gun = gun
 	_inventory = inventory
 	_selected_item = selected_item
-	_keybind_rows[&"use_item"].visible = not inventory.is_empty()
-	_keybind_rows[&"next_item"].visible = not inventory.is_empty()
 	_refresh_loadout()
+
+
+## While the loot window is open, loot dragged onto the loadout window is
+## passed to `handler` (an empty Callable stops it taking drops).
+func set_loot_drop_handler(handler: Callable) -> void:
+	_loadout.drop_handler = handler
 
 
 ## Lights the weapon in hand: the gun in gun mode, else the melee weapon.
@@ -146,10 +135,6 @@ func set_gun_drawn(drawn: bool) -> void:
 
 func _refresh_loadout() -> void:
 	_loadout.set_entries(_melee, _gun, _gun_drawn, _inventory, _selected_item)
-	# The keybind panel sits just above the window, which grows with the item count.
-	var height := _keybinds.offset_bottom - _keybinds.offset_top
-	_keybinds.offset_bottom = _loadout.offset_top - KEYBIND_GAP
-	_keybinds.offset_top = _keybinds.offset_bottom - height
 
 
 ## Shows the interact prompt while something interactable is in reach: the icon
@@ -168,10 +153,9 @@ func flash_message(text: String) -> void:
 	_message_timer = message_time
 
 
-## Gun mode has its own prompt row in place of the keybind panel; its queue sits top center.
+## Gun mode has its own prompt row; its queue sits top center.
 func show_targeting(shown: bool) -> void:
 	_targeting.visible = shown
-	_keybinds.visible = not shown
 	if shown:
 		_build_gun_prompts()
 

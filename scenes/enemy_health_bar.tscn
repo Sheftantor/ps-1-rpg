@@ -7,6 +7,7 @@
 
 [node name="EnemyHealthBar" type="Node3D"]
 script = ExtResource("1_bar")
+place_to_side = true
 
 [node name="Display" type="Sprite3D" parent="."]
 render_priority = 10

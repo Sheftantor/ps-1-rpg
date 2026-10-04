@@ -47,12 +47,15 @@ const ITEM_GAP := 28.0
 const DRAG_TURN := 0.012
 const STICK_TURN := 3.0
 const STICK_DEADZONE := 0.25
+## Overall size of the gear/stats window, scaled about its center.
+const FRAME_SCALE := 0.85
 
 var _was_paused: bool = false
 ## Hover bubble, pinning and the description panel for the slots.
 var _board: SlotBoard
 
 @onready var _root: Control = $Root
+@onready var _frame: Control = $Root/Frame
 @onready var _main_slots: VBoxContainer = $Root/Frame/Layout/Gear/MainSlots
 @onready var _accessory_slots: VBoxContainer = $Root/Frame/Layout/Gear/Accessories
 @onready var _weapon_slots: HBoxContainer = $Root/Frame/Layout/Weapons
@@ -69,6 +72,8 @@ var _board: SlotBoard
 
 func _ready() -> void:
 	_root.visible = false
+	_frame.scale = Vector2(FRAME_SCALE, FRAME_SCALE)
+	_frame.resized.connect(func() -> void: _frame.pivot_offset = _frame.size * 0.5)
 	_board = SlotBoard.new(_bubble, _description_title, _description_body, "GEAR", DESCRIPTION_HINT)
 	_model_view.gui_input.connect(_on_model_input)
 	# Same as the player: a private copy of the tree so its parameters are its own.

@@ -1,10 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/loot_window.gd" id="1_loot"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
 [ext_resource type="LabelSettings" path="res://resources/ui/menu_section.tres" id="3_section"]
 [ext_resource type="StyleBox" path="res://resources/ui/window_template.tres" id="4_window"]
-[ext_resource type="LabelSettings" path="res://resources/ui/stat_label.tres" id="5_label"]
 
 [node name="LootWindow" type="CanvasLayer"]
 process_mode = 3
@@ -47,8 +46,7 @@ label_settings = ExtResource("3_section")
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Hint" type="Label" parent="Root/Window/Layout"]
+[node name="Prompts" type="HBoxContainer" parent="Root/Window/Layout"]
 layout_mode = 2
-text = "RIGHT-CLICK: TAKE"
-label_settings = ExtResource("5_label")
-autowrap_mode = 3
+mouse_filter = 2
+theme_override_constants/separation = 22
