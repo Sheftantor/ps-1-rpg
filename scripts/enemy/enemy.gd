@@ -111,7 +111,11 @@ func face_target(delta: float) -> void:
 func face_direction(direction: Vector3, delta: float) -> void:
 	if direction.length_squared() < 0.0001:
 		return
-	var target_yaw := atan2(-direction.x, -direction.z)
+	# The direction is in world space but Facing turns relative to the body, so take
+	# off the body's own yaw: an enemy placed rotated in a level still faces right.
+	var body_forward := -global_basis.z
+	var body_yaw := atan2(-body_forward.x, -body_forward.z)
+	var target_yaw := atan2(-direction.x, -direction.z) - body_yaw
 	facing.rotation.y = lerp_angle(facing.rotation.y, target_yaw, 1.0 - exp(-stats.turn_speed * delta))
 
 

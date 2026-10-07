@@ -1,0 +1,26 @@
+[gd_resource type="Theme" format=3 uid="uid://cusc4v6m2xc6u"]
+
+[ext_resource type="FontFile" uid="uid://bmylgkk6gtohf" path="res://Import/MGS1 Codec.ttf" id="1_ed4vw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v5hth"]
+bg_color = Color(0.10516318, 0.090766884, 0.07984165, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+shadow_size = 7
+anti_aliasing_size = 5.348
+
+[resource]
+default_font = ExtResource("1_ed4vw")
+default_font_size = 22
+Panel/styles/panel = SubResource("StyleBoxFlat_v5hth")

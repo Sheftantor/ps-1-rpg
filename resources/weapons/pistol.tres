@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://b722as2rwrfg5"]
 
+[ext_resource type="Texture2D" uid="uid://bvconkv3bhi6g" path="res://textures/ui/icons/placeholder_gun.png" id="1_i4ekl"]
 [ext_resource type="Script" uid="uid://bko71xs07rlxu" path="res://scripts/combat/weapon_data.gd" id="1_weapon"]
 [ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="2_attack"]
 [ext_resource type="PackedScene" path="res://scenes/pistol.tscn" id="3_model"]

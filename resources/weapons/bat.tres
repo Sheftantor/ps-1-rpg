@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="MeleeWeaponData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="MeleeWeaponData" format=3 uid="uid://bgc5fqxlooyl8"]
 
-[ext_resource type="Script" path="res://scripts/combat/melee_weapon_data.gd" id="1_melee"]
+[ext_resource type="Texture2D" uid="uid://dfadepuwcpxfy" path="res://textures/ui/icons/placeholder_melee.png" id="1_2mk26"]
+[ext_resource type="Script" uid="uid://cgvvtw0crexss" path="res://scripts/combat/melee_weapon_data.gd" id="1_melee"]
 [ext_resource type="PackedScene" path="res://scenes/bat.tscn" id="2_model"]
 
 [resource]
