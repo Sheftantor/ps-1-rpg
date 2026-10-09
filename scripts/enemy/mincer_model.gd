@@ -83,6 +83,12 @@ func set_flash(color: Color) -> void:
 		mesh.set_instance_shader_parameter(&"flash_color", color)
 
 
+## Multiplies the skin colour (the PS1 shader's per-instance tint).
+func set_tint(color: Color) -> void:
+	for mesh: GeometryInstance3D in _meshes:
+		mesh.set_instance_shader_parameter(&"tint", color)
+
+
 func set_pulse(amount: float) -> void:
 	scale = _base_scale * amount
 

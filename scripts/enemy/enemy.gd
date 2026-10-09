@@ -16,6 +16,12 @@ const WALK_ANIM_MIN_SPEED: float = 0.15
 ## until it spots the player. Zero on an axis keeps it on a line; zero on both
 ## keeps it standing.
 @export var patrol_area: Vector2 = Vector2(6.0, 6.0)
+## This enemy's level for the level badge. 0 = use stats.level, so one stats
+## resource can still be placed as tougher or weaker individuals.
+@export_range(0, 99) var level_override: int = 0
+## Multiplies the model's colours. A stand-in for real variants: tougher levels
+## are recoloured until they get their own models.
+@export var body_tint: Color = Color.WHITE
 
 var target: Node3D = null
 ## The attack chosen for the current turn (set in Reposition, used through Recover).
@@ -47,6 +53,8 @@ func _ready() -> void:
 	add_to_group(&"enemies")
 	home_position = global_position
 	health.setup(stats.max_health)
+	model.set_tint(body_tint)
+	health.died.connect(_award_xp)
 	hurtbox.hit_received.connect(_on_hit_received)
 	state_machine.start(self)
 
@@ -96,6 +104,16 @@ func direction_to_target() -> Vector3:
 	var offset := target.global_position - global_position
 	offset.y = 0.0
 	return offset.normalized()
+
+
+func _award_xp() -> void:
+	var player := get_tree().get_first_node_in_group(&"player") as Player
+	if player != null:
+		player.award_kill(level())
+
+
+func level() -> int:
+	return level_override if level_override > 0 else stats.level
 
 
 func forward() -> Vector3:

@@ -24,7 +24,7 @@ var _time: float = 0.0
 
 
 func _ready() -> void:
-	add_to_group(&"pickups")
+	add_to_group(&"interactables")
 	var sack: Node3D = SACK.instantiate()
 	add_child(sack)
 	_aura = sack.get_node(^"Aura")
@@ -58,8 +58,13 @@ func remove(entry: Resource) -> void:
 	elif entry == item:
 		item = null
 	if contents().is_empty():
-		remove_from_group(&"pickups")
+		remove_from_group(&"interactables")
+		AreaTravel.service().mark_collected(self)
 		queue_free()
+
+
+func interact(player: Player) -> void:
+	player.loot_window.open(self)
 
 
 func in_reach(point: Vector3) -> bool:

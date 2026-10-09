@@ -25,6 +25,12 @@ func setup(maximum: int) -> void:
 	changed.emit(current, max_health)
 
 
+## Sets health directly (e.g. carried over from the last area); no damage events.
+func set_current(value: int) -> void:
+	current = clampi(value, 0, max_health)
+	changed.emit(current, max_health)
+
+
 func heal(amount: int) -> void:
 	if is_dead:
 		return

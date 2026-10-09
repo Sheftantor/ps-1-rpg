@@ -67,6 +67,7 @@ static func ensure_defaults() -> void:
 	# Loot window: take the row under the cursor (right-click) or with focus (A).
 	_bind(&"loot_take", [_mouse(MOUSE_BUTTON_RIGHT), _button(JOY_BUTTON_A)])
 	_bind(&"debug_hurt", [_key(KEY_K), _button(JOY_BUTTON_BACK)])
+	_bind(&"debug_level_up", [_key(KEY_L)])
 
 
 ## Short on-screen name for the first binding of `action` on the given device

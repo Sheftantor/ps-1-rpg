@@ -41,6 +41,8 @@ const EMPTY := "-"
 const DESCRIPTION_HINT := "Point at a slot or click it to see what it holds."
 ## Colour of a stat's name; the value is white.
 const NAME_COLOR := Color(0.72, 0.74, 0.8)
+## Unspent-point "+" buttons.
+const POINT_COLOR := Color(1.0, 0.84, 0.3)
 ## Space between the weapons and the carried items (pixels).
 const ITEM_GAP := 28.0
 ## Model turn speed: radians per pixel dragged, and per second at full stick.
@@ -51,6 +53,8 @@ const STICK_DEADZONE := 0.25
 const FRAME_SCALE := 0.85
 
 var _was_paused: bool = false
+## The player the screen was last built for.
+var _player: Player = null
 ## Hover bubble, pinning and the description panel for the slots.
 var _board: SlotBoard
 
@@ -61,6 +65,7 @@ var _board: SlotBoard
 @onready var _weapon_slots: HBoxContainer = $Root/Frame/Layout/Weapons
 @onready var _combat_rows: VBoxContainer = $Root/Frame/Layout/Stats/Combat/Rows
 @onready var _spirit_rows: VBoxContainer = $Root/Frame/Layout/Stats/Spirit/Rows
+@onready var _title: Label = $Root/Title
 @onready var _description_title: Label = $Root/Frame/Layout/Description/Lines/Title
 @onready var _description_body: Label = $Root/Frame/Layout/Description/Lines/Body
 @onready var _model_view: SubViewportContainer = $Root/Frame/Layout/Gear/ModelFrame/ModelView
@@ -150,6 +155,7 @@ func close() -> void:
 
 
 func _build(player: Player) -> void:
+	_player = player
 	for box: Node in [_main_slots, _accessory_slots, _weapon_slots, _combat_rows, _spirit_rows]:
 		for child in box.get_children():
 			box.remove_child(child)
@@ -163,21 +169,24 @@ func _build(player: Player) -> void:
 	_board.add_weapons(_weapon_slots, player)
 	_item_slots_for(player)
 
+	var needed := player.xp_to_next()
+	_title.text = "STATUS   LV %d   XP %s" % [player.level, "%d/%d" % [player.xp, needed] if needed > 0 else "MAX"]
+
 	_section(_combat_rows, "COMBAT")
 	_stat(_combat_rows, "HEALTH", "%d/%d" % [player.health.current, player.health.max_health])
-	_stat(_combat_rows, "STRENGTH", str(player.stats.strength))
-	_stat(_combat_rows, "AGILITY", str(player.stats.agility))
+	_stat(_combat_rows, "STRENGTH", str(player.attributes.strength), &"strength")
+	_stat(_combat_rows, "AGILITY", str(player.attributes.agility), &"agility")
 	var attack := GearText.melee_damage(player)
 	_stat(_combat_rows, "ATTACK", str(attack) if attack > 0 else EMPTY)
 	_stat(_combat_rows, "DEFENSE", str(player.armor_defense()))
 
 	_section(_spirit_rows, "SPIRIT")
 	_stat(_spirit_rows, "ENERGY", "%d/%d" % [roundi(player.stamina.current), roundi(player.stamina.maximum)])
-	_stat(_spirit_rows, "MEMES", str(player.stats.memes))
-	_stat(_spirit_rows, "STEALTH", str(player.stats.stealth))
+	_stat(_spirit_rows, "FOCUS", str(player.attributes.focus), &"focus")
+	_stat(_spirit_rows, "MEMES", str(player.attributes.memes), &"memes")
 	var gun := player.gun
 	_stat(_spirit_rows, "GUN DMG", str(gun.shot.damage) if gun != null and gun.shot != null else EMPTY)
-	_stat(_spirit_rows, "POINTS", str(player.stats.stat_points))
+	_stat(_spirit_rows, "POINTS", str(player.stat_points))
 
 	_dress_model(player)
 
@@ -224,7 +233,9 @@ func _section(box: VBoxContainer, title: String) -> void:
 	box.add_child(label)
 
 
-func _stat(box: VBoxContainer, stat_name: String, value_text: String) -> void:
+## A stat row. With an attribute key, a "+" button spends an unspent level-up
+## point on it while the player has any.
+func _stat(box: VBoxContainer, stat_name: String, value_text: String, attribute: StringName = &"") -> void:
 	var row := HBoxContainer.new()
 	var name_label := Label.new()
 	name_label.text = stat_name
@@ -237,7 +248,29 @@ func _stat(box: VBoxContainer, stat_name: String, value_text: String) -> void:
 	value.label_settings = LABEL_SETTINGS
 	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(value)
+	if attribute != &"" and _player.stat_points > 0:
+		var plus := Button.new()
+		plus.text = "+"
+		plus.custom_minimum_size = Vector2(34, 30)
+		plus.add_theme_font_override(&"font", LABEL_SETTINGS.font)
+		plus.add_theme_font_size_override(&"font_size", 26)
+		plus.add_theme_color_override(&"font_color", POINT_COLOR)
+		for state: StringName in [&"normal", &"hover", &"pressed", &"focus"]:
+			var style := StyleBoxFlat.new()
+			style.bg_color = Color(0.1, 0.1, 0.11) if state == &"normal" else Color(0.3, 0.26, 0.12)
+			style.set_border_width_all(2)
+			style.border_color = POINT_COLOR
+			plus.add_theme_stylebox_override(state, style)
+		plus.pressed.connect(_spend.bind(attribute))
+		row.add_child(plus)
 	box.add_child(row)
+
+
+## Puts a level-up point into an attribute and redraws the screen.
+func _spend(attribute: StringName) -> void:
+	if _player.spend_stat_point(attribute):
+		# After this button's press: the rebuild frees it.
+		_build.call_deferred(_player)
 
 
 # --- Model preview ------------------------------------------------------------

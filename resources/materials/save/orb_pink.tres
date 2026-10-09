@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="1_ps1"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(1, 0.42, 0.74, 1)
+shader_parameter/emission_color = Color(0.95, 0.3, 0.65, 1)
+shader_parameter/emission_energy = 1.1

@@ -38,6 +38,12 @@ func drain(amount: float) -> void:
 	changed.emit(current, maximum)
 
 
+## Sets stamina directly (e.g. carried over from the last area).
+func set_current(value: float) -> void:
+	current = clampf(value, 0.0, maximum)
+	changed.emit(current, maximum)
+
+
 func restore(amount: float) -> void:
 	current = minf(current + amount, maximum)
 	changed.emit(current, maximum)

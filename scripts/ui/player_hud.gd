@@ -1,6 +1,6 @@
 class_name PlayerHud
 extends CanvasLayer
-## Player HUD: top-left health and stamina bars with values, the bottom-left
+## Player HUD: top-left health, energy and XP bars with values, the bottom-left
 ## loadout window (LoadoutPanel: both weapons, then the carried items with the
 ## selected one under the cursor), pickup prompt and short messages, plus the gun-mode targeting
 ## overlay (connector web, reticle with target and range-state labels, mode
@@ -33,11 +33,17 @@ var _gun: WeaponData = null
 var _inventory: Array[ItemStack] = []
 var _selected_item: int = 0
 var _slots: Array[Control] = []
+var _level_up_tween: Tween = null
+@onready var _level_up_y: float = $Root/LevelUp.position.y
 
 @onready var _health_value: Label = $Root/Stats/HealthRow/Value
 @onready var _health_bar: Range = $Root/Stats/HealthBar
 @onready var _stamina_value: Label = $Root/Stats/StaminaRow/Value
 @onready var _stamina_bar: Range = $Root/Stats/StaminaBar
+@onready var _xp_level: Label = $Root/Stats/XpRow/Name
+@onready var _xp_value: Label = $Root/Stats/XpRow/Value
+@onready var _xp_bar: Range = $Root/Stats/XpBar
+@onready var _level_up: Label = $Root/LevelUp
 @onready var _loadout: LoadoutPanelScript = $Root/LoadoutPanel
 @onready var _prompt: Label = $Root/Prompt
 ## Interact prompt: an InputIcon for the bound input plus a one-word verb.
@@ -103,6 +109,29 @@ func set_health(current: float, maximum: float) -> void:
 
 func set_stamina(current: float, maximum: float) -> void:
 	_set_stat(_stamina_bar, _stamina_value, current, maximum)
+
+
+## Level and the XP bar toward the next one (needed 0 = max level).
+func set_xp(level: int, xp: int, needed: int) -> void:
+	_xp_level.text = "LV %d" % level
+	_xp_bar.max_value = maxi(needed, 1)
+	_xp_bar.value = xp if needed > 0 else _xp_bar.max_value
+	_xp_value.text = "%d/%d" % [xp, needed] if needed > 0 else "MAX"
+
+
+## Big gold "LEVEL UP!" banner that rises a little and fades.
+func show_level_up(level: int) -> void:
+	if _level_up_tween != null:
+		_level_up_tween.kill()
+	_level_up.text = "LEVEL UP!  LV %d" % level
+	_level_up.visible = true
+	_level_up.modulate.a = 1.0
+	_level_up.position.y = _level_up_y
+	_level_up_tween = _level_up.create_tween()
+	_level_up_tween.tween_interval(1.4)
+	_level_up_tween.tween_property(_level_up, ^"modulate:a", 0.0, 0.8)
+	_level_up_tween.parallel().tween_property(_level_up, ^"position:y", _level_up_y - 20.0, 0.8)
+	_level_up_tween.tween_callback(_level_up.hide)
 
 
 func _set_stat(bar: Range, value_label: Label, current: float, maximum: float) -> void:

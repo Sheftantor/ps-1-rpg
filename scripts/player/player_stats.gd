@@ -4,15 +4,40 @@ extends Resource
 
 @export var max_health: int = 100
 @export var max_stamina: float = 100.0
-## Unspent level-up points. Nothing spends them yet.
+## Starting character level. The live level is Player.level.
+@export_range(1, 99) var level: int = 1
+## Starting unspent stat points (each level-up adds stat_points_per_level).
 @export var stat_points: int = 0
 
 @export_group("Attributes")
-## Shown on the status screen. Not yet wired into combat, stealth or dialogue.
+## Starting values; level-up points raise the player's own copy (Player.attributes).
+## Strength: melee damage and melee crit. Agility: dodge-roll i-frames and
+## stealth. Focus: gun accuracy and gun crit. Memes: summoning cost and power.
+## Shown on the status screen; not yet wired into combat, stealth or summoning.
 @export var strength: int = 10
 @export var agility: int = 10
-@export var stealth: int = 5
-@export var memes: int = 5
+@export var focus: int = 10
+@export var memes: int = 10
+
+@export_group("Leveling")
+## WoW-style curve: XP to go from level L to L+1 is xp_first + xp_growth * (L - 1).
+@export_range(1, 99) var max_level: int = 60
+@export var xp_first: int = 400
+@export var xp_growth: int = 500
+## Kill XP before the level gap: kill_xp_base + kill_xp_per_level * enemy level
+## (WoW's 45 + 5 x level).
+@export var kill_xp_base: int = 45
+@export var kill_xp_per_level: int = 5
+## Extra kill XP per level an enemy is above the player, counted up to max_bonus_levels.
+@export_range(0.0, 1.0, 0.01) var xp_bonus_per_level: float = 0.05
+@export var max_bonus_levels: int = 4
+## An enemy this many levels below the player gives no XP ("grey"); between, XP
+## falls off linearly.
+@export var grey_gap: int = 5
+## Gained every level-up.
+@export var health_per_level: int = 10
+@export var energy_per_level: float = 5.0
+@export var stat_points_per_level: int = 1
 
 @export_group("Stamina")
 ## Per second, once regeneration resumes.

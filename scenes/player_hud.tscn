@@ -10,12 +10,16 @@
 [ext_resource type="Script" path="res://scripts/ui/input_icon.gd" id="8_input_icon"]
 [ext_resource type="LabelSettings" path="res://resources/ui/prompt_label.tres" id="9_prompt"]
 [ext_resource type="Script" path="res://scripts/ui/loadout_panel.gd" id="10_loadout_panel"]
+[ext_resource type="LabelSettings" path="res://resources/ui/level_up.tres" id="11_level_up"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stat_background"]
 bg_color = Color(0, 0, 0, 0.55)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_fill"]
 bg_color = Color(0.9, 0.7, 0.2, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xp_fill"]
+bg_color = Color(0.62, 0.32, 0.95, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
 content_margin_left = 6.0
@@ -48,7 +52,7 @@ layout_mode = 1
 offset_left = 20.0
 offset_top = 16.0
 offset_right = 380.0
-offset_bottom = 160.0
+offset_bottom = 210.0
 mouse_filter = 2
 theme_override_constants/separation = 4
 
@@ -84,7 +88,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"HudStatLabel"
-text = "STAMINA"
+text = "ENERGY"
 
 [node name="Value" type="Label" parent="Root/Stats/StaminaRow"]
 layout_mode = 2
@@ -101,6 +105,47 @@ theme_override_styles/background = SubResource("StyleBoxFlat_stat_background")
 theme_override_styles/fill = SubResource("StyleBoxFlat_stamina_fill")
 value = 100.0
 show_percentage = false
+
+[node name="XpRow" type="HBoxContainer" parent="Root/Stats"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Root/Stats/XpRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HudStatLabel"
+text = "LV 1"
+
+[node name="Value" type="Label" parent="Root/Stats/XpRow"]
+layout_mode = 2
+theme_type_variation = &"HudStatLabel"
+text = "0/400"
+horizontal_alignment = 2
+
+[node name="XpBar" type="ProgressBar" parent="Root/Stats"]
+custom_minimum_size = Vector2(180, 8)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_stat_background")
+theme_override_styles/fill = SubResource("StyleBoxFlat_xp_fill")
+max_value = 400.0
+show_percentage = false
+
+[node name="LevelUp" type="Label" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -400.0
+offset_top = 150.0
+offset_right = 400.0
+offset_bottom = 250.0
+grow_horizontal = 2
+text = "LEVEL UP!"
+label_settings = ExtResource("11_level_up")
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="LoadoutPanel" type="Control" parent="Root"]
 layout_mode = 1

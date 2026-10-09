@@ -6,7 +6,8 @@ extends Node3D
 ## drawn into the Canvas SubViewport and shown on a billboarded Sprite3D, so it
 ## can be styled in the editor. The optional Bar is a TextureProgressBar with a
 ## fixed texture: losing health shrinks how much of it shows (enemies have no
-## bar, only the number). The white HealthValue always shows current health; each hit spawns a copy of the
+## bar, only the number). Enemy bars also carry a LevelBadge over the number.
+## The white HealthValue always shows current health; each hit spawns a copy of the
 ## hidden DamageNumber (yellow, above the middle of the bar) that drifts up a
 ## little and fades out. With place_to_side on, the display slides off to the
 ## side of the character facing away from the middle of the screen (where the
@@ -66,6 +67,8 @@ extends Node3D
 @onready var _bar: Range = get_node_or_null(^"Canvas/Root/Bar")
 @onready var _value: Label = $Canvas/Root/HealthValue
 @onready var _damage_template: Label = $Canvas/Root/DamageNumber
+## Optional: the enemy level badge over the number (EnemyLevelBadge).
+@onready var _badge: Control = get_node_or_null(^"Canvas/Root/LevelBadge")
 @onready var _base_pixel_size: float = _display.pixel_size
 
 var _scale := 1.0
@@ -175,3 +178,5 @@ func _on_died() -> void:
 		if _bar != null:
 			_bar.visible = false
 		_value.visible = false
+		if _badge != null:
+			_badge.visible = false

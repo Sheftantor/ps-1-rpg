@@ -3,6 +3,9 @@ extends Resource
 ## Tunable enemy numbers. Edit res://resources/enemies/*.tres in the inspector.
 
 @export var max_health: int = 80
+## Shown on the level badge over the health number, coloured against the
+## player's level. An Enemy's level_override replaces it per instance.
+@export_range(1, 99) var level: int = 1
 ## Face shown in gun mode's target queue slots. Defaults to a generic placeholder.
 @export var portrait: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
 

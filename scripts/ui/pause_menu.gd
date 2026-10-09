@@ -44,6 +44,7 @@ const SECTIONS: Array = [
 		[[&"inventory"], "INVENTORY"],
 		[[&"pause"], "PAUSE"],
 		[[&"debug_hurt"], "HURT SELF (DEBUG)"],
+		[[&"debug_level_up"], "LEVEL UP (DEBUG)"],
 	]],
 ]
 const SECTION_SETTINGS: LabelSettings = preload("res://resources/ui/menu_section.tres")

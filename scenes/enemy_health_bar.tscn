@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/floating_health_bar.gd" id="1_bar"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
 [ext_resource type="LabelSettings" path="res://resources/ui/damage_number.tres" id="5_number"]
 [ext_resource type="LabelSettings" path="res://resources/ui/health_value.tres" id="6_value"]
+[ext_resource type="Script" path="res://scripts/ui/enemy_level_badge.gd" id="7_badge"]
+[ext_resource type="LabelSettings" path="res://resources/ui/level_badge.tres" id="8_badge_text"]
 
 [node name="EnemyHealthBar" type="Node3D"]
 script = ExtResource("1_bar")
@@ -14,13 +16,14 @@ render_priority = 10
 pixel_size = 0.0022
 billboard = 1
 no_depth_test = true
+offset = Vector2(0, 25)
 fixed_size = true
 texture_filter = 1
 
 [node name="Canvas" type="SubViewport" parent="."]
 disable_3d = true
 transparent_bg = true
-size = Vector2i(440, 150)
+size = Vector2i(440, 200)
 render_target_update_mode = 4
 
 [node name="Root" type="Control" parent="Canvas"]
@@ -36,11 +39,32 @@ theme = ExtResource("2_theme")
 [node name="HealthValue" type="Label" parent="Canvas/Root"]
 layout_mode = 0
 offset_left = 120.0
-offset_top = 66.0
+offset_top = 116.0
 offset_right = 320.0
-offset_bottom = 146.0
+offset_bottom = 196.0
 text = "80"
 label_settings = ExtResource("6_value")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LevelBadge" type="Control" parent="Canvas/Root"]
+layout_mode = 0
+offset_left = 197.0
+offset_top = 102.0
+offset_right = 243.0
+offset_bottom = 148.0
+mouse_filter = 2
+script = ExtResource("7_badge")
+
+[node name="LevelLabel" type="Label" parent="Canvas/Root/LevelBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+label_settings = ExtResource("8_badge_text")
 horizontal_alignment = 1
 vertical_alignment = 1
 

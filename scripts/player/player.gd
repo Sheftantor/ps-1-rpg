@@ -10,6 +10,11 @@ extends CharacterBody3D
 
 ## Buffered action names. Inputs go through buffer_action() so a press made
 ## mid-swing or mid-roll still happens once the player is free to act.
+## Emitted when the character level changes (enemy level badges recolour on it).
+signal level_changed(level: int)
+## Emitted when XP, the level or stat points change (HUD XP bar, status screen).
+signal progress_changed
+
 const ACTION_LIGHT: StringName = &"attack_light"
 const ACTION_HEAVY: StringName = &"attack_heavy"
 const ACTION_DODGE: StringName = &"dodge"
@@ -89,6 +94,14 @@ const FALL_ANIM_DELAY: float = 0.12
 @export var debug_hit_damage: int = 15
 @export var debug_hit_knockback: float = 4.0
 
+## Current character level; change it with set_level() so listeners hear about it.
+var level: int = 1
+## XP into the current level (Leveling.xp_to_next(level) completes it).
+var xp: int = 0
+## Unspent points; spend_stat_point() puts one into an attribute.
+var stat_points: int = 0
+## The player's own attribute values (start from stats, raised by level-ups).
+var attributes: Dictionary[StringName, int] = {}
 var lock_target: Enemy = null
 ## The player's copy of loadout.inventory; items are spent from this.
 var inventory: Array[ItemStack] = []
@@ -160,6 +173,9 @@ var _hip_attachment: BoneAttachment3D = null
 func _ready() -> void:
 	InputBindings.ensure_defaults()
 	add_to_group(&"player")
+	level = stats.level
+	stat_points = stats.stat_points
+	attributes = {strength = stats.strength, agility = stats.agility, focus = stats.focus, memes = stats.memes}
 	health.setup(stats.max_health)
 	health.died.connect(_on_died)
 	stamina.setup(stats.max_stamina, stats.stamina_regen_delay)
@@ -183,6 +199,8 @@ func _ready() -> void:
 	stamina.changed.connect(hud.set_stamina)
 	hud.set_health(health.current, health.max_health)
 	hud.set_stamina(stamina.current, stamina.maximum)
+	progress_changed.connect(_refresh_xp_hud)
+	_refresh_xp_hud()
 	_refresh_item_hud()
 	# The action slots' clips are swapped at runtime, so use a private copy of the tree.
 	_anim_tree.tree_root = _anim_tree.tree_root.duplicate(true)
@@ -217,6 +235,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(&"debug_hurt"):
 		_debug_hurt()
+	elif event.is_action_pressed(&"debug_level_up"):
+		gain_xp(xp_to_next() - xp)
 	elif event.is_action_pressed(&"lock_on"):
 		if state_machine.current_name() == PlayerState.GUN_AIM:
 			state_machine.current.cycle_target()
@@ -423,7 +443,8 @@ func _on_died() -> void:
 	swing_hitbox.deactivate()
 	lock_target = null
 	state_machine.transition_to(PlayerState.DEAD)
-	get_tree().create_timer(RESPAWN_DELAY).timeout.connect(get_tree().reload_current_scene)
+	# Back to the last save orb (or this area's start), level and items kept.
+	get_tree().create_timer(RESPAWN_DELAY).timeout.connect(AreaTravel.service().respawn)
 
 
 # --- Lock-on & camera -----------------------------------------------------------
@@ -623,11 +644,119 @@ func armor_defense() -> int:
 	return total
 
 
-## Opens the loot window on the nearest sack in reach (interact input).
+# --- Progression ----------------------------------------------------------------
+
+func xp_to_next() -> int:
+	return Leveling.xp_to_next(level, stats)
+
+
+## Adds XP, levelling up (possibly several times) as each level fills.
+func gain_xp(amount: int) -> void:
+	if amount <= 0 or level >= stats.max_level:
+		return
+	xp += amount
+	while level < stats.max_level and xp >= xp_to_next():
+		xp -= xp_to_next()
+		_level_up()
+	if level >= stats.max_level:
+		xp = 0
+	progress_changed.emit()
+
+
+func _refresh_xp_hud() -> void:
+	hud.set_xp(level, xp, xp_to_next())
+
+
+## Called by an enemy as it dies.
+func award_kill(enemy_level: int) -> void:
+	var gained := Leveling.kill_xp(enemy_level, level, stats)
+	if gained > 0:
+		hud.flash_message("+%d XP" % gained)
+		gain_xp(gained)
+
+
+## WoW-style level-up: more max health and energy (the gain is added to the
+## current values too) and a stat point to put into one attribute.
+func _level_up() -> void:
+	set_level(level + 1)
+	stat_points += stats.stat_points_per_level
+	health.max_health += stats.health_per_level
+	health.heal(stats.health_per_level)
+	stamina.maximum += stats.energy_per_level
+	stamina.restore(stats.energy_per_level)
+	hud.show_level_up(level)
+
+
+## Puts one unspent point into an attribute (strength, agility, focus, memes).
+func spend_stat_point(attribute: StringName) -> bool:
+	if stat_points <= 0 or not attributes.has(attribute):
+		return false
+	stat_points -= 1
+	attributes[attribute] += 1
+	progress_changed.emit()
+	return true
+
+
+## What carries over when AreaTravel moves the player to another area: the
+## new area has its own Player instance, which load_state() brings up to date.
+func save_state() -> Dictionary:
+	return {
+		level = level,
+		xp = xp,
+		stat_points = stat_points,
+		attributes = attributes.duplicate(),
+		max_health = health.max_health,
+		max_stamina = stamina.maximum,
+		health = health.current,
+		stamina = stamina.current,
+		gun = gun,
+		inventory = inventory.duplicate(),
+		selected_item = selected_item,
+	}
+
+
+func load_state(state: Dictionary) -> void:
+	if state.is_empty():
+		return
+	set_level(state.level)
+	xp = state.xp
+	stat_points = state.stat_points
+	attributes.assign(state.attributes)
+	health.max_health = state.max_health
+	health.set_current(state.health)
+	stamina.maximum = state.max_stamina
+	stamina.set_current(state.stamina)
+	gun = state.gun
+	inventory.assign(state.inventory)
+	selected_item = state.selected_item
+	_refresh_item_hud()
+	progress_changed.emit()
+
+
+## Stands the player at a spawn point, body and camera facing its forward (-Z).
+func place_at(spawn: Transform3D) -> void:
+	global_position = spawn.origin
+	velocity = Vector3.ZERO
+	var forward := -spawn.basis.z
+	var yaw := atan2(-forward.x, -forward.z)
+	_camera_rig.rotation.y = yaw
+	_facing.rotation.y = yaw
+
+
+func set_level(value: int) -> void:
+	value = maxi(1, value)
+	if value == level:
+		return
+	level = value
+	level_changed.emit(level)
+
+
+## Uses the nearest interactable in reach (interact input): opens a loot
+## sack's window, rests at a save orb.
 func interact() -> void:
-	var pickup := nearest_pickup()
-	if pickup != null:
-		loot_window.open(pickup)
+	var target := nearest_interactable()
+	if target != null:
+		target.interact(self)
 
 
 ## Takes one entry out of a loot sack: a weapon goes in the gun slot, items
@@ -658,23 +787,25 @@ func add_item(stack: ItemStack) -> void:
 	_refresh_item_hud()
 
 
-func nearest_pickup() -> Pickup:
-	var nearest: Pickup = null
+## The closest thing in the "interactables" group in reach. Each provides
+## in_reach(point), interact(player) and an interact_verb for the prompt.
+func nearest_interactable() -> Node3D:
+	var nearest: Node3D = null
 	var nearest_distance := INF
-	for node: Node in get_tree().get_nodes_in_group(&"pickups"):
-		var pickup := node as Pickup
-		if pickup == null or pickup.is_queued_for_deletion() or not pickup.in_reach(global_position):
+	for node: Node in get_tree().get_nodes_in_group(&"interactables"):
+		var target := node as Node3D
+		if target == null or target.is_queued_for_deletion() or not target.in_reach(global_position):
 			continue
-		var distance := global_position.distance_squared_to(pickup.global_position)
+		var distance := global_position.distance_squared_to(target.global_position)
 		if distance < nearest_distance:
-			nearest = pickup
+			nearest = target
 			nearest_distance = distance
 	return nearest
 
 
 func _update_pickup_prompt() -> void:
-	var pickup := nearest_pickup() if current_state().name != PlayerState.GUN_AIM else null
-	hud.set_interact(ACTION_INTERACT, pickup.interact_verb if pickup != null else "")
+	var target := nearest_interactable() if current_state().name != PlayerState.GUN_AIM else null
+	hud.set_interact(ACTION_INTERACT, target.interact_verb if target != null else "")
 
 
 ## Gun mode: sheathes the melee weapon at the hip and puts the gun in its hand,
