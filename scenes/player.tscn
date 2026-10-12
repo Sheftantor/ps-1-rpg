@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/player/states/move.gd" id="11_move"]
 [ext_resource type="Script" path="res://scripts/player/states/dodge.gd" id="12_dodge"]
 [ext_resource type="Script" path="res://scripts/player/states/light_attack.gd" id="13_light_attack"]
+[ext_resource type="Script" path="res://scripts/player/states/bat_swing.gd" id="22_bat_swing"]
 [ext_resource type="Script" path="res://scripts/player/states/heavy_attack.gd" id="14_heavy_attack"]
 [ext_resource type="Script" path="res://scripts/player/states/block.gd" id="15_block"]
 [ext_resource type="Script" path="res://scripts/player/states/hit_stun.gd" id="16_hit_stun"]
@@ -26,6 +27,8 @@
 [ext_resource type="PackedScene" path="res://scenes/inventory_menu.tscn" id="96_inventory"]
 [ext_resource type="PackedScene" path="res://scenes/loot_window.tscn" id="95_loot"]
 [ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
+[ext_resource type="Script" path="res://scripts/player/player_saveable.gd" id="99_saveable"]
+[ext_resource type="Script" path="res://scripts/player/states/orb_touch.gd" id="100_orb_touch"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -49,6 +52,13 @@ size = Vector3(2.4, 0.6, 1.5)
 [sub_resource type="BoxMesh" id="BoxMesh_swing"]
 material = SubResource("StandardMaterial3D_debug")
 size = Vector3(2.4, 0.6, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_arc"]
+size = Vector3(0.5, 1, 1.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_arc"]
+material = SubResource("StandardMaterial3D_debug")
+size = Vector3(0.5, 1, 1.4)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
 radius = 0.45
@@ -108,6 +118,24 @@ shape = SubResource("BoxShape3D_swing")
 [node name="DebugMesh" type="MeshInstance3D" parent="Facing/SwingHitbox"]
 mesh = SubResource("BoxMesh_swing")
 
+[node name="SwingArc" type="Node3D" parent="Facing"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="ArcHitbox" type="Area3D" parent="Facing/SwingArc"]
+collision_layer = 0
+collision_mask = 16
+monitoring = false
+monitorable = false
+script = ExtResource("4_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/SwingArc/ArcHitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.85)
+shape = SubResource("BoxShape3D_arc")
+
+[node name="DebugMesh" type="MeshInstance3D" parent="Facing/SwingArc/ArcHitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.85)
+mesh = SubResource("BoxMesh_arc")
+
 [node name="Hurtbox" type="Area3D" parent="." unique_id=1919024979]
 collision_layer = 8
 collision_mask = 0
@@ -156,7 +184,7 @@ script = ExtResource("11_move")
 script = ExtResource("12_dodge")
 
 [node name="LightAttack" type="Node" parent="StateMachine"]
-script = ExtResource("13_light_attack")
+script = ExtResource("22_bat_swing")
 
 [node name="HeavyAttack" type="Node" parent="StateMachine"]
 script = ExtResource("14_heavy_attack")
@@ -172,6 +200,9 @@ script = ExtResource("17_dead")
 
 [node name="GunAim" type="Node" parent="StateMachine"]
 script = ExtResource("19_gun_aim")
+
+[node name="OrbTouch" type="Node" parent="StateMachine"]
+script = ExtResource("100_orb_touch")
 
 [node name="PlayerHud" parent="." instance=ExtResource("20_player_hud")]
 
@@ -191,3 +222,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
 
 [node name="BlobShadow" type="MeshInstance3D" parent="."]
 script = ExtResource("98_blob_shadow")
+
+[node name="Saveable" type="Node" parent="."]
+script = ExtResource("99_saveable")

@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pistol_bolt.gd" id="1_bolt"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bolt"]
+shading_mode = 0
+albedo_color = Color(1, 0.6, 0.08, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_trail_near"]
+shading_mode = 0
+albedo_color = Color(0.95, 0.4, 0.02, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_trail_far"]
+shading_mode = 0
+albedo_color = Color(0.7, 0.22, 0.02, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_bolt"]
+material = SubResource("StandardMaterial3D_bolt")
+radius = 0.035
+height = 0.28
+radial_segments = 4
+rings = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_trail_near"]
+material = SubResource("StandardMaterial3D_trail_near")
+size = Vector3(0.026, 0.026, 0.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_trail_far"]
+material = SubResource("StandardMaterial3D_trail_far")
+size = Vector3(0.014, 0.014, 0.45)
+
+[node name="PistolBolt" type="Node3D"]
+script = ExtResource("1_bolt")
+
+[node name="Bolt" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0)
+cast_shadow = 0
+mesh = SubResource("SphereMesh_bolt")
+
+[node name="Trail" type="Node3D" parent="."]
+
+[node name="Near" type="MeshInstance3D" parent="Trail"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.225)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_trail_near")
+
+[node name="Far" type="MeshInstance3D" parent="Trail"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.675)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_trail_far")

@@ -23,6 +23,8 @@ hit_window = Vector2(0.067, 0.333)
 
 [resource]
 script = ExtResource("1_stats")
+damage_percent = 0.2
+health_in_bat_hits = 7.0
 move_speed = 1.8
 strafe_speed = 1.0
 attacks = Array[ExtResource("2_attack")]([SubResource("Resource_slash")])

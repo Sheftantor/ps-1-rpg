@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/floating_health_bar.gd" id="1_bar"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
@@ -6,6 +6,7 @@
 [ext_resource type="LabelSettings" path="res://resources/ui/health_value.tres" id="6_value"]
 [ext_resource type="Script" path="res://scripts/ui/enemy_level_badge.gd" id="7_badge"]
 [ext_resource type="LabelSettings" path="res://resources/ui/level_badge.tres" id="8_badge_text"]
+[ext_resource type="Script" path="res://scripts/ui/enemy_hud_visibility.gd" id="20_visibility"]
 
 [node name="EnemyHealthBar" type="Node3D"]
 script = ExtResource("1_bar")
@@ -79,3 +80,6 @@ text = "25"
 label_settings = ExtResource("5_number")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Visibility" type="Node" parent="."]
+script = ExtResource("20_visibility")

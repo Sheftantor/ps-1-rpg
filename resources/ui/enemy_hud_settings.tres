@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EnemyHudSettings" format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/enemy_hud_settings.gd" id="1_settings"]
+
+[resource]
+script = ExtResource("1_settings")
+full_opacity_distance = 16.0
+hide_distance = 26.0

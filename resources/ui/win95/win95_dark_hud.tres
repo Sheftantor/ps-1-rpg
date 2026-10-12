@@ -1,0 +1,36 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_body.tres" id="1_xfvsk"]
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_title.tres" id="2_06jp6"]
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_style_box.gd" id="3_w7sao"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4e6ko"]
+
+[sub_resource type="StyleBox" id="StyleBox_babsr"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+script = ExtResource("3_w7sao")
+bevel_width = 4
+shadow_size = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dm530"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_msdbn"]
+
+[resource]
+HintLabel/fonts/font = ExtResource("1_xfvsk")
+HintLabel/styles/normal = SubResource("StyleBoxEmpty_4e6ko")
+Label/colors/font_color = Color(0.9098039, 0.9019608, 0.8745098, 1)
+Label/constants/outline_size = 0
+Label/font_sizes/font_size = 30
+Label/fonts/font = ExtResource("2_06jp6")
+Label/styles/normal = SubResource("StyleBox_babsr")
+SlotCount/fonts/font = ExtResource("1_xfvsk")
+SlotCount/styles/normal = SubResource("StyleBoxEmpty_dm530")
+SmallLabel/font_sizes/font_size = 24
+SmallLabel/fonts/font = ExtResource("1_xfvsk")
+SmallLabel/styles/normal = SubResource("StyleBoxEmpty_msdbn")

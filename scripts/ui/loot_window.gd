@@ -14,10 +14,6 @@ extends CanvasLayer
 ## True while the window is up; the player ignores input and physics meanwhile.
 static var is_open: bool = false
 
-const LABEL_SETTINGS: LabelSettings = preload("res://resources/ui/stat_label.tres")
-const ROW_STYLE: StyleBox = preload("res://resources/ui/window_inset.tres")
-const HOVER_COLOR := Color(1.0, 0.85, 0.35, 1.0)
-const DETAIL_COLOR := Color(0.72, 0.74, 0.8)
 ## [action, word, clickable] for each prompt under the list.
 const PROMPTS: Array = [
 	[&"loot_take", "TAKE", false],
@@ -30,7 +26,6 @@ const DRAG_KEY := "loot_entry"
 var _was_paused: bool = false
 var _player: Player = null
 var _pickup: Pickup = null
-var _hover_style: StyleBoxFlat
 var _gamepad: bool = false
 ## Row -> the sack entry it shows.
 var _entries: Dictionary[Control, Resource] = {}
@@ -43,8 +38,6 @@ var _prompt_icons: Array[InputIcon] = []
 
 func _ready() -> void:
 	_root.visible = false
-	_hover_style = ROW_STYLE.duplicate() as StyleBoxFlat
-	_hover_style.border_color = HOVER_COLOR
 	_build_prompts()
 
 
@@ -154,8 +147,9 @@ func _build_prompts() -> void:
 		if PROMPTS[i][2]:
 			pair.mouse_filter = Control.MOUSE_FILTER_STOP
 			pair.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-			pair.mouse_entered.connect(func() -> void: word.modulate = HOVER_COLOR)
-			pair.mouse_exited.connect(func() -> void: word.modulate = Color.WHITE)
+			pair.mouse_entered.connect(func() -> void:
+				word.add_theme_color_override(&"font_color", word.get_theme_color(&"accent", &"Win95")))
+			pair.mouse_exited.connect(word.remove_theme_color_override.bind(&"font_color"))
 			pair.gui_input.connect(_on_prompt_input.bind(PROMPTS[i][0]))
 		_prompts.add_child(pair)
 
@@ -189,7 +183,7 @@ func _build() -> void:
 func _row(entry: Resource) -> PanelContainer:
 	var row := PanelContainer.new()
 	row.focus_mode = Control.FOCUS_ALL
-	row.add_theme_stylebox_override(&"panel", ROW_STYLE)
+	row.theme_type_variation = &"ListRow"
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override(&"separation", 12)
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -208,12 +202,13 @@ func _row(entry: Resource) -> PanelContainer:
 	var name_label := _label(Pickup.entry_name(entry).to_upper())
 	text.add_child(name_label)
 	var detail := _label("GUN" if entry is WeaponData else "ITEM  X%d" % _count(entry))
-	detail.modulate = DETAIL_COLOR
+	detail.theme_type_variation = &"HintLabel"
 	text.add_child(detail)
 
 	row.mouse_entered.connect(row.grab_focus)
-	row.focus_entered.connect(row.add_theme_stylebox_override.bind(&"panel", _hover_style))
-	row.focus_exited.connect(row.add_theme_stylebox_override.bind(&"panel", ROW_STYLE))
+	# The focused row gets the selection bar.
+	row.focus_entered.connect(row.set.bind(&"theme_type_variation", &"ListRowSelected"))
+	row.focus_exited.connect(row.set.bind(&"theme_type_variation", &"ListRow"))
 	row.gui_input.connect(_on_row_input.bind(row))
 	# Left-drag the row onto the HUD's loadout window to take it.
 	row.set_drag_forwarding(_drag_data.bind(row), Callable(), Callable())
@@ -223,7 +218,6 @@ func _row(entry: Resource) -> PanelContainer:
 func _label(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
-	label.label_settings = LABEL_SETTINGS
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
 

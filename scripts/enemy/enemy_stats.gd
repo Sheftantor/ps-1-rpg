@@ -9,6 +9,15 @@ extends Resource
 ## Face shown in gun mode's target queue slots. Defaults to a generic placeholder.
 @export var portrait: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
 
+@export_group("Level Scaling")
+## One hit's damage at the same level as the player, as a share of a same-level,
+## ungeared player's max health; then scaled by the level gap (CombatTuning).
+## 0 = use each attack's own damage, still scaled by the gap.
+@export_range(0.0, 1.0, 0.01) var damage_percent: float = 0.0
+## Max health at the same level as the player, in basic bat-swing hits; then
+## scaled by the level gap. 0 = use max_health, still scaled by the gap.
+@export var health_in_bat_hits: float = 0.0
+
 @export_group("Movement")
 @export var move_speed: float = 3.5
 @export var strafe_speed: float = 2.2

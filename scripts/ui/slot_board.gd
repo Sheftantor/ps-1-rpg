@@ -8,8 +8,6 @@ extends RefCounted
 ## The screen owns the nodes: a Bubble (PanelContainer with a Text label and a
 ## Tail polygon) and the description Title/Body labels.
 
-const LABEL_SETTINGS: LabelSettings = preload("res://resources/ui/stat_label.tres")
-const TITLE_COLOR := Color(1.0, 0.82, 0.4)
 ## Gap between a slot and its tooltip bubble (pixels).
 const BUBBLE_GAP := 16.0
 
@@ -37,10 +35,7 @@ func _init(bubble: PanelContainer, title: Label, body: Label, empty_title: Strin
 	_body = body
 	_empty_title = empty_title
 	_empty_body = empty_body
-	_bubble_text.label_settings = LABEL_SETTINGS
-	_title.label_settings = LABEL_SETTINGS
-	_title.modulate = TITLE_COLOR
-	_body.label_settings = LABEL_SETTINGS
+	_title.theme_type_variation = &"SectionLabel"
 
 
 ## Forgets all slots (the screen frees the nodes) and resets the panel.

@@ -1,28 +1,7 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_menu"]
-[ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" path="res://textures/ui/psx/pause_title.png" id="3_title"]
-[ext_resource type="Texture2D" path="res://textures/ui/psx/menu_resume.png" id="4_resume"]
-[ext_resource type="Texture2D" path="res://textures/ui/psx/menu_resume_selected.png" id="5_resume_selected"]
-[ext_resource type="Texture2D" path="res://textures/ui/psx/menu_exit.png" id="6_exit"]
-[ext_resource type="Texture2D" path="res://textures/ui/psx/menu_exit_selected.png" id="7_exit_selected"]
-[ext_resource type="Texture2D" path="res://textures/ui/psx/text_block.png" id="8_block"]
-[ext_resource type="LabelSettings" path="res://resources/ui/menu_header.tres" id="9_header"]
-[ext_resource type="LabelSettings" path="res://resources/ui/menu_label.tres" id="10_label"]
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_block"]
-content_margin_left = 28.0
-content_margin_top = 20.0
-content_margin_right = 28.0
-content_margin_bottom = 24.0
-texture = ExtResource("8_block")
-texture_margin_left = 24.0
-texture_margin_top = 24.0
-texture_margin_right = 24.0
-texture_margin_bottom = 24.0
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_focus"]
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_window.gd" id="2_window"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 process_mode = 3
@@ -36,63 +15,70 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("2_theme")
 
-[node name="Backdrop" type="ColorRect" parent="Root"]
+[node name="Backdrop" type="Panel" parent="Root"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.72)
+theme_type_variation = &"ScreenDim"
 
-[node name="Title" type="TextureRect" parent="Root"]
+[node name="Title" type="Label" parent="Root"]
 layout_mode = 0
 offset_left = 64.0
 offset_top = 56.0
-offset_right = 397.0
-offset_bottom = 104.0
-texture = ExtResource("3_title")
+offset_right = 432.0
+offset_bottom = 120.0
+theme_type_variation = &"HeadingLabel"
+text = "PAUSED"
 
-[node name="Menu" type="VBoxContainer" parent="Root"]
+[node name="Menu" type="Container" parent="Root"]
 layout_mode = 0
 offset_left = 48.0
 offset_top = 150.0
 offset_right = 432.0
 offset_bottom = 310.0
-theme_override_constants/separation = 8
+script = ExtResource("2_window")
+title = "Menu"
 
-[node name="Resume" type="TextureButton" parent="Root/Menu"]
+[node name="Resume" type="Button" parent="Root/Menu"]
 layout_mode = 2
-theme_override_styles/focus = SubResource("StyleBoxEmpty_focus")
-texture_normal = ExtResource("4_resume")
-texture_hover = ExtResource("5_resume_selected")
-texture_focused = ExtResource("5_resume_selected")
+text = "RESUME"
 
-[node name="Exit" type="TextureButton" parent="Root/Menu"]
+[node name="KeyBindings" type="Button" parent="Root/Menu"]
 layout_mode = 2
-theme_override_styles/focus = SubResource("StyleBoxEmpty_focus")
-texture_normal = ExtResource("6_exit")
-texture_hover = ExtResource("7_exit_selected")
-texture_focused = ExtResource("7_exit_selected")
+text = "KEY BINDINGS"
 
-[node name="Info" type="PanelContainer" parent="Root"]
+[node name="ExitToMenu" type="Button" parent="Root/Menu"]
+layout_mode = 2
+text = "EXIT TO MENU"
+
+[node name="Exit" type="Button" parent="Root/Menu"]
+layout_mode = 2
+text = "EXIT GAME"
+
+[node name="Info" type="Container" parent="Root"]
+visible = false
 layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -720.0
-offset_top = 40.0
-offset_right = -40.0
-offset_bottom = -40.0
-grow_horizontal = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -420.0
+offset_right = 380.0
+offset_bottom = 420.0
+grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_block")
+script = ExtResource("2_window")
+title = "Key Bindings"
 
 [node name="Scroll" type="ScrollContainer" parent="Root/Info"]
 layout_mode = 2
+size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [node name="Content" type="VBoxContainer" parent="Root/Info/Scroll"]
@@ -102,24 +88,77 @@ theme_override_constants/separation = 8
 
 [node name="ControlsHeader" type="Label" parent="Root/Info/Scroll/Content"]
 layout_mode = 2
+theme_type_variation = &"SectionLabel"
 text = "CONTROLS"
-label_settings = ExtResource("9_header")
 
 [node name="Controls" type="VBoxContainer" parent="Root/Info/Scroll/Content"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Spacer" type="Control" parent="Root/Info/Scroll/Content"]
+visible = false
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 
 [node name="StatusHeader" type="Label" parent="Root/Info/Scroll/Content"]
+visible = false
 layout_mode = 2
+theme_type_variation = &"SectionLabel"
 text = "ENEMIES"
-label_settings = ExtResource("9_header")
 
 [node name="Status" type="Label" parent="Root/Info/Scroll/Content"]
+visible = false
 autowrap_mode = 3
 layout_mode = 2
 text = "PLAYER  HP 100/100"
-label_settings = ExtResource("10_label")
+
+[node name="Back" type="Button" parent="Root/Info"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "BACK"
+
+[node name="Modal" type="Control" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Confirm" type="Container" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_window")
+title = "Confirm"
+
+[node name="Message" type="Label" parent="Root/Confirm"]
+layout_mode = 2
+text = "Exit the game? Unsaved progress will be lost."
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Confirm"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Yes" type="Button" parent="Root/Confirm/Buttons"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+text = "YES"
+
+[node name="No" type="Button" parent="Root/Confirm/Buttons"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+text = "NO"

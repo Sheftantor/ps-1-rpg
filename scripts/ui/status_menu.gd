@@ -16,8 +16,6 @@ extends CanvasLayer
 ## True while the screen is up; the player ignores input and physics meanwhile.
 static var is_open: bool = false
 
-const LABEL_SETTINGS: LabelSettings = preload("res://resources/ui/stat_label.tres")
-const SECTION_SETTINGS: LabelSettings = preload("res://resources/ui/menu_section.tres")
 const ICONS := "res://textures/ui/icons/"
 ## [slot, tooltip name, empty-slot picture (its lit gear_* twin is the default
 ## for worn gear), what goes there]
@@ -39,10 +37,6 @@ const ACCESSORY_SLOTS := [
 const EMPTY := "-"
 ## Shown in the description panel when nothing is hovered or pinned.
 const DESCRIPTION_HINT := "Point at a slot or click it to see what it holds."
-## Colour of a stat's name; the value is white.
-const NAME_COLOR := Color(0.72, 0.74, 0.8)
-## Unspent-point "+" buttons.
-const POINT_COLOR := Color(1.0, 0.84, 0.3)
 ## Space between the weapons and the carried items (pixels).
 const ITEM_GAP := 28.0
 ## Model turn speed: radians per pixel dragged, and per second at full stick.
@@ -229,7 +223,7 @@ func _item_slots_for(player: Player) -> void:
 func _section(box: VBoxContainer, title: String) -> void:
 	var label := Label.new()
 	label.text = title
-	label.label_settings = SECTION_SETTINGS
+	label.theme_type_variation = &"SectionLabel"
 	box.add_child(label)
 
 
@@ -239,28 +233,18 @@ func _stat(box: VBoxContainer, stat_name: String, value_text: String, attribute:
 	var row := HBoxContainer.new()
 	var name_label := Label.new()
 	name_label.text = stat_name
-	name_label.label_settings = LABEL_SETTINGS
-	name_label.modulate = NAME_COLOR
+	name_label.theme_type_variation = &"HintLabel"
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(name_label)
 	var value := Label.new()
 	value.text = value_text
-	value.label_settings = LABEL_SETTINGS
+	value.theme_type_variation = &"MonoLabel"
 	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(value)
 	if attribute != &"" and _player.stat_points > 0:
 		var plus := Button.new()
 		plus.text = "+"
-		plus.custom_minimum_size = Vector2(34, 30)
-		plus.add_theme_font_override(&"font", LABEL_SETTINGS.font)
-		plus.add_theme_font_size_override(&"font_size", 26)
-		plus.add_theme_color_override(&"font_color", POINT_COLOR)
-		for state: StringName in [&"normal", &"hover", &"pressed", &"focus"]:
-			var style := StyleBoxFlat.new()
-			style.bg_color = Color(0.1, 0.1, 0.11) if state == &"normal" else Color(0.3, 0.26, 0.12)
-			style.set_border_width_all(2)
-			style.border_color = POINT_COLOR
-			plus.add_theme_stylebox_override(state, style)
+		plus.theme_type_variation = &"PointButton"
 		plus.pressed.connect(_spend.bind(attribute))
 		row.add_child(plus)
 	box.add_child(row)

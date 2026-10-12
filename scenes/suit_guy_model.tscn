@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy/suit_guy/suit_model.gd" id="1_model"]
+[ext_resource type="PackedScene" uid="uid://i0worqhnsiu5" path="res://Import/Character/Suit_Enemy1/tripo_convert_771ff019-bd4c-461b-804f-ef0993e8daf0.fbx" id="2_rig"]
+[ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="3_ps1"]
+[ext_resource type="Texture2D" uid="uid://vu74qhi0lde4" path="res://Import/Character/Suit_Enemy1/tripo_convert_771ff019-bd4c-461b-804f-ef0993e8daf0_0.png" id="4_skin"]
+[ext_resource type="AnimationLibrary" path="res://resources/enemies/suit_guy_animations.tres" id="5_anims"]
+[ext_resource type="PackedScene" path="res://scenes/suppressed_pistol.tscn" id="6_gun"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_skin"]
+render_priority = 0
+shader = ExtResource("3_ps1")
+shader_parameter/albedo_texture = ExtResource("4_skin")
+
+[node name="SuitModel" type="Node3D"]
+script = ExtResource("1_model")
+skin_material = SubResource("ShaderMaterial_skin")
+
+[node name="Visual" parent="." instance=ExtResource("2_rig")]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../Visual")
+libraries = {
+&"": ExtResource("5_anims")
+}
+
+[node name="RightHandAttachment" type="BoneAttachment3D" parent="."]
+bone_name = "mixamorig_RightHand"
+bone_idx = 39
+use_external_skeleton = true
+external_skeleton = NodePath("../Visual/Skeleton3D")
+
+[node name="GunMount" type="Node3D" parent="RightHandAttachment"]
+transform = Transform3D(0.4423819, -0.0905404, -0.46278045, -0.37307757, 0.32089037, -0.41941345, 0.28840324, 0.5539828, 0.16730729, 0.0011085048, 0.027971447, 0.00094377995)
+
+[node name="SuppressedPistol" parent="RightHandAttachment/GunMount" instance=ExtResource("6_gun")]

@@ -36,6 +36,8 @@ var home_position: Vector3 = Vector3.ZERO
 var slash_chain: int = 0
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+## Whether max health has been scaled to the player's level yet.
+var _scaled_to_player: bool = false
 var _hit_flash_timer: float = 0.0
 var _chain_timer: float = 0.0
 ## False once the current swing is hit, so it doesn't count toward the chain.
@@ -46,7 +48,7 @@ var _swing_clean: bool = false
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var health: Health = $Health
 @onready var state_machine: StateMachine = $StateMachine
-@onready var model: MincerModel = $Facing/Model
+@onready var model: EnemyModel = $Facing/Model
 
 
 func _ready() -> void:
@@ -62,6 +64,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not has_target():
 		target = get_tree().get_first_node_in_group(&"player") as Node3D
+	if not _scaled_to_player:
+		_scale_to_player()
 	if not is_on_floor():
 		velocity.y -= _gravity * delta
 	state_machine.physics_update(delta)
@@ -114,6 +118,56 @@ func _award_xp() -> void:
 
 func level() -> int:
 	return level_override if level_override > 0 else stats.level
+
+
+# --- Level scaling --------------------------------------------------------------
+# Max health and hit damage follow the level gap to the player (LevelScaling,
+# res://resources/combat_tuning.tres), from the bases in stats' Level Scaling group.
+
+## Enemy level minus the player's level (0 without a player).
+func level_gap() -> int:
+	var player := _player()
+	return level() - player.level if player != null else 0
+
+
+func scaled_max_health() -> int:
+	var player := _player()
+	var base := float(stats.max_health)
+	if stats.health_in_bat_hits > 0.0 and player != null:
+		base = stats.health_in_bat_hits * LevelScaling.bat_damage(player.stats)
+	return maxi(1, roundi(base * LevelScaling.health_multiplier(level_gap())))
+
+
+## One hit's damage: stats.damage_percent of a same-level player's max health
+## (or raw_damage when that's 0), scaled by the level gap.
+func scaled_damage(raw_damage: int) -> int:
+	var player := _player()
+	var base := float(raw_damage)
+	if stats.damage_percent > 0.0 and player != null:
+		base = stats.damage_percent * LevelScaling.player_max_health_at(level(), player.stats)
+	return maxi(1, roundi(base * LevelScaling.damage_multiplier(level_gap())))
+
+
+func _player() -> Player:
+	return get_tree().get_first_node_in_group(&"player") as Player
+
+
+func _scale_to_player() -> void:
+	var player := _player()
+	if player == null:
+		return
+	_scaled_to_player = true
+	health.setup(scaled_max_health())
+	player.level_changed.connect(_on_player_level_changed)
+
+
+## Keeps the same share of health when the gap changes mid-fight.
+func _on_player_level_changed(_level: int) -> void:
+	if health.is_dead:
+		return
+	var fraction := float(health.current) / health.max_health
+	health.max_health = scaled_max_health()
+	health.set_current(maxi(1, roundi(fraction * health.max_health)))
 
 
 func forward() -> Vector3:
@@ -192,13 +246,13 @@ func is_top_attack() -> bool:
 	return slash_chain >= stats.escalation_chain_length - stats.top_attack_count
 
 
-## current_attack, boosted for the top of the chain.
+## current_attack with level-scaled damage, boosted for the top of the chain.
 func escalated_attack() -> AttackData:
-	if not is_top_attack():
-		return current_attack
 	var boosted := current_attack.duplicate() as AttackData
-	boosted.knockback *= stats.top_attack_knockback_multiplier
-	boosted.hit_stun_multiplier *= stats.top_attack_hit_stun_multiplier
+	boosted.damage = scaled_damage(current_attack.damage)
+	if is_top_attack():
+		boosted.knockback *= stats.top_attack_knockback_multiplier
+		boosted.hit_stun_multiplier *= stats.top_attack_hit_stun_multiplier
 	return boosted
 
 

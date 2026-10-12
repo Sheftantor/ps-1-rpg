@@ -6,10 +6,13 @@ extends CanvasLayer
 ## the background, swaps it in, carries the player's state over (level, XP,
 ## health, energy, items; see Player.save_state()), stands the player at the
 ## named spawn point and fades back in. The game is paused for the trip.
-## Also the souls-like checkpoint: resting at a SaveOrb (rest_at) saves there
-## (to SAVE_PATH too) and reloads the area so its enemies respawn; dying
-## (respawn) returns to the last orb rested at, or the area's start if none.
-## Emptied loot sacks are remembered per area, so they stay gone.
+## Also the souls-like checkpoint: resting at a SaveOrb (rest_at) makes it the
+## checkpoint, brings the area's enemies back at their posts in place (no
+## reload or loading screen; revive_enemies) and saves the game to the current
+## slot (SaveManager); dying (respawn) returns to the last orb rested at, or
+## the area's start if none, through the loading screen.
+## Emptied loot sacks are remembered per area, so they stay gone. The
+## checkpoint and emptied sacks are saved with the game ("saveable" group).
 
 ## Fade to and from black (real seconds).
 const FADE_TIME := 0.45
@@ -22,7 +25,6 @@ const TEXT_SETTINGS: LabelSettings = preload("res://resources/ui/prompt_label.tr
 const SPAWN_GROUP := &"spawn_points"
 ## Where respawning with no checkpoint puts the player.
 const DEFAULT_SPAWN := &"FromSouth"
-const SAVE_PATH := "user://save.json"
 
 var busy: bool = false
 
@@ -66,6 +68,9 @@ func _ready() -> void:
 	_loading.label_settings = TEXT_SETTINGS
 	_loading.position.y += 50.0
 	_cover.visible = false
+	add_to_group(&"saveable")
+	SaveManager.game_started.connect(_on_game_started)
+	SaveManager.claim_save_data(self)
 
 
 ## Fades out, loads scene_path and puts the player at the spawn point named
@@ -116,15 +121,57 @@ func travel(scene_path: String, spawn_name: StringName, area_name: String, refil
 	busy = false
 
 
-## Rests at a save orb: it becomes the checkpoint (saved to disk) and the area
-## reloads, enemies respawned, with the player stood at the orb.
+## Rests at a save orb: it becomes the checkpoint, the area's enemies come
+## back where they started (dead or alive) and the game saves, all in place.
 func rest_at(orb: SaveOrb) -> void:
 	if busy:
 		return
 	var scene_path := orb.get_tree().current_scene.scene_file_path
 	checkpoint = {scene = scene_path, spawn = String(SaveOrb.SPAWN_NAME), area_name = orb.area_name}
-	_write_save()
-	travel(scene_path, SaveOrb.SPAWN_NAME, orb.area_name, true)
+	revive_enemies()
+	SaveManager.save_game()
+
+
+## Puts every enemy the area scene places back as the scene file has it: each
+## Enemy, EnemySpawnPoint and EnemySpawner in a fresh copy of the scene replaces
+## the live one at the same path (or fills the gap if it died and was freed),
+## so killed enemies return and the rest go back to their posts at full health.
+## Enemies spawned by other means stay as they are. Returns how many were reset.
+func revive_enemies() -> int:
+	var scene := get_tree().current_scene
+	var packed := load(scene.scene_file_path) as PackedScene
+	if packed == null:
+		return 0
+	var fresh := packed.instantiate()
+	var originals: Array[Node] = []
+	_collect_enemy_roots(fresh, originals)
+	for original: Node in originals:
+		var path := String(fresh.get_path_to(original))
+		var parent_path := path.get_base_dir()
+		var live_parent := scene if parent_path == "" else scene.get_node_or_null(parent_path)
+		if live_parent == null:
+			continue
+		var index := original.get_index()
+		var live := scene.get_node_or_null(path)
+		if live != null:
+			index = live.get_index()
+			live_parent.remove_child(live)
+			live.queue_free()
+		original.get_parent().remove_child(original)
+		original.owner = null
+		live_parent.add_child(original)
+		original.owner = scene
+		live_parent.move_child(original, mini(index, live_parent.get_child_count() - 1))
+	fresh.free()
+	return originals.size()
+
+
+static func _collect_enemy_roots(node: Node, into: Array[Node]) -> void:
+	for child: Node in node.get_children():
+		if child is Enemy or child is EnemySpawnPoint or child is EnemySpawner:
+			into.append(child)
+		else:
+			_collect_enemy_roots(child, into)
 
 
 ## After death: back to the checkpoint, or the start of the current area.
@@ -155,22 +202,32 @@ func _remove_collected() -> void:
 			node.queue_free()
 
 
-## The checkpoint and the player's progress, as JSON (resources by path).
-func _write_save() -> void:
-	var player := get_tree().get_first_node_in_group(&"player") as Player
-	if player == null:
-		return
-	var state := player.save_state()
-	var inventory := []
-	for stack: ItemStack in state.inventory:
-		inventory.append([stack.item.resource_path, stack.count])
-	state.inventory = inventory
-	state.gun = state.gun.resource_path if state.gun != null else ""
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		push_warning("AreaTravel: couldn't write %s" % SAVE_PATH)
-		return
-	file.store_string(JSON.stringify({checkpoint = checkpoint, player = state}, "  "))
+# --- Saving (SaveManager) ---------------------------------------------------------
+
+func get_save_data() -> Dictionary:
+	var collected := {}
+	for scene_path: String in _collected:
+		collected[scene_path] = Array(_collected[scene_path])
+	return {checkpoint = checkpoint, collected = collected}
+
+
+func apply_save_data(data: Dictionary) -> void:
+	_on_game_started(0)
+	if data.get("checkpoint") is Dictionary:
+		checkpoint = data.checkpoint
+	var collected = data.get("collected")
+	if collected is Dictionary:
+		for scene_path in collected:
+			if collected[scene_path] is Array:
+				_collected[String(scene_path)] = PackedStringArray(collected[scene_path])
+	if get_tree().current_scene != null:
+		_remove_collected()
+
+
+## A new game or a load: forget the last game's checkpoint and emptied sacks.
+func _on_game_started(_slot: int) -> void:
+	checkpoint = {}
+	_collected.clear()
 
 
 func _spawn_point(spawn_name: StringName) -> Node3D:

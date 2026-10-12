@@ -933,6 +933,22 @@ func play_roll_animation(duration: float) -> void:
 	_play_action(ANIM_ROLL, _anim.get_animation(ANIM_ROLL).length / maxf(duration, 0.01))
 
 
+## Plays any action clip (e.g. the bat swings) in the one-shot slots at speed.
+func play_action_clip(clip: StringName, speed: float) -> void:
+	_play_action(clip, speed)
+
+
+## Changes the running action clip's playback speed (the bat swing retimes each phase).
+func set_action_speed(speed: float) -> void:
+	_action_speed = speed
+	_anim_tree.set("parameters/Action%sSpeed/scale" % ACTION_SLOTS[_action_slot], speed)
+
+
+## Phase lengths (windup, strike, recovery) built into a bat swing clip.
+func action_clip_phase_times(clip: StringName) -> Vector3:
+	return _anim.get_animation(clip).get_meta(&"phase_times", Vector3.ZERO)
+
+
 ## Frames in the Roll clip; the roll's i-frames are counted in these.
 func roll_clip_frames() -> int:
 	var clip := _anim.get_animation(ANIM_ROLL)
@@ -1007,10 +1023,14 @@ func _update_animation(delta: float) -> void:
 ## drop) and raises the arms with the jump curve: none at takeoff, fully up at
 ## the apex, back down as the fall speeds up again.
 func _update_air_layer() -> void:
-	var in_air: bool = _anim_tree.get(TREE_AIR_STATE) == "air"
+	var air_state: StringName = _anim_tree.get(TREE_AIR_STATE)
+	var in_air := air_state == &"air"
 	if is_on_floor():
 		_jumped = false
-		if in_air:
+		# Also when the layer hasn't started yet (""): a player placed right on
+		# the floor (e.g. loading a save) never leaves the ground to start it,
+		# and the whole tree outputs nothing (T-pose) until it does.
+		if air_state != &"ground":
 			_anim_tree.set(TREE_AIR_REQUEST, "ground")
 	elif not in_air:
 		var jumping := velocity.y > 0.0 and _air_time <= FALL_ANIM_DELAY

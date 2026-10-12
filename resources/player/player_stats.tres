@@ -16,7 +16,6 @@ recovery_time = 0.45
 [sub_resource type="Resource" id="Resource_light1"]
 script = ExtResource("2_attack")
 display_name = "Light 1"
-damage = 8
 knockback = 1.5
 lunge_speed = 3.5
 startup_time = 0.08

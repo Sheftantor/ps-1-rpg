@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Win95Palette" format=3]
+
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_body.tres" id="1_1ohp2"]
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_palette.gd" id="1_palette"]
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_mono.tres" id="2_hufjk"]
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_title.tres" id="4_ajrtl"]
+
+[resource]
+script = ExtResource("1_palette")
+scale = 2
+title_font = ExtResource("4_ajrtl")
+body_font = ExtResource("1_1ohp2")
+mono_font = ExtResource("2_hufjk")

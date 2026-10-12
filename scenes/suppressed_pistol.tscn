@@ -1,0 +1,46 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://bhkppjlxnmlai" path="res://Import/Weapons/Silencer_gun/Silencer_Pistol.glb" id="1_glb"]
+[ext_resource type="Script" path="res://scripts/combat/suppressed_pistol.gd" id="2_script"]
+[ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="3_ps1"]
+[ext_resource type="Texture2D" uid="uid://de8ishjf00mye" path="res://Import/Weapons/Silencer_gun/Silencer_Pistol_tripo_rgb_e67ddb0e-b579-468d-b488-bde9025954f4.jpg" id="4_tex"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gun"]
+render_priority = 0
+shader = ExtResource("3_ps1")
+shader_parameter/albedo_texture = ExtResource("4_tex")
+
+[node name="SuppressedPistol" instance=ExtResource("1_glb")]
+transform = Transform3D(-0.3601758, 0, 0, 0, 0.3601758, 0, 0, 0, -0.3601758, 0, 0, 0)
+script = ExtResource("2_script")
+
+[node name="Gun_Grip_and_Silencer" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.26, 0.32)
+surface_material_override/0 = SubResource("ShaderMaterial_gun")
+
+[node name="Slider" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.26, 0.32)
+surface_material_override/0 = SubResource("ShaderMaterial_gun")
+
+[node name="Clock_Back_trigger" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.26, 0.32)
+surface_material_override/0 = SubResource("ShaderMaterial_gun")
+
+[node name="Bullet" parent="." index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.26, 0.32)
+visible = false
+surface_material_override/0 = SubResource("ShaderMaterial_gun")
+
+[node name="Trigger" parent="." index="4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.26, 0.32)
+surface_material_override/0 = SubResource("ShaderMaterial_gun")
+
+[node name="Magazine" parent="." index="5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.26, 0.32)
+surface_material_override/0 = SubResource("ShaderMaterial_gun")
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.204, 0.8198)
+
+[node name="Eject" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06, 0.22, 0.04)

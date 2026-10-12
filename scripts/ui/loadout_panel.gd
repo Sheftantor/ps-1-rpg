@@ -1,36 +1,21 @@
 class_name LoadoutPanel
 extends Control
-## Bottom-left loadout window, styled after the retro RPG UI template
-## (res://Import/images (3).jpg): a charcoal rounded window with a light rim and
-## corner studs, holding one row per entry. Each row is a coloured bar with the
-## name, led by the item's icon square (an IconSlot, the same size as the status
-## screen's). Rows: the melee weapon, the gun, then the carried items with counts.
-## The weapon in hand is lit and the other dimmed; the selected item (the one
-## use_item spends, cycled with next_item) gets the cursor arrow and a bright
-## rim. Shows at most max_item_rows items, scrolling to keep the selection in
+## Bottom-left loadout window in the Windows 95 theme: a raised window
+## (WindowPanel) holding one row per entry. Each row is a list row with the
+## name (ListRow), led by the item's icon square (an IconSlot, the same size as
+## the status screen's). Rows: the melee weapon, the gun, then the carried items
+## with counts. The weapon in hand is lit and the other muted (HintLabel); the
+## selected item (the one use_item spends, cycled with next_item) gets the
+## cursor arrow and the accent bar (ListRowSelected). Colors, fonts and sizes
+## come from the theme. Shows at most max_item_rows items, scrolling to keep the selection in
 ## view. The window grows upward from its bottom-left corner and is only as wide
 ## as its longest name needs. PlayerHud fills it through set_entries(). While
 ## drop_handler is set (the loot window is open) it accepts loot dragged onto it.
 
-const FONT: Font = preload("res://resources/ui/hud_font_bold.tres")
-
 @export_range(1, 6) var max_item_rows: int = 3
-@export var font_size: int = 32
-## Overall size of the window, scaled from its bottom-left corner.
-@export_range(0.5, 1.5) var ui_scale: float = 0.85
-## Template palette: charcoal window, light grey rim and studs.
-@export var window_color: Color = Color(0.1, 0.1, 0.11, 0.92)
-@export var rim_color: Color = Color(0.62, 0.64, 0.68, 1.0)
-@export var text_color: Color = Color(0.95, 0.95, 0.97)
-@export var cursor_color: Color = Color(1.0, 0.92, 0.55)
-## Hues for the weapon rows and (cycled) item rows, as in the template's command bars.
-@export var melee_color: Color = Color(0.72, 0.1, 0.1)
-@export var gun_color: Color = Color(0.1, 0.32, 0.78)
-@export var item_colors: Array[Color] = [Color(0.12, 0.55, 0.2), Color(0.62, 0.52, 0.08), Color(0.06, 0.5, 0.5)]
-## Brightness of rows that aren't active (the weapon not in hand, unselected items).
-@export_range(0.0, 1.0) var inactive_dim: float = 0.55
-## Corner rounding (pixels); drawn without anti-aliasing so corners step like pixel art.
-@export var corner_radius: int = 10
+## Overall size of the window, scaled from its bottom-left corner. Keep it at 1
+## so the theme's pixel bevels stay crisp.
+@export_range(0.5, 1.5) var ui_scale: float = 1.0
 
 ## Rows are as tall as an icon slot, so every icon square matches the status screen.
 const ROW_HEIGHT := IconSlot.SIZE
@@ -38,13 +23,9 @@ const ROW_HEIGHT := IconSlot.SIZE
 const PADDING_X := 6.0
 const PADDING_Y := 12.0
 const ROW_GAP := 6.0
-const STUD_SIZE := 6.0
 ## Spacing inside a row: between arrow, icon and bar, and the bar's text margins.
 const ROW_SEPARATION := 6.0
 const ARROW_WIDTH := 12.0
-const BAR_MARGIN := 6.0
-const BAR_BORDER := 2.0
-const LABEL_OUTLINE := 8
 
 ## Called with the drag data when something is dropped on the window; while
 ## it's set the window takes drops (PlayerHud.set_loot_drop_handler).
@@ -67,28 +48,8 @@ func _ready() -> void:
 	var window := Panel.new()
 	window.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	window.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := _box(window_color, corner_radius)
-	style.set_border_width_all(2)
-	style.border_color = rim_color
-	window.add_theme_stylebox_override(&"panel", style)
+	window.theme_type_variation = &"WindowPanel"
 	add_child(window)
-	# Corner studs, like the template's window rivets.
-	for corner: Vector2 in [Vector2(1, 0), Vector2(1, 1), Vector2(0, 0)]:
-		var stud := ColorRect.new()
-		stud.color = rim_color
-		stud.custom_minimum_size = Vector2(STUD_SIZE, STUD_SIZE)
-		stud.size = Vector2(STUD_SIZE, STUD_SIZE)
-		stud.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		stud.anchor_left = corner.x
-		stud.anchor_right = corner.x
-		stud.anchor_top = corner.y
-		stud.anchor_bottom = corner.y
-		var inset := Vector2(4, 4)
-		stud.offset_left = -inset.x - STUD_SIZE if corner.x > 0 else inset.x
-		stud.offset_top = -inset.y - STUD_SIZE if corner.y > 0 else inset.y
-		stud.offset_right = stud.offset_left + STUD_SIZE
-		stud.offset_bottom = stud.offset_top + STUD_SIZE
-		add_child(stud)
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -116,16 +77,15 @@ func set_entries(melee: MeleeWeaponData, gun: WeaponData, gun_drawn: bool, items
 	names.append(melee.display_name if melee != null else "UNARMED")
 	names.append(gun.display_name if gun != null else "-")
 	_add_row(false, melee.icon if melee != null else null, names[0],
-		melee_color, melee != null and not gun_drawn, false)
+		melee != null and not gun_drawn, false)
 	_add_row(false, gun.icon if gun != null else null, names[1],
-		gun_color, gun != null and gun_drawn, false)
+		gun != null and gun_drawn, false)
 	var visible_items := mini(items.size(), max_item_rows)
 	var first := clampi(selected - visible_items + 1, 0, maxi(0, items.size() - visible_items))
 	for i in range(first, first + visible_items):
 		var stack := items[i]
 		names.append("%s x%d" % [stack.item.display_name, stack.count])
-		_add_row(true, stack.item.icon, names[-1],
-			item_colors[i % item_colors.size()], i == selected, i == selected)
+		_add_row(true, stack.item.icon, names[-1], i == selected, i == selected)
 	var rows := 2 + visible_items
 	var height := rows * ROW_HEIGHT + (rows - 1) * ROW_GAP + PADDING_Y * 2.0
 	offset_top = offset_bottom - height
@@ -134,10 +94,12 @@ func set_entries(melee: MeleeWeaponData, gun: WeaponData, gun_drawn: bool, items
 
 ## Window width that fits the longest name without clipping.
 func _width_for(names: Array[String]) -> float:
+	var font := get_theme_font(&"font", &"Label")
+	var font_size := get_theme_font_size(&"font_size", &"Label")
 	var text_width := 0.0
 	for text: String in names:
-		text_width = maxf(text_width, FONT.get_string_size(text.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
-	var bar := text_width + LABEL_OUTLINE + (BAR_MARGIN + BAR_BORDER) * 2.0
+		text_width = maxf(text_width, font.get_string_size(text.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+	var bar := text_width + get_theme_stylebox(&"panel", &"ListRowSelected").get_minimum_size().x
 	return PADDING_X * 2.0 + ARROW_WIDTH + IconSlot.SIZE + ROW_SEPARATION * 2.0 + ceilf(bar)
 
 
@@ -149,8 +111,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	drop_handler.call(data)
 
 
-func _add_row(is_item: bool, icon: Texture2D, text: String, hue: Color, active: bool, cursor: bool) -> void:
-	var shade := 1.0 if active else inactive_dim
+func _add_row(is_item: bool, icon: Texture2D, text: String, active: bool, cursor: bool) -> void:
 	var line := HBoxContainer.new()
 	line.custom_minimum_size.y = ROW_HEIGHT
 	line.add_theme_constant_override(&"separation", int(ROW_SEPARATION))
@@ -158,7 +119,7 @@ func _add_row(is_item: bool, icon: Texture2D, text: String, hue: Color, active: 
 	_rows.add_child(line)
 
 	var arrow := _Arrow.new()
-	arrow.color = cursor_color
+	arrow.color = get_theme_color(&"accent", &"Win95")
 	arrow.visible_arrow = cursor
 	line.add_child(arrow)
 
@@ -169,52 +130,34 @@ func _add_row(is_item: bool, icon: Texture2D, text: String, hue: Color, active: 
 		slot.show_icon(icon, "", 0, cursor)
 	else:
 		slot.show_empty()
-	slot.modulate = Color.WHITE if active else Color(0.7, 0.7, 0.72)
 	line.add_child(slot)
 
-	# Bar: the long, darker field holding the icon and name.
+	# Bar: the list row holding the name; the selected item's has the accent bar.
 	var bar := PanelContainer.new()
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var bar_style := _box(hue.darkened(0.35) * Color(shade, shade, shade), 6)
-	bar_style.set_border_width_all(int(BAR_BORDER))
-	bar_style.border_color = cursor_color if cursor else hue.darkened(0.6)
-	bar_style.content_margin_left = BAR_MARGIN
-	bar_style.content_margin_right = BAR_MARGIN
-	bar.add_theme_stylebox_override(&"panel", bar_style)
+	bar.theme_type_variation = &"ListRowSelected" if cursor else &"ListRow"
 	line.add_child(bar)
 	var contents := HBoxContainer.new()
 	contents.add_theme_constant_override(&"separation", 8)
 	contents.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar.add_child(contents)
-	var name_label := _label(text, shade, HORIZONTAL_ALIGNMENT_LEFT)
+	var name_label := _label(text, active, HORIZONTAL_ALIGNMENT_LEFT)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	contents.add_child(name_label)
 
 
-func _label(text: String, shade: float, align: HorizontalAlignment) -> Label:
+func _label(text: String, active: bool, align: HorizontalAlignment) -> Label:
 	var label := Label.new()
 	label.text = text.to_upper()
-	label.add_theme_font_override(&"font", FONT)
-	label.add_theme_font_size_override(&"font_size", font_size)
-	label.add_theme_color_override(&"font_color", text_color if shade >= 1.0 else text_color.darkened(0.35))
-	label.add_theme_color_override(&"font_outline_color", Color.BLACK)
-	label.add_theme_constant_override(&"outline_size", LABEL_OUTLINE)
+	# Plain label font and size (the width maths assumes them); muted when the
+	# row is not active.
+	label.add_theme_color_override(&"font_color", get_theme_color(&"font_color", &"Label" if active else &"HintLabel"))
 	label.horizontal_alignment = align
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.clip_text = true
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
-
-
-func _box(color: Color, radius: int) -> StyleBoxFlat:
-	var box := StyleBoxFlat.new()
-	box.bg_color = color
-	box.set_corner_radius_all(radius)
-	# Few segments and no smoothing: stepped, pixel-art corners.
-	box.corner_detail = 3
-	box.anti_aliasing = false
-	return box
 
 
 ## Pixel cursor arrow pointing at the selected row.

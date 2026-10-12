@@ -39,6 +39,7 @@
 [ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="41_takfg"]
 [ext_resource type="Resource" path="res://resources/enemies/passive_target_stats.tres" id="44_kt0b8"]
 [ext_resource type="Script" path="res://scripts/world/area_exit.gd" id="45_b85x0"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_spawn_point.gd" id="46_spawn"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_uruus"]
 render_priority = 0
@@ -1580,40 +1581,58 @@ item = SubResource("Resource_7qfv2")
 
 [node name="GruntSouth" parent="Enemies" unique_id=1354924605 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -4, 0.15, 13)
-level_override = 1
+level_override = 4
 
 [node name="GruntCafe" parent="Enemies" unique_id=53594126 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5, 0.15, 9)
-level_override = 1
+level_override = 4
 
 [node name="GruntPinch" parent="Enemies" unique_id=39933669 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1, 0.15, -1)
-level_override = 1
+level_override = 4
 
 [node name="GruntBleachers" parent="Enemies" unique_id=2134395766 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3, 0.15, -4)
-level_override = 1
+level_override = 4
 
 [node name="GruntBleachersTop" parent="Enemies" unique_id=489557998 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 2.9, -9.8)
-level_override = 1
+level_override = 4
 
 [node name="GruntShed" parent="Enemies" unique_id=512283705 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3, 0.15, -19)
-level_override = 1
+level_override = 4
 
 [node name="GruntNorth" parent="Enemies" unique_id=1541588900 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 0.15, -28)
-level_override = 1
+level_override = 4
 
 [node name="GruntEastWalk" parent="Enemies" unique_id=1977731189 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 20, 0.15, -12)
-level_override = 1
+level_override = 4
 
 [node name="FarTargetPlinth" parent="Enemies" unique_id=1248445225 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 5.7, -24)
 stats = ExtResource("44_kt0b8")
 level_override = 1
+
+[node name="SuitGuyNearSpawn" type="Marker3D" parent="Enemies"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6.5, 0.15, 12.5)
+script = ExtResource("46_spawn")
+levels_above_player = 1
+patrol_area = Vector2(4, 4)
+
+[node name="SuitGuyWestSpawn" type="Marker3D" parent="Enemies"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -12, 0.15, 1)
+script = ExtResource("46_spawn")
+levels_above_player = 3
+patrol_area = Vector2(5, 5)
+
+[node name="SuitGuyNorthSpawn" type="Marker3D" parent="Enemies"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14, 0.15, -21)
+script = ExtResource("46_spawn")
+levels_above_player = 4
+patrol_area = Vector2(5, 5)
 
 [node name="Gates" type="Node3D" parent="." unique_id=832298068]
 

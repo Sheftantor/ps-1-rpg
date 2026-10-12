@@ -1,5 +1,5 @@
 class_name MincerModel
-extends Node3D
+extends EnemyModel
 ## The Mincer's rigged model (res://Import/Character/Mincer.glb). Gives its clips
 ## short names, makes them play in place (the body is moved by Enemy, not by root
 ## motion), and wraps playback, flashes and the arm jitter for the enemy states.

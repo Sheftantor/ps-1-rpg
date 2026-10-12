@@ -1,0 +1,12 @@
+[gd_resource type="FontVariation" format=3]
+
+[ext_resource type="FontFile" path="res://resources/ui/fonts/PixelifySans-Variable.ttf" id="1_laqas"]
+
+[resource]
+base_font = ExtResource("1_laqas")
+variation_opentype = {
+2003265652: 500
+}
+opentype_features = {
+1818847073: 0
+}

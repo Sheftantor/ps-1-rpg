@@ -1,0 +1,41 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_body.tres" id="1_0xgpq"]
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_title.tres" id="2_3k5sj"]
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_style_box.gd" id="3_ko7t8"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8vhur"]
+
+[sub_resource type="StyleBox" id="StyleBox_gm4fr"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+script = ExtResource("3_ko7t8")
+bevel_width = 4
+face_color = Color(0.8509804, 0.8392157, 0.8039216, 1)
+light_color = Color(1, 1, 1, 1)
+dark_color = Color(0.4627451, 0.44705883, 0.41568628, 1)
+outline_color = Color(0.4627451, 0.44705883, 0.41568628, 1)
+shadow_color = Color(0.4627451, 0.44705883, 0.41568628, 1)
+shadow_size = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_edwpl"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tda58"]
+
+[resource]
+HintLabel/fonts/font = ExtResource("1_0xgpq")
+HintLabel/styles/normal = SubResource("StyleBoxEmpty_8vhur")
+Label/colors/font_color = Color(0.105882354, 0.105882354, 0.09803922, 1)
+Label/constants/outline_size = 0
+Label/font_sizes/font_size = 30
+Label/fonts/font = ExtResource("2_3k5sj")
+Label/styles/normal = SubResource("StyleBox_gm4fr")
+SlotCount/fonts/font = ExtResource("1_0xgpq")
+SlotCount/styles/normal = SubResource("StyleBoxEmpty_edwpl")
+SmallLabel/font_sizes/font_size = 24
+SmallLabel/fonts/font = ExtResource("1_0xgpq")
+SmallLabel/styles/normal = SubResource("StyleBoxEmpty_tda58")

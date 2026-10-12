@@ -1,0 +1,198 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/start_menu.gd" id="1_menu"]
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_window.gd" id="2_window"]
+
+[node name="StartMenu" type="CanvasLayer"]
+script = ExtResource("1_menu")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Backdrop" type="Panel" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"DesktopPanel"
+
+[node name="MainWindow" type="Container" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -100.0
+offset_right = 360.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_window")
+title = "PS1-RPG"
+tag = "v0.1"
+collapse_when_empty = true
+
+[node name="MainMenu" type="VBoxContainer" parent="Control/MainWindow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"WindowBody"
+
+[node name="Logo" type="Label" parent="Control/MainWindow/MainMenu"]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "PS1-RPG"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NewGameButton" type="Button" parent="Control/MainWindow/MainMenu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "NEW GAME"
+
+[node name="ContinueButton" type="Button" parent="Control/MainWindow/MainMenu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "CONTINUE"
+
+[node name="LoadGameButton" type="Button" parent="Control/MainWindow/MainMenu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "LOAD GAME"
+
+[node name="QuitButton" type="Button" parent="Control/MainWindow/MainMenu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "QUIT"
+
+[node name="NewGameMenu" type="Container" parent="Control"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -100.0
+offset_right = 420.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_window")
+title = "New Game"
+tag = "3 SLOTS"
+
+[node name="List" type="VBoxContainer" parent="Control/NewGameMenu"]
+layout_mode = 2
+theme_type_variation = &"WindowBody"
+
+[node name="Label" type="Label" parent="Control/NewGameMenu/List"]
+layout_mode = 2
+theme_type_variation = &"HintLabel"
+text = "START A NEW GAME.."
+
+[node name="Control" type="Control" parent="Control/NewGameMenu/List"]
+layout_mode = 2
+
+[node name="Slots" type="PanelContainer" parent="Control/NewGameMenu/List"]
+layout_mode = 2
+theme_type_variation = &"FieldPanel"
+
+[node name="SlotList" type="VBoxContainer" parent="Control/NewGameMenu/List/Slots"]
+layout_mode = 2
+theme_type_variation = &"FieldList"
+
+[node name="NewSlot1" type="Button" parent="Control/NewGameMenu/List/Slots/SlotList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ListButton"
+text = "BEGIN SLOT 1"
+alignment = 0
+
+[node name="NewSlot2" type="Button" parent="Control/NewGameMenu/List/Slots/SlotList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ListButton"
+text = "BEGIN SLOT 2"
+alignment = 0
+
+[node name="NewSlot3" type="Button" parent="Control/NewGameMenu/List/Slots/SlotList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ListButton"
+text = "BEGIN SLOT 3"
+alignment = 0
+
+[node name="LoadGameMenu" type="Container" parent="Control"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -560.0
+offset_top = -100.0
+offset_right = 560.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_window")
+title = "Load Game"
+tag = "3 SLOTS"
+
+[node name="List" type="VBoxContainer" parent="Control/LoadGameMenu"]
+layout_mode = 2
+theme_type_variation = &"WindowBody"
+
+[node name="Label" type="Label" parent="Control/LoadGameMenu/List"]
+layout_mode = 2
+theme_type_variation = &"HintLabel"
+text = "LOAD A SAVE GAME.."
+
+[node name="Control" type="Control" parent="Control/LoadGameMenu/List"]
+layout_mode = 2
+
+[node name="Slots" type="PanelContainer" parent="Control/LoadGameMenu/List"]
+layout_mode = 2
+theme_type_variation = &"FieldPanel"
+
+[node name="SlotList" type="VBoxContainer" parent="Control/LoadGameMenu/List/Slots"]
+layout_mode = 2
+theme_type_variation = &"FieldList"
+
+[node name="LoadSlot1" type="Button" parent="Control/LoadGameMenu/List/Slots/SlotList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ListButton"
+text = "SLOT 1
+EMPTY"
+alignment = 0
+
+[node name="LoadSlot2" type="Button" parent="Control/LoadGameMenu/List/Slots/SlotList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ListButton"
+text = "SLOT 2
+EMPTY"
+alignment = 0
+
+[node name="LoadSlot3" type="Button" parent="Control/LoadGameMenu/List/Slots/SlotList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ListButton"
+text = "SLOT 3
+EMPTY"
+alignment = 0

@@ -16,6 +16,13 @@ extends CanvasLayer
 @export var target_text: String = "TARGET"
 ## Queue slot and reticle label for queued targets, numbered in queue order.
 @export var queued_format: String = "ENEMY %s"
+## Gun mode's TARGET / range boxes sit at the left edge, 4% in and centered
+## vertically (anchors on Root/Targeting/TargetPanel); this nudges them (pixels).
+@export var target_panel_offset: Vector2 = Vector2.ZERO:
+	set(value):
+		target_panel_offset = value
+		if is_node_ready():
+			_place_target_panel()
 
 # Typed by path so the HUD loads before the editor has registered the class_name.
 const LoadoutPanelScript := preload("res://scripts/ui/loadout_panel.gd")
@@ -53,8 +60,9 @@ var _level_up_tween: Tween = null
 @onready var _targeting: Control = $Root/Targeting
 @onready var _links: TargetLinks = $Root/Targeting/Links
 @onready var _reticle: TargetReticle = $Root/Targeting/Reticle
-@onready var _target_label: Label = $Root/Targeting/Reticle/TargetLabel
-@onready var _range_label: Label = $Root/Targeting/Reticle/RangeLabel
+@onready var _target_panel: Control = $Root/Targeting/TargetPanel
+@onready var _target_label: Label = $Root/Targeting/TargetPanel/TargetLabel
+@onready var _range_label: Label = $Root/Targeting/TargetPanel/RangeLabel
 @onready var _mode_label: Label = $Root/Targeting/ModeLabel
 @onready var _queue_row: HBoxContainer = $Root/Targeting/QueueRow
 @onready var _slot_template: Control = $Root/Targeting/QueueRow/SlotTemplate
@@ -62,6 +70,7 @@ var _level_up_tween: Tween = null
 
 
 func _ready() -> void:
+	_place_target_panel()
 	_targeting.visible = false
 	_slot_template.visible = false
 	_prompt.text = ""
@@ -240,6 +249,14 @@ func set_queue(portraits: Array[Texture2D]) -> void:
 ## every target, queued ones highlighted, and the reticle on `cursor` (index
 ## into targets, -1 for none) with its queue number, range state and distance.
 ## `queued` lists indices into targets in queue order (-1 for off-list ones).
+## Applies target_panel_offset to the panel's left-edge anchor point.
+func _place_target_panel() -> void:
+	_target_panel.offset_left = target_panel_offset.x
+	_target_panel.offset_right = target_panel_offset.x
+	_target_panel.offset_top = target_panel_offset.y
+	_target_panel.offset_bottom = target_panel_offset.y
+
+
 func update_targeting(camera: Camera3D, origin: Vector3, targets: Array[Vector3], cursor: int,
 		queued: PackedInt32Array, in_range: bool, distance: float) -> void:
 	var points := PackedVector2Array()
@@ -258,6 +275,8 @@ func update_targeting(camera: Camera3D, origin: Vector3, targets: Array[Vector3]
 	_links.set_links(camera.unproject_position(origin), points, cursor_2d, queued_2d)
 
 	_reticle.visible = cursor_2d >= 0
+	# The TARGET / range boxes show while there's a reticle, as when they rode on it.
+	_target_panel.visible = _reticle.visible
 	if cursor_2d < 0:
 		return
 	_reticle.position = points[cursor_2d] - _reticle.size * 0.5
