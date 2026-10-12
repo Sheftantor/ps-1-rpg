@@ -31,6 +31,6 @@ use_external_skeleton = true
 external_skeleton = NodePath("../Visual/Skeleton3D")
 
 [node name="GunMount" type="Node3D" parent="RightHandAttachment"]
-transform = Transform3D(0.4423819, -0.0905404, -0.46278045, -0.37307757, 0.32089037, -0.41941345, 0.28840324, 0.5539828, 0.16730729, 0.0011085048, 0.027971447, 0.00094377995)
+transform = Transform3D(0.333750169, -0.068307211, -0.349139631, -0.281464278, 0.242092218, -0.316421874, 0.217582659, 0.417946243, 0.126223149, 0.001108505, 0.027971447, 0.00094378)
 
 [node name="SuppressedPistol" parent="RightHandAttachment/GunMount" instance=ExtResource("6_gun")]

@@ -18,14 +18,13 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="Window" type="Container" parent="Root"]
-custom_minimum_size = Vector2(440, 0)
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 260.0
 offset_top = -140.0
-offset_right = 700.0
+offset_right = 260.0
 offset_bottom = -140.0
 grow_vertical = 2
 script = ExtResource("4_window")
@@ -41,11 +40,13 @@ layout_mode = 2
 theme_type_variation = &"SectionLabel"
 text = "LOOT"
 
-[node name="Rows" type="VBoxContainer" parent="Root/Window/Layout"]
+[node name="Grid" type="GridContainer" parent="Root/Window/Layout"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 4
 
 [node name="Prompts" type="HBoxContainer" parent="Root/Window/Layout"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 14

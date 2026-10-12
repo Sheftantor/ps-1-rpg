@@ -3,12 +3,11 @@ extends CanvasLayer
 ## Character screen on the status_menu input (C / D-pad up). A 3D render of the
 ## player model (with the equipped melee weapon in hand) sits between two columns
 ## of gear slots: clothing on the left, rings, trinkets and the charm on the
-## right, with the melee weapon, gun and carried items below. Under those, a
-## description panel explains the slot under the cursor (or the one clicked to
-## pin it), and two stat panels read the player's live numbers.
-## Empty slots show a grey picture of what goes there; a slot's name only appears
-## in a speech-bubble tooltip while the mouse is over it or controller focus is
-## on it. Click (or ui_accept) pins a slot so its description stays up. Drag the
+## right, with the melee weapon, gun and carried items below, and two stat
+## panels under those reading the player's live numbers.
+## Empty slots show a grey picture of what goes there. Hovering a slot (or
+## controller focus on it) shows the shared ItemTooltip: the item's name, type,
+## numbers and description, or what goes in an empty slot. Drag the
 ## model (or push the right stick) to turn it. Frees the mouse and pauses the
 ## game while open; status_menu, pause or ui_cancel closes it.
 ## Layout and styling live in res://scenes/status_menu.tscn.
@@ -35,8 +34,6 @@ const ACCESSORY_SLOTS := [
 	[ArmorData.Slot.CHARM, "CHARM", "slot_charm", "One charm, carried for luck, goes here."],
 ]
 const EMPTY := "-"
-## Shown in the description panel when nothing is hovered or pinned.
-const DESCRIPTION_HINT := "Point at a slot or click it to see what it holds."
 ## Space between the weapons and the carried items (pixels).
 const ITEM_GAP := 28.0
 ## Model turn speed: radians per pixel dragged, and per second at full stick.
@@ -49,7 +46,7 @@ const FRAME_SCALE := 0.85
 var _was_paused: bool = false
 ## The player the screen was last built for.
 var _player: Player = null
-## Hover bubble, pinning and the description panel for the slots.
+## Hover, focus and the item tooltip for the slots.
 var _board: SlotBoard
 
 @onready var _root: Control = $Root
@@ -60,12 +57,9 @@ var _board: SlotBoard
 @onready var _combat_rows: VBoxContainer = $Root/Frame/Layout/Stats/Combat/Rows
 @onready var _spirit_rows: VBoxContainer = $Root/Frame/Layout/Stats/Spirit/Rows
 @onready var _title: Label = $Root/Title
-@onready var _description_title: Label = $Root/Frame/Layout/Description/Lines/Title
-@onready var _description_body: Label = $Root/Frame/Layout/Description/Lines/Body
 @onready var _model_view: SubViewportContainer = $Root/Frame/Layout/Gear/ModelFrame/ModelView
 @onready var _turntable: Node3D = $Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport/Turntable
 @onready var _model: Node3D = $Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport/Turntable/Model
-@onready var _bubble: PanelContainer = $Root/Bubble
 @onready var _close_icon: InputIcon = $Root/Hint/Icon
 
 
@@ -73,7 +67,8 @@ func _ready() -> void:
 	_root.visible = false
 	_frame.scale = Vector2(FRAME_SCALE, FRAME_SCALE)
 	_frame.resized.connect(func() -> void: _frame.pivot_offset = _frame.size * 0.5)
-	_board = SlotBoard.new(_bubble, _description_title, _description_body, "GEAR", DESCRIPTION_HINT)
+	# No bubble or description panel: tooltip mode.
+	_board = SlotBoard.new(null, null, null, "", "")
 	_model_view.gui_input.connect(_on_model_input)
 	# Same as the player: a private copy of the tree so its parameters are its own.
 	var anim_tree := _model.get_node(^"AnimationTree") as AnimationTree
@@ -197,14 +192,14 @@ func _gear_slot(column: VBoxContainer, player: Player, spec: Array) -> void:
 	# The right-hand column's bubbles open toward the model.
 	var left := column == _accessory_slots
 	if piece == null:
-		_board.add(slot, slot_name, slot_name, "Empty. " + spec[3], slot.show_placeholder.bind(empty_icon), left)
+		_board.add(slot, slot_name, slot_name.capitalize(), "Empty. " + spec[3], slot.show_placeholder.bind(empty_icon), left)
 		return
 	var body := piece.description
 	if piece.defense > 0:
 		body = GearText.join(body, "+%d DEFENSE" % piece.defense)
 	var item_name := piece.display_name.to_upper()
 	_board.add(slot, slot_name + "\n" + item_name, slot_name + ": " + item_name, body,
-		slot.show_icon.bind(piece.icon if piece.icon != null else worn_icon, ""), left)
+		slot.show_icon.bind(piece.icon if piece.icon != null else worn_icon, ""), left, piece)
 
 
 func _item_slots_for(player: Player) -> void:

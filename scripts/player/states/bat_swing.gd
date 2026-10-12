@@ -2,7 +2,7 @@ extends PlayerState
 ## The bat combo: three swings, each one press (or keep the button held).
 ## Swing 1 goes right-to-left, swing 2 left-to-right, swing 3 is the finisher: a
 ## strong, wide right-to-left sweep (finisher_arc_degrees) with a longer reach,
-## a bigger step forward, the body twisting through it, a heavier hit-stop and
+## a bigger step forward, the body twisting through it and
 ## a longer recovery that can't be dodged out of at first, like the end of a
 ## Kingdom Hearts ground combo.
 ## Chaining: a press any time during swing 1 or 2 queues the next swing, which
@@ -47,7 +47,6 @@ func enter(_msg: Dictionary) -> void:
 	if _pivot == null:
 		_pivot = player.get_node(^"Facing/SwingArc")
 		_hitbox = player.get_node(^"Facing/SwingArc/ArcHitbox")
-		_hitbox.hit_landed.connect(_on_hit_landed)
 		_model = player.get_node(^"Facing/Model")
 		_model_rest = _model.transform
 		_pivot_rest_scale = _pivot.scale
@@ -193,19 +192,6 @@ func _twist(amount: float) -> void:
 static func _ease_in_out(t: float) -> float:
 	var u := clampf(t, 0.0, 1.0)
 	return u * u * (3.0 - 2.0 * u)
-
-
-func _on_hit_landed(_hurtbox: Hurtbox) -> void:
-	var stop_time := TUNING.finisher_hit_stop_time if _is_finisher() else TUNING.hit_stop_time
-	if stop_time <= 0.0 or Engine.time_scale != 1.0:
-		return
-	Engine.time_scale = TUNING.hit_stop_time_scale
-	get_tree().create_timer(stop_time, true, false, true).timeout.connect(_end_hit_stop)
-
-
-func _end_hit_stop() -> void:
-	if is_equal_approx(Engine.time_scale, TUNING.hit_stop_time_scale):
-		Engine.time_scale = 1.0
 
 
 func _now() -> float:

@@ -18,9 +18,11 @@ extends PlayerState
 ##   gun_mode cancels: back to the sword with nothing fired.
 ## After stats.gun_drain_delay real seconds, bullet time drains stamina
 ## (stats.gun_energy_drain per second); it doesn't regenerate meanwhile. When it
-## runs out the queue executes by itself and can't be cancelled. Executing
-## restores normal time and fires the queued shots in order,
-## stats.gun_shot_interval apart; targets that died meanwhile are skipped.
+## runs out the queue executes by itself and can't be cancelled. Executing fires
+## the queued shots in order, stats.gun_shot_interval apart, with the world still
+## stopped (enemies, their shots and projectiles stay frozen; hits land and play
+## out once time resumes); targets that died meanwhile are skipped. Time
+## resumes after the last shot.
 
 enum Phase { SLOWING, STOPPED, EXECUTING, RECOVERING }
 
@@ -199,7 +201,9 @@ func _undo() -> void:
 
 
 func _execute() -> void:
-	_resume_time()
+	# The world stays frozen while the queue fires (from bullet time too).
+	Engine.time_scale = 1.0
+	get_tree().paused = true
 	_phase = Phase.EXECUTING
 	_phase_time = 0.0
 	_shot_timer = 0.0
@@ -220,6 +224,7 @@ func _fire_next(real_delta: float) -> void:
 		player.fire_gun(target)
 		_shot_timer = player.stats.gun_shot_interval
 		return
+	_resume_time()
 	_phase = Phase.RECOVERING
 	_phase_time = 0.0
 
@@ -263,10 +268,10 @@ func _update_hud() -> void:
 			hud.set_mode_text("EXECUTE")
 		Phase.RECOVERING:
 			hud.set_mode_text("")
-	var portraits: Array[Texture2D] = []
+	var queued_stats: Array[EnemyStats] = []
 	for enemy in queue:
-		portraits.append(enemy.stats.portrait if is_instance_valid(enemy) else null)
-	hud.set_queue(portraits)
+		queued_stats.append(enemy.stats if is_instance_valid(enemy) else null)
+	hud.set_queue(queued_stats)
 	var points: Array[Vector3] = []
 	for enemy in _targets:
 		points.append(player.aim_point(enemy))

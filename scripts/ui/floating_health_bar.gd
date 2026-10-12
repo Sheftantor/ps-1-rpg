@@ -162,6 +162,9 @@ func _on_health_changed(current: int, maximum: int) -> void:
 
 
 func _on_damaged(amount: int) -> void:
+	# Feel draws the floating damage numbers while those are switched on.
+	if Feel.settings.enabled and Feel.settings.damage_numbers_enabled:
+		return
 	var number := _damage_template.duplicate() as Label
 	number.text = str(amount)
 	number.visible = true

@@ -26,6 +26,10 @@ extends CanvasLayer
 
 # Typed by path so the HUD loads before the editor has registered the class_name.
 const LoadoutPanelScript := preload("res://scripts/ui/loadout_panel.gd")
+const IconSlotScript := preload("res://scripts/ui/icon_slot.gd")
+## Queue slot side (pixels): the ItemSlot frame's 8 px margins leave a 64 px
+## picture, the portrait icons' own size, so they draw 1:1 with no rescaling.
+const PORTRAIT_SLOT_SIZE := 80.0
 ## Queue slot portrait for an enemy whose stats have none.
 const PORTRAIT_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
 
@@ -65,14 +69,12 @@ var _level_up_tween: Tween = null
 @onready var _range_label: Label = $Root/Targeting/TargetPanel/RangeLabel
 @onready var _mode_label: Label = $Root/Targeting/ModeLabel
 @onready var _queue_row: HBoxContainer = $Root/Targeting/QueueRow
-@onready var _slot_template: Control = $Root/Targeting/QueueRow/SlotTemplate
 @onready var _gun_prompts: HBoxContainer = $Root/Targeting/Prompts
 
 
 func _ready() -> void:
 	_place_target_panel()
 	_targeting.visible = false
-	_slot_template.visible = false
 	_prompt.text = ""
 	_interact.visible = false
 	_refresh_keybinds()
@@ -121,6 +123,13 @@ func set_stamina(current: float, maximum: float) -> void:
 
 
 ## Level and the XP bar toward the next one (needed 0 = max level).
+## Brightens the XP bar for a moment (kill feedback).
+func pulse_xp_bar(seconds: float) -> void:
+	var tween := _xp_bar.create_tween()
+	tween.tween_property(_xp_bar, ^"modulate", Color(2.2, 2.2, 2.2), seconds * 0.3)
+	tween.tween_property(_xp_bar, ^"modulate", Color.WHITE, seconds * 0.7)
+
+
 func set_xp(level: int, xp: int, needed: int) -> void:
 	_xp_level.text = "LV %d" % level
 	_xp_bar.max_value = maxi(needed, 1)
@@ -229,20 +238,26 @@ func set_mode_text(text: String) -> void:
 	_mode_label.text = text
 
 
-## One slot per queued shot, in queue order, copied from the hidden
-## SlotTemplate: the target's portrait (placeholder if null) over "ENEMY 1", "ENEMY 2", ...
-func set_queue(portraits: Array[Texture2D]) -> void:
-	var count := portraits.size()
+## One slot per queued shot, in queue order: the target's portrait in an item
+## icon slot (same frame and filtering as every other icon, at
+## PORTRAIT_SLOT_SIZE; placeholder if it has none). No name label: the name
+## is only the slot's tooltip. null = a target that's gone (placeholder).
+func set_queue(targets: Array[EnemyStats]) -> void:
+	var count := targets.size()
 	while _slots.size() < count:
-		var slot := _slot_template.duplicate() as Control
-		slot.visible = true
+		var slot := IconSlotScript.new()
+		slot.placeholder = PORTRAIT_PLACEHOLDER
+		slot.set_slot_size(PORTRAIT_SLOT_SIZE)
+		slot.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_queue_row.add_child(slot)
 		_slots.append(slot)
 	while _slots.size() > count:
 		_slots.pop_back().queue_free()
 	for i in _slots.size():
-		(_slots[i].get_node("VBox/Label") as Label).text = queued_format % (i + 1)
-		(_slots[i].get_node("VBox/Icon") as TextureRect).texture = 				portraits[i] if portraits[i] != null else PORTRAIT_PLACEHOLDER
+		var stats := targets[i]
+		_slots[i].show_icon(stats.portrait if stats != null else null,
+				stats.display_name if stats != null else "")
 
 
 ## Projects the player and target points onto the screen: connector lines to

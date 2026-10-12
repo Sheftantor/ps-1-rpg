@@ -16,15 +16,15 @@
 [ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
-radius = 0.4
-height = 1.6
+radius = 0.45
+height = 2.35
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_unused"]
 size = Vector3(0.5, 0.5, 0.5)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
-radius = 0.45
-height = 1.6
+radius = 0.5
+height = 2.35
 
 [node name="SuitGuy" type="CharacterBody3D"]
 collision_layer = 4
@@ -37,13 +37,13 @@ patrol_area = Vector2(5, 5)
 level_override = 3
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.175, 0)
 shape = SubResource("CapsuleShape3D_body")
 
 [node name="Facing" type="Node3D" parent="."]
 
 [node name="Model" parent="Facing" instance=ExtResource("2_model")]
-transform = Transform3D(-1.5466, 0, 0, 0, 1.5466, 0, 0, 0, -1.5466, 0, 0, 0)
+transform = Transform3D(-2.05, 0, 0, 0, 2.05, 0, 0, 0, -2.05, 0, 0, 0)
 
 [node name="Hitbox" type="Area3D" parent="Facing"]
 collision_layer = 0
@@ -63,7 +63,7 @@ monitoring = false
 script = ExtResource("5_hurtbox")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.175, 0)
 shape = SubResource("CapsuleShape3D_hurtbox")
 
 [node name="Health" type="Node" parent="."]
@@ -89,8 +89,9 @@ script = ExtResource("11_stagger")
 script = ExtResource("12_dead")
 
 [node name="HealthBar" parent="." instance=ExtResource("99_health_bar")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.45, 0)
 side_drop = 0.25
 
 [node name="BlobShadow" type="MeshInstance3D" parent="."]
 script = ExtResource("98_blob_shadow")
+radius = 0.75

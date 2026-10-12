@@ -19,6 +19,55 @@ extends Enemy
 @export var windup: float = 0.4
 ## Delay before the first windup after spotting the player (s).
 @export var first_shot_delay: float = 0.6
+## Of the windup, how long the gun is held at chest height before the shot (s);
+## the rest is the raise. The shot still comes `windup` after the raise starts.
+@export_range(0.0, 1.0, 0.01) var aim_hold_seconds: float = 0.25
+
+@export_group("Posture")
+## Legs and torso length (arms untouched): 1 = the model as built. Taller or
+## lower stance.
+@export_range(0.8, 1.4, 0.01) var stand_height_scale: float = 1.12:
+	set(value):
+		stand_height_scale = value
+		_apply_posture()
+## Torso lean behind vertical (degrees); negative leans forward.
+@export_range(-10.0, 20.0, 0.5) var lean_back_degrees: float = 4.0:
+	set(value):
+		lean_back_degrees = value
+		_apply_posture()
+## Torso turn while aiming, gun side toward the player (degrees).
+@export_range(0.0, 60.0, 1.0) var aim_turn_degrees: float = 30.0:
+	set(value):
+		aim_turn_degrees = value
+		_apply_posture()
+## Clavicles raised (degrees): higher shoulders, collar higher.
+@export_range(0.0, 30.0, 0.5) var shoulder_raise_degrees: float = 10.0:
+	set(value):
+		shoulder_raise_degrees = value
+		_apply_posture()
+## Shoulders pulled back (degrees): squarer, broader chest.
+@export_range(0.0, 30.0, 0.5) var shoulder_square_degrees: float = 8.0:
+	set(value):
+		shoulder_square_degrees = value
+		_apply_posture()
+## Silencer angle below level at low-ready (degrees).
+@export_range(0.0, 60.0, 1.0) var low_ready_pitch_degrees: float = 25.0:
+	set(value):
+		low_ready_pitch_degrees = value
+		_apply_posture()
+## Hip bob kept while walking (1 = the walk clip's own).
+@export_range(0.0, 1.0, 0.05) var walk_bob_scale: float = 0.4:
+	set(value):
+		walk_bob_scale = value
+		_apply_posture()
+## Gun kick on each shot (degrees).
+@export_range(0.0, 30.0, 0.5) var recoil_degrees: float = 8.0:
+	set(value):
+		recoil_degrees = value
+		_apply_posture()
+## Gap from the collar up to the health bar's anchor (m). The bar follows the
+## collar, so it stays above him at any stand_height_scale.
+@export var health_bar_clearance: float = 0.5
 
 @export_group("Projectile")
 @export var projectile_scene: PackedScene = preload("res://scenes/pistol_bolt.tscn")
@@ -28,14 +77,29 @@ extends Enemy
 @export var damage: int = 10
 @export var projectile_lifetime: float = 3.0
 
-## Height of this body's eyes for line-of-sight checks (m). It has no head, so
-## this is about where one would be.
-const EYE_HEIGHT: float = 1.5
+## Line-of-sight checks start this far above the collar (m): about where his
+## eyes would be. He has no head.
+const EYE_ABOVE_COLLAR: float = 0.15
+## How quickly the health bar follows the collar's height (per second).
+const HEALTH_BAR_FOLLOW: float = 6.0
 ## What blocks sight: the world (layer 1).
 const SIGHT_MASK: int = 1
 
 ## Counts down to the next shot; Engage starts the windup when it reaches zero.
 var shot_cooldown: float = 0.0
+
+@onready var _health_bar: Node3D = $HealthBar
+
+
+func _ready() -> void:
+	super()
+	_apply_posture()
+	_health_bar.position.y = suit_model().collar_height() + health_bar_clearance
+
+
+func _process(delta: float) -> void:
+	var target := suit_model().collar_height() + health_bar_clearance
+	_health_bar.position.y = lerpf(_health_bar.position.y, target, 1.0 - exp(-HEALTH_BAR_FOLLOW * delta))
 
 
 func _physics_process(delta: float) -> void:
@@ -51,7 +115,8 @@ func suit_model() -> SuitModel:
 func has_line_of_sight() -> bool:
 	if not has_target():
 		return false
-	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * EYE_HEIGHT,
+	var eye := global_position + Vector3.UP * (suit_model().collar_height() + EYE_ABOVE_COLLAR)
+	var query := PhysicsRayQueryParameters3D.create(eye,
 			_target_chest(), SIGHT_MASK, [get_rid()])
 	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
@@ -75,3 +140,18 @@ func fire_shot() -> void:
 func _target_chest() -> Vector3:
 	var player := target as Player
 	return player.aim_origin() if player != null else target.global_position + Vector3.UP * 1.3
+
+
+## Pushes the Posture group to the model's SuitPosture.
+func _apply_posture() -> void:
+	if not is_node_ready():
+		return
+	var posture := suit_model().posture
+	posture.stand_height_scale = stand_height_scale
+	posture.lean_back_degrees = lean_back_degrees
+	posture.aim_turn_degrees = aim_turn_degrees
+	posture.shoulder_raise_degrees = shoulder_raise_degrees
+	posture.shoulder_square_degrees = shoulder_square_degrees
+	posture.low_ready_pitch_degrees = low_ready_pitch_degrees
+	posture.walk_bob_scale = walk_bob_scale
+	posture.recoil_degrees = recoil_degrees

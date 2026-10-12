@@ -3,6 +3,8 @@ extends EnemyModel
 ## The Mincer's rigged model (res://Import/Character/Mincer.glb). Gives its clips
 ## short names, makes them play in place (the body is moved by Enemy, not by root
 ## motion), and wraps playback, flashes and the arm jitter for the enemy states.
+## The combo's poses (rear-up, claw sweeps, stumble) are a MincerPose layer on
+## the skeleton, driven through `pose`.
 
 const CLIP_WALK: StringName = &"Walk"
 ## Weight-shifting hesitation; doubles as the standing idle and the hit flinch.
@@ -31,6 +33,9 @@ static var _walk_rig_speed: float = 0.3
 var _meshes: Array[GeometryInstance3D] = []
 var _base_scale: Vector3 = Vector3.ONE
 
+## The combo pose layer (made in _ready).
+var pose: MincerPose = null
+
 @onready var _anim: AnimationPlayer = $AnimationPlayer
 @onready var _jitter: ArmJitter = $Mincer/Skeleton3D/ArmJitter
 
@@ -44,7 +49,24 @@ func _ready() -> void:
 	_anim.add_animation_library(&"", _library)
 	for node: Node in find_children("*", "GeometryInstance3D", true, false):
 		_meshes.append(node as GeometryInstance3D)
+	pose = MincerPose.new()
+	pose.name = &"Pose"
+	_jitter.get_parent().add_child(pose)
+	# Before the jitter, so the tremble shakes the posed claws.
+	_jitter.get_parent().move_child(pose, _jitter.get_index())
 	play(CLIP_IDLE)
+
+
+## Drops the combo pose at once (back to the clip alone).
+func reset_pose() -> void:
+	pose.weight = 0.0
+	pose.lean_degrees = 0.0
+	pose.yaw_degrees = 0.0
+	pose.roll_degrees = 0.0
+	pose.rear = 0.0
+	pose.swing = 0.0
+	pose.guard = 0.0
+	pose.reach = 0.0
 
 
 ## Plays clip at speed (AnimationPlayer.speed_scale). Keeps an already-playing

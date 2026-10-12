@@ -4,7 +4,8 @@ extends PanelContainer
 ## field (theme type ItemSlot), an optional stack count in the bottom-right
 ## corner (SlotCount) and the theme's accent outline when selected. The name goes in the hover tooltip; the icon is the
 ## primary display. Used by the status screen and the HUD's loadout window, all
-## at SIZE so every icon square matches. Icon art is drawn on a transparent
+## at SIZE so every icon square matches (the loot window shrinks them with
+## set_slot_scale()). Icon art is drawn on a transparent
 ## background. A null icon shows `placeholder` instead; an empty slot
 ## (show_empty()) is just the dimmed frame.
 
@@ -15,6 +16,8 @@ const SIZE := 56.0
 @export var placeholder: Texture2D = preload("res://textures/ui/icons/placeholder_item.png")
 
 var _selected: bool = false
+## Size relative to SIZE (set_slot_scale); frame margins and the count shrink too.
+var _scale: float = 1.0
 var _icon := TextureRect.new()
 var _count := Label.new()
 
@@ -39,6 +42,32 @@ func _init() -> void:
 ## Square side length in pixels.
 func set_slot_size(side: float) -> void:
 	custom_minimum_size = Vector2(side, side)
+
+
+## The same slot at factor x SIZE, with the frame's inner margins and the stack
+## count's font scaled to match (the bevel keeps its width).
+func set_slot_scale(factor: float) -> void:
+	_scale = factor
+	set_slot_size(roundf(SIZE * factor))
+	_apply_scale()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_ENTER_TREE:
+		_apply_scale()
+
+
+func _apply_scale() -> void:
+	if not is_inside_tree() or is_equal_approx(_scale, 1.0):
+		return
+	remove_theme_stylebox_override(&"panel")
+	_count.remove_theme_font_size_override(&"font_size")
+	var box := get_theme_stylebox(&"panel").duplicate() as StyleBox
+	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		box.set_content_margin(side, maxf(2.0, roundf(box.get_content_margin(side) * _scale)))
+	add_theme_stylebox_override(&"panel", box)
+	_count.add_theme_font_size_override(&"font_size",
+			maxi(8, roundi(_count.get_theme_font_size(&"font_size") * _scale)))
 
 
 ## Fills the slot. count > 0 shows a stack count; tooltip is the item's name.

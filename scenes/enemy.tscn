@@ -16,7 +16,7 @@
 [ext_resource type="Script" path="res://scripts/enemy/states/recover.gd" id="14_recover"]
 [ext_resource type="Script" path="res://scripts/enemy/states/stagger.gd" id="15_stagger"]
 [ext_resource type="Script" path="res://scripts/enemy/states/dead.gd" id="16_dead"]
-[ext_resource type="Script" path="res://scripts/enemy/states/balance_loss.gd" id="17_balance_loss"]
+[ext_resource type="Script" path="res://scripts/enemy/states/step_back.gd" id="17_step_back"]
 [ext_resource type="PackedScene" path="res://scenes/enemy_health_bar.tscn" id="99_health_bar"]
 [ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
 
@@ -112,8 +112,8 @@ script = ExtResource("14_recover")
 [node name="Stagger" type="Node" parent="StateMachine"]
 script = ExtResource("15_stagger")
 
-[node name="BalanceLoss" type="Node" parent="StateMachine"]
-script = ExtResource("17_balance_loss")
+[node name="StepBack" type="Node" parent="StateMachine"]
+script = ExtResource("17_step_back")
 
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("16_dead")

@@ -22,10 +22,6 @@ extends Resource
 @export var swing_buffer_window: float = 0.15
 ## Forward step during the strike (m).
 @export var swing_lunge_distance: float = 0.2
-## Freeze when a swing connects (real seconds).
-@export var hit_stop_time: float = 0.05
-## How slow the game runs during the hit-stop.
-@export_range(0.0, 1.0, 0.01) var hit_stop_time_scale: float = 0.05
 
 ## Keep swinging while the attack button is held (a press still works too).
 @export var swing_hold_to_combo: bool = true
@@ -46,8 +42,6 @@ extends Resource
 ## The body turns with the sweep: wound back this far before it, carried
 ## through the other way after (degrees, total).
 @export var finisher_body_twist_degrees: float = 70.0
-## Freeze when the finisher connects (real seconds).
-@export var finisher_hit_stop_time: float = 0.09
 
 @export_group("Level Gap: Enemy Health")
 ## Health multiplier per level the enemy is above the player.

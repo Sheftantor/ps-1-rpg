@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" path="res://scenes/player_model.tscn" id="7_model"]
 [ext_resource type="Compositor" path="res://resources/rendering/ps1_compositor.tres" id="8_ps1"]
 [ext_resource type="Material" path="res://resources/materials/city/stone_trim.tres" id="9_stone"]
-[ext_resource type="Script" path="res://scripts/ui/win95/win95_text_scroll.gd" id="90_text_scroll"]
 
 [sub_resource type="Environment" id="Environment_stage"]
 background_mode = 1
@@ -160,29 +159,6 @@ layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="Description" type="ScrollContainer" parent="Root/Frame/Layout"]
-custom_minimum_size = Vector2(0, 120)
-layout_mode = 2
-theme_type_variation = &"FieldScroll"
-horizontal_scroll_mode = 0
-vertical_scroll_mode = 4
-script = ExtResource("90_text_scroll")
-
-[node name="Lines" type="VBoxContainer" parent="Root/Frame/Layout/Description"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 2
-
-[node name="Title" type="Label" parent="Root/Frame/Layout/Description/Lines"]
-layout_mode = 2
-text = "GEAR"
-
-[node name="Body" type="Label" parent="Root/Frame/Layout/Description/Lines"]
-custom_minimum_size = Vector2(560, 0)
-layout_mode = 2
-text = "-"
-autowrap_mode = 3
-
 [node name="Stats" type="HBoxContainer" parent="Root/Frame/Layout"]
 layout_mode = 2
 theme_override_constants/separation = 14
@@ -204,18 +180,3 @@ theme_type_variation = &"FieldPanel"
 [node name="Rows" type="VBoxContainer" parent="Root/Frame/Layout/Stats/Spirit"]
 layout_mode = 2
 theme_override_constants/separation = 0
-
-[node name="Bubble" type="PanelContainer" parent="Root"]
-visible = false
-top_level = true
-layout_mode = 0
-mouse_filter = 2
-theme_type_variation = &"TooltipPanel"
-
-[node name="Text" type="Label" parent="Root/Bubble"]
-layout_mode = 2
-text = "SLOT"
-
-[node name="Tail" type="Polygon2D" parent="Root/Bubble"]
-visible = false
-polygon = PackedVector2Array(0, -10, 0, 10, -14, 0)

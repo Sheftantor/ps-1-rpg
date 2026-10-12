@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/ui/enemy_level_badge.gd" id="7_badge"]
 [ext_resource type="LabelSettings" path="res://resources/ui/level_badge.tres" id="8_badge_text"]
 [ext_resource type="Script" path="res://scripts/ui/enemy_hud_visibility.gd" id="20_visibility"]
+[ext_resource type="Script" path="res://scripts/ui/enemy_hud_layout.gd" id="21_layout"]
 
 [node name="EnemyHealthBar" type="Node3D"]
 script = ExtResource("1_bar")
@@ -83,3 +84,6 @@ vertical_alignment = 1
 
 [node name="Visibility" type="Node" parent="."]
 script = ExtResource("20_visibility")
+
+[node name="Layout" type="Node" parent="."]
+script = ExtResource("21_layout")

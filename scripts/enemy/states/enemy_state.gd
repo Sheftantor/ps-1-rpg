@@ -1,9 +1,10 @@
 class_name EnemyState
 extends State
 ## Base for enemy states. Flow:
-## Idle (patrol) -> Aware -> Reposition -> (Approach) -> Telegraph -> Attack -> Recover -> Reposition
-## The last attack of an unbroken escalation chain goes Attack -> BalanceLoss instead.
-## Stagger and Dead can interrupt from any state that allows it.
+## Idle (patrol) -> Aware -> Reposition -> (Approach) -> Telegraph -> Attack (the
+## five-swing combo) -> Recover (vulnerable) -> Reposition. Rarely, Reposition
+## goes to StepBack instead of starting a combo. Stagger and Dead can interrupt
+## from any state that allows it.
 
 const IDLE: StringName = &"Idle"
 const AWARE: StringName = &"Aware"
@@ -13,7 +14,7 @@ const TELEGRAPH: StringName = &"Telegraph"
 const ATTACK: StringName = &"Attack"
 const RECOVER: StringName = &"Recover"
 const STAGGER: StringName = &"Stagger"
-const BALANCE_LOSS: StringName = &"BalanceLoss"
+const STEP_BACK: StringName = &"StepBack"
 const DEAD: StringName = &"Dead"
 
 var enemy: Enemy:
@@ -26,7 +27,7 @@ func can_be_staggered() -> bool:
 	return true
 
 
-## Helpless and open to punishment (stagger, balance loss).
+## Helpless and open to punishment (stagger, the post-combo recovery).
 func is_exposed() -> bool:
 	return false
 

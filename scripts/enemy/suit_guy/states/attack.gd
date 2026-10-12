@@ -1,5 +1,5 @@
 extends SuitState
-## One shot: raises the gun over `windup` (still turning, then committed for the
+## One shot: raises the gun quickly and holds it (aim_hold_seconds) over `windup` (still turning, then committed for the
 ## last COMMIT_TIME) with an orange flash as the tell, fires at the player's chest
 ## as it is at that instant (no tracking after), then lowers the gun and goes
 ## back to Engage.
@@ -21,7 +21,9 @@ var _fired: bool = false
 func enter(_msg: Dictionary) -> void:
 	_timer = suit.windup
 	_fired = false
-	suit.suit_model().raise_gun(suit.windup)
+	# Quick raise, then a visible hold at chest height; the shot still comes
+	# `windup` after this starts.
+	suit.suit_model().raise_gun(maxf(suit.windup - suit.aim_hold_seconds, 0.05))
 
 
 func exit() -> void:

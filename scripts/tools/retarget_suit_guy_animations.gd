@@ -21,7 +21,7 @@ const CLIPS := {&"Idle": &"Idle", &"Walking": &"Walk", &"AimPistol": &"Aim", &"A
 const P := "mixamorig_"
 ## Scale of the model under Suit Guy's Facing node. Keep in sync with
 ## res://scenes/suit_guy.tscn (Facing/Model).
-const MODEL_SCALE := 1.5466
+const MODEL_SCALE := 2.05
 ## Fraction of the way from the hand bone to the middle knuckle where the grip sits.
 const PALM_FRACTION := 0.5
 const FPS := 30.0

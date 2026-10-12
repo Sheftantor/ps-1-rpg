@@ -1,18 +1,24 @@
 extends EnemyState
 ## Circles the player at medium range, periodically asking for the attack turn.
-## Holding the turn, it picks an attack and telegraphs if already in range,
-## otherwise approaches first. Asks sooner the further an escalation chain runs.
+## Only some rounds (stats.back_off_chance) does he back away when the player
+## comes in close; usually he holds his ground and just circles.
+## Holding the turn (and with the combo cooldown over), it picks an attack and
+## telegraphs if already in range, otherwise approaches first; or, rarely
+## (stats.random_step_back_chance), steps back to reset the spacing instead.
 
 var _strafe_sign: float = 1.0
 var _decision_timer: float = 0.0
 var _flip_timer: float = 0.0
+## Whether this round of circling backs away from a player who comes too close.
+var _backs_off: bool = false
 
 
 func enter(_msg: Dictionary) -> void:
 	var stats := enemy.stats
 	_strafe_sign = 1.0 if randf() < 0.5 else -1.0
-	_decision_timer = randf_range(stats.reposition_time_min, stats.reposition_time_max) / enemy.attack_speed()
+	_decision_timer = randf_range(stats.reposition_time_min, stats.reposition_time_max)
 	_flip_timer = randf_range(stats.strafe_flip_time_min, stats.strafe_flip_time_max)
+	_backs_off = randf() < stats.back_off_chance
 
 
 func physics_update(delta: float) -> void:
@@ -25,10 +31,13 @@ func physics_update(delta: float) -> void:
 	_strafe(distance, delta)
 
 	_decision_timer -= delta
-	if _decision_timer > 0.0:
+	if _decision_timer > 0.0 or not enemy.combo_ready():
 		return
 	if not enemy.try_acquire_attack_token():
 		_decision_timer = stats.token_retry_interval
+		return
+	if randf() < stats.random_step_back_chance:
+		transition_to(STEP_BACK)
 		return
 	enemy.current_attack = enemy.pick_attack()
 	transition_to(TELEGRAPH if distance <= enemy.current_attack.max_range else APPROACH)
@@ -38,8 +47,10 @@ func _strafe(distance: float, delta: float) -> void:
 	var stats := enemy.stats
 	var to_target := enemy.direction_to_target()
 	var tangent := to_target.cross(Vector3.UP) * _strafe_sign
-	# -1..1: back off when too close, close in when too far.
+	# -1..1: back off when too close (only some rounds), close in when too far.
 	var radial := clampf((distance - stats.preferred_distance) / stats.distance_tolerance, -1.0, 1.0)
+	if not _backs_off:
+		radial = maxf(radial, 0.0)
 	var desired := tangent * stats.strafe_speed + to_target * radial * stats.move_speed
 	enemy.move_horizontal(desired, stats.acceleration, delta)
 	enemy.face_target(delta)

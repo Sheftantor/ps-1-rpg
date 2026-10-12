@@ -27,10 +27,10 @@ signal game_loaded(slot: int)
 const SAVE_VERSION: int = 1
 const SLOTS: Array[String] = ["save_01", "save_02", "save_03"]
 const NEW_GAME_SCENE: String = "res://scenes/test_plaza.tscn"
+## The loading screen's title for a new game (the area NEW_GAME_SCENE is).
+const NEW_GAME_AREA_NAME: String = "Times Square"
 const START_MENU_SCENE: String = "res://scenes/start_menu.tscn"
 const SAVEABLE_GROUP: StringName = &"saveable"
-## Slide direction of SceneManager's fade for new games and loads.
-const TRANSITION_DIRECTION: String = "up"
 
 var current_slot: int = 0
 ## The data last saved or loaded.
@@ -90,7 +90,7 @@ func create_new_save_game(slot: int) -> void:
 	save_data = {}
 	_pending = {}
 	game_started.emit(slot)
-	SceneManager.transition_scene(NEW_GAME_SCENE, "", Vector3.ZERO, TRANSITION_DIRECTION)
+	SceneManager.transition_scene(NEW_GAME_SCENE, "", Vector3.ZERO, NEW_GAME_AREA_NAME)
 	await SceneManager.new_scene_ready
 	save_game()
 
@@ -148,7 +148,9 @@ func load_game(slot: int) -> bool:
 	play_time = float(data.get("play_time", 0.0))
 	_pending = {}
 	game_started.emit(slot)
-	_change_and_apply(String(data.scene_path))
+	var summary = data.get("summary")
+	var location := String(summary.get("location", "")) if summary is Dictionary else ""
+	_change_and_apply(String(data.scene_path), location if location != "" else _area_name(String(data.scene_path)))
 	return true
 
 
@@ -223,11 +225,17 @@ static func format_date(timestamp: int) -> String:
 	return Time.get_datetime_string_from_unix_time(local, true).left(16)
 
 
-func _change_and_apply(scene_path: String) -> void:
-	SceneManager.transition_scene(scene_path, "", Vector3.ZERO, TRANSITION_DIRECTION)
+func _change_and_apply(scene_path: String, title: String) -> void:
+	SceneManager.transition_scene(scene_path, "", Vector3.ZERO, title)
 	await SceneManager.new_scene_ready
 	apply_save_data_to_scene()
 	game_loaded.emit(current_slot)
+
+
+## Fallback loading-screen title for a save without a location: the scene's
+## file name, e.g. "Test Plaza".
+static func _area_name(scene_path: String) -> String:
+	return scene_path.get_file().get_basename().capitalize()
 
 
 ## The slot's data, upgraded to SAVE_VERSION, or {} if it's missing, damaged,

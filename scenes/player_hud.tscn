@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://scripts/ui/target_reticle.gd" id="4_reticle"]
 [ext_resource type="Texture2D" path="res://resources/ui/player_health_under.tres" id="5_background"]
 [ext_resource type="Texture2D" path="res://resources/ui/player_health_fill.tres" id="6_gradient"]
-[ext_resource type="Texture2D" path="res://textures/ui/enemy_silhouette.png" id="7_silhouette"]
 [ext_resource type="Script" path="res://scripts/ui/input_icon.gd" id="8_input_icon"]
 [ext_resource type="Script" path="res://scripts/ui/loadout_panel.gd" id="10_loadout_panel"]
 [ext_resource type="Theme" path="res://resources/ui/win95/win95_dark_hud.tres" id="12_hud"]
@@ -268,41 +267,11 @@ anchor_right = 0.5
 offset_left = -480.0
 offset_top = 90.0
 offset_right = 480.0
-offset_bottom = 162.0
+offset_bottom = 170.0
 grow_horizontal = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 alignment = 1
-
-[node name="SlotTemplate" type="PanelContainer" parent="Root/Targeting/QueueRow"]
-visible = false
-custom_minimum_size = Vector2(112, 72)
-layout_mode = 2
-size_flags_vertical = 0
-mouse_filter = 2
-theme_type_variation = &"ItemSlot"
-
-[node name="VBox" type="VBoxContainer" parent="Root/Targeting/QueueRow/SlotTemplate"]
-layout_mode = 2
-mouse_filter = 2
-alignment = 1
-
-[node name="Icon" type="TextureRect" parent="Root/Targeting/QueueRow/SlotTemplate/VBox"]
-texture_filter = 1
-custom_minimum_size = Vector2(38, 38)
-layout_mode = 2
-size_flags_horizontal = 4
-mouse_filter = 2
-texture = ExtResource("7_silhouette")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="Root/Targeting/QueueRow/SlotTemplate/VBox"]
-layout_mode = 2
-theme_type_variation = &"SmallLabel"
-text = "ENEMY 1"
-horizontal_alignment = 1
-clip_text = true
 
 [node name="Prompts" type="HBoxContainer" parent="Root/Targeting"]
 layout_mode = 1

@@ -6,8 +6,6 @@ extends CharacterBody3D
 
 signal died
 
-const HIT_FLASH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.85)
-const HIT_FLASH_TIME: float = 0.12
 ## Below this ground speed (m/s) the model stands instead of walking.
 const WALK_ANIM_MIN_SPEED: float = 0.15
 
@@ -31,17 +29,22 @@ var telegraph_flash: Color = Color(0.0, 0.0, 0.0, 0.0)
 var pulse_scale: float = 1.0
 ## Where the enemy spawned; the centre of its patrol area.
 var home_position: Vector3 = Vector3.ZERO
-## Attacks finished in a row without the player landing a hit (see the
-## Escalation group in EnemyStats). The next attack is number slash_chain + 1.
-var slash_chain: int = 0
+## The combo swing in progress (1-5), 0 outside a combo (see the Attack state).
+var combo_swing: int = 0
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 ## Whether max health has been scaled to the player's level yet.
 var _scaled_to_player: bool = false
+## Hit / kill flash (Feel): colour and seconds left.
+var _hit_flash_color: Color = Color.WHITE
 var _hit_flash_timer: float = 0.0
-var _chain_timer: float = 0.0
-## False once the current swing is hit, so it doesn't count toward the chain.
-var _swing_clean: bool = false
+## Feel's hit push: extra velocity and seconds left.
+var _push_velocity: Vector3 = Vector3.ZERO
+var _push_timer: float = 0.0
+## Seconds left of the post-combo vulnerability window.
+var _vulnerable_timer: float = 0.0
+## Seconds until the next combo may start.
+var _combo_cooldown: float = 0.0
 
 @onready var facing: Node3D = $Facing
 @onready var hitbox: Hitbox = $Facing/Hitbox
@@ -62,6 +65,9 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Hit stop (Feel): this enemy alone holds still for a moment.
+	if Feel.is_frozen(self):
+		return
 	if not has_target():
 		target = get_tree().get_first_node_in_group(&"player") as Node3D
 	if not _scaled_to_player:
@@ -69,8 +75,18 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= _gravity * delta
 	state_machine.physics_update(delta)
-	move_and_slide()
-	_update_escalation(delta)
+	if _push_timer > 0.0:
+		# Feel's push rides on top of the state's own movement for one step.
+		_push_timer -= delta
+		var own_velocity := velocity
+		velocity += _push_velocity
+		move_and_slide()
+		velocity.x = own_velocity.x
+		velocity.z = own_velocity.z
+	else:
+		move_and_slide()
+	_vulnerable_timer = maxf(_vulnerable_timer - delta, 0.0)
+	_combo_cooldown = maxf(_combo_cooldown - delta, 0.0)
 	_update_visuals(delta)
 	_update_animation()
 
@@ -112,8 +128,8 @@ func direction_to_target() -> Vector3:
 
 func _award_xp() -> void:
 	var player := get_tree().get_first_node_in_group(&"player") as Player
-	if player != null:
-		player.award_kill(level())
+	var xp := player.award_kill(level()) if player != null else 0
+	Feel.on_kill(self, xp)
 
 
 func level() -> int:
@@ -224,68 +240,47 @@ func release_attack_token(cooldown: float) -> void:
 	EnemyAttackCoordinator.release(self, cooldown)
 
 
-# --- Escalation -----------------------------------------------------------------
-# Each attack finished without the player landing a hit adds to slash_chain:
-# the next one plays faster, the arms start to shake from jitter_start_attack on,
-# the top attacks hit harder, and finishing the last one costs the enemy its
-# balance. Any hit the player lands drops the chain back to the base attack.
+# --- Combo ----------------------------------------------------------------------
+# One attack: the Combo group in EnemyStats (telegraph, five swings, recovery).
 
-## Playback-speed multiplier for the next attack (also scales its timings).
-func attack_speed() -> float:
-	return 1.0 + stats.escalation_speed_step * slash_chain
-
-
-## Arm jitter (degrees) for the next attack's swing; 0 before jitter_start_attack.
-func attack_jitter() -> float:
-	var past_start := slash_chain + 1 - stats.jitter_start_attack
-	return stats.jitter_degrees_per_attack * (past_start + 1) if past_start >= 0 else 0.0
+## A combo swing: current_attack's knockback, stun and lunge with
+## stats.attack_damage (level-scaled). Every swing deals the same damage.
+func combo_attack() -> AttackData:
+	var swing := current_attack.duplicate() as AttackData
+	swing.damage = scaled_damage(stats.attack_damage)
+	return swing
 
 
-## Whether the next attack is one of the harder-hitting top attacks.
-func is_top_attack() -> bool:
-	return slash_chain >= stats.escalation_chain_length - stats.top_attack_count
+func is_vulnerable() -> bool:
+	return _vulnerable_timer > 0.0
 
 
-## current_attack with level-scaled damage, boosted for the top of the chain.
-func escalated_attack() -> AttackData:
-	var boosted := current_attack.duplicate() as AttackData
-	boosted.damage = scaled_damage(current_attack.damage)
-	if is_top_attack():
-		boosted.knockback *= stats.top_attack_knockback_multiplier
-		boosted.hit_stun_multiplier *= stats.top_attack_hit_stun_multiplier
-	return boosted
+## Opens the post-combo vulnerability window for seconds.
+func set_vulnerable(seconds: float) -> void:
+	_vulnerable_timer = seconds
 
 
-func begin_attack() -> void:
-	_swing_clean = true
+func combo_ready() -> bool:
+	return _combo_cooldown <= 0.0
 
 
-## Called when an attack's swing ends. Counts it toward the chain unless it was
-## hit; returns true when it was the last attack in the chain and the enemy
-## should lose its balance.
-func finish_attack() -> bool:
-	if not _swing_clean:
-		return false
-	if slash_chain + 1 >= stats.escalation_chain_length:
-		break_chain()
-		return true
-	slash_chain += 1
-	_chain_timer = stats.escalation_chain_timeout
-	return false
+## No combo for at least seconds (never shortens a longer wait).
+func start_combo_cooldown(seconds: float) -> void:
+	_combo_cooldown = maxf(_combo_cooldown, seconds)
 
 
-func break_chain() -> void:
-	slash_chain = 0
-	_chain_timer = 0.0
-	_swing_clean = false
+## Flashes the model color for seconds (hit and kill feedback), shown at once.
+func flash(color: Color, seconds: float) -> void:
+	_hit_flash_color = color
+	_hit_flash_timer = seconds
+	model.set_flash(color)
 
 
-func _update_escalation(delta: float) -> void:
-	if slash_chain == 0:
-		return
-	_chain_timer -= delta
-	if _chain_timer <= 0.0:
-		break_chain()
+## Adds a push (m/s) for seconds through the body's normal movement, so walls
+## still stop it (hit feedback, on top of the hit's own knockback).
+func push(push_velocity: Vector3, seconds: float) -> void:
+	_push_velocity = push_velocity
+	_push_timer = seconds
 
 
 func reset_telegraph_visuals() -> void:
@@ -295,8 +290,7 @@ func reset_telegraph_visuals() -> void:
 
 func _update_visuals(delta: float) -> void:
 	_hit_flash_timer = maxf(_hit_flash_timer - delta, 0.0)
-	var flash := HIT_FLASH_COLOR if _hit_flash_timer > 0.0 else telegraph_flash
-	model.set_flash(flash)
+	model.set_flash(_hit_flash_color if _hit_flash_timer > 0.0 else telegraph_flash)
 	model.set_pulse(pulse_scale)
 
 
@@ -312,10 +306,10 @@ func _update_animation() -> void:
 
 
 func _on_hit_received(attack: AttackData, source: Node3D) -> void:
-	health.take_damage(attack.damage)
-	_hit_flash_timer = HIT_FLASH_TIME
-	# Interrupted: the escalation starts over from the base attack.
-	break_chain()
+	var damage := attack.damage
+	if is_vulnerable():
+		damage = roundi(damage * stats.vulnerable_damage_multiplier)
+	health.take_damage(damage)
 	var push := global_position - source.global_position
 	push.y = 0.0
 	var msg := {"knockback": push.normalized() * attack.knockback}

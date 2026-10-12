@@ -224,7 +224,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.is_pressed():
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			get_viewport().set_input_as_handled()
-		return
+			return
+		# The loot window frees the cursor but the fight goes on: keys and the
+		# controller still act, only mouse-look waits.
+		if not LootWindow.is_open or event is InputEventMouse:
+			return
 
 	if event is InputEventMouseMotion:
 		if state_machine.current_name() == PlayerState.GUN_AIM:
@@ -260,6 +264,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Hit stop (Feel): the player alone holds still for a moment.
+	if Feel.is_frozen(self):
+		return
 	# Gun mode keeps the player processing through pauses; the pause menu stops it.
 	if GameMenus.any_open():
 		return
@@ -667,12 +674,13 @@ func _refresh_xp_hud() -> void:
 	hud.set_xp(level, xp, xp_to_next())
 
 
-## Called by an enemy as it dies.
-func award_kill(enemy_level: int) -> void:
+## Called by an enemy as it dies. Returns the XP gained.
+func award_kill(enemy_level: int) -> int:
 	var gained := Leveling.kill_xp(enemy_level, level, stats)
 	if gained > 0:
 		hud.flash_message("+%d XP" % gained)
 		gain_xp(gained)
+	return gained
 
 
 ## WoW-style level-up: more max health and energy (the gain is added to the

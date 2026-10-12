@@ -7,6 +7,9 @@ extends RefCounted
 ## pins a slot so its description stays up after the cursor leaves.
 ## The screen owns the nodes: a Bubble (PanelContainer with a Text label and a
 ## Tail polygon) and the description Title/Body labels.
+## Tooltip mode (bubble and labels all null, as on the status screen): no bubble
+## or panel; the shared ItemTooltip shows each slot's content instead, next to
+## the cursor on hover or beside the slot under controller focus.
 
 ## Gap between a slot and its tooltip bubble (pixels).
 const BUBBLE_GAP := 16.0
@@ -23,41 +26,63 @@ var _title: Label
 var _body: Label
 var _empty_title: String
 var _empty_body: String
-## Per slot: {bubble, title, body, redraw, left}
+## Per slot: {bubble, title, body, redraw, left, content}
 var _info: Dictionary[IconSlot, Dictionary] = {}
+var _use_tooltip: bool = false
+## The slot the mouse is over (its tooltip follows the cursor, not focus).
+var _mouse_slot: IconSlot = null
 
 
 func _init(bubble: PanelContainer, title: Label, body: Label, empty_title: String, empty_body: String) -> void:
+	_use_tooltip = bubble == null and title == null
 	_bubble = bubble
-	_bubble_text = bubble.get_node(^"Text")
-	_bubble_tail = bubble.get_node(^"Tail")
+	if bubble != null:
+		_bubble_text = bubble.get_node(^"Text")
+		_bubble_tail = bubble.get_node(^"Tail")
 	_title = title
 	_body = body
 	_empty_title = empty_title
 	_empty_body = empty_body
-	_title.theme_type_variation = &"SectionLabel"
+	if _title != null:
+		_title.theme_type_variation = &"SectionLabel"
 
 
 ## Forgets all slots (the screen frees the nodes) and resets the panel.
 func clear() -> void:
 	_info.clear()
 	pinned = null
-	_bubble.visible = false
+	_mouse_slot = null
+	hide_bubble()
 	show_description(null)
 
 
 func hide_bubble() -> void:
-	_bubble.visible = false
+	if _bubble != null:
+		_bubble.visible = false
+	if _use_tooltip:
+		ItemTooltip.service().hide_now()
 
 
 ## Registers a slot. redraw draws it unhighlighted; bubble_left puts the
-## tooltip on the slot's left (for slots on the right edge).
-func add(slot: IconSlot, bubble: String, title: String, body: String, redraw: Callable, bubble_left := false) -> void:
-	_info[slot] = {bubble = bubble, title = title, body = body, redraw = redraw, left = bubble_left}
+## tooltip on the slot's left (for slots on the right edge). content is what
+## the ItemTooltip shows in tooltip mode (an item resource); null shows title
+## and body (empty slots).
+func add(slot: IconSlot, bubble: String, title: String, body: String, redraw: Callable, bubble_left := false,
+		content: Variant = null) -> void:
+	_info[slot] = {bubble = bubble, title = title, body = body, redraw = redraw, left = bubble_left,
+			content = content if content != null else {title = title, body = body}}
 	slot.focus_mode = Control.FOCUS_ALL
 	redraw.call()
-	slot.mouse_entered.connect(slot.grab_focus)
+	slot.mouse_entered.connect(func() -> void:
+		_mouse_slot = slot
+		if _use_tooltip:
+			ItemTooltip.service().hover(slot, _info[slot].content)
+		slot.grab_focus())
 	slot.mouse_exited.connect(func() -> void:
+		if _mouse_slot == slot:
+			_mouse_slot = null
+		if _use_tooltip:
+			ItemTooltip.service().leave(slot)
 		if slot.has_focus():
 			slot.release_focus())
 	slot.focus_entered.connect(_on_focused.bind(slot))
@@ -66,6 +91,8 @@ func add(slot: IconSlot, bubble: String, title: String, body: String, redraw: Ca
 
 
 func show_description(slot: IconSlot) -> void:
+	if _title == null:
+		return
 	if slot == null or not _info.has(slot):
 		_title.text = _empty_title
 		_body.text = _empty_body
@@ -106,16 +133,25 @@ func _on_focused(slot: IconSlot) -> void:
 	if not _info.has(slot):
 		return
 	slot.set_selected(true)
-	_bubble_text.text = _info[slot].bubble
-	_bubble.visible = true
-	_place_bubble.call_deferred(slot)
+	if _use_tooltip:
+		# Controller focus (the mouse's own hover is already showing it).
+		if slot != _mouse_slot:
+			ItemTooltip.service().focus(slot, _info[slot].content)
+	else:
+		_bubble_text.text = _info[slot].bubble
+		_bubble.visible = true
+		_place_bubble.call_deferred(slot)
 	show_description(slot)
 
 
 func _on_unfocused(slot: IconSlot) -> void:
 	if _info.has(slot):
 		_redraw(slot)
-	_bubble.visible = false
+	if _use_tooltip:
+		if slot != _mouse_slot:
+			ItemTooltip.service().leave(slot)
+	elif _bubble != null:
+		_bubble.visible = false
 	show_description(pinned)
 
 
@@ -159,14 +195,16 @@ func add_weapons(parent: Container, player: Player) -> void:
 		add(slot, "WEAPON", "WEAPON", "Empty. Your melee weapon goes here.", _greyed.bind(slot, MELEE_PLACEHOLDER))
 	else:
 		var item_name := melee.display_name.to_upper()
-		add(slot, "WEAPON\n" + item_name, "WEAPON: " + item_name, GearText.melee(player), slot.show_icon.bind(melee.icon, ""))
+		add(slot, "WEAPON\n" + item_name, "WEAPON: " + item_name, GearText.melee(player),
+				slot.show_icon.bind(melee.icon, ""), false, melee)
 	var gun := player.gun
 	slot = new_slot(parent)
 	if gun == null:
 		add(slot, "GUN", "GUN", "Empty. Pick up a gun to carry it here.", _greyed.bind(slot, GUN_PLACEHOLDER))
 	else:
 		var item_name := gun.display_name.to_upper()
-		add(slot, "GUN\n" + item_name, "GUN: " + item_name, GearText.gun(gun), slot.show_icon.bind(gun.icon, ""))
+		add(slot, "GUN\n" + item_name, "GUN: " + item_name, GearText.gun(gun),
+				slot.show_icon.bind(gun.icon, ""), false, gun)
 
 
 ## A carried item stack, with its count in the corner.
@@ -174,7 +212,7 @@ func add_item(parent: Container, stack: ItemStack) -> IconSlot:
 	var slot := new_slot(parent)
 	var item_name := stack.item.display_name.to_upper()
 	add(slot, "ITEM\n" + item_name, "ITEM: " + item_name, GearText.item(stack),
-		slot.show_icon.bind(stack.item.icon, "", stack.count))
+		slot.show_icon.bind(stack.item.icon, "", stack.count), false, stack)
 	return slot
 
 

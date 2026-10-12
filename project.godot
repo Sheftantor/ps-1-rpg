@@ -22,6 +22,7 @@ PS1Renderer="*res://scripts/rendering/ps1_renderer.gd"
 SceneManager="*res://scenes/scene_manager.tscn"
 SaveManager="*res://scripts/save/save_manager.gd"
 Win95Cursor="*res://scripts/ui/win95/win95_cursor.gd"
+Feel="*res://scripts/feel/feel.gd"
 
 [beckett]
 

@@ -177,7 +177,7 @@ func go_to_main_menu() -> void:
 		return
 	_leaving = true
 	_set_buttons_enabled(false)
-	scene_manager.transition_scene(START_MENU_SCENE, "", Vector3.ZERO, "up")
+	scene_manager.transition_scene(START_MENU_SCENE)
 
 
 # --- Views -------------------------------------------------------------------------

@@ -24,6 +24,7 @@ func activate(attack: AttackData, source: Node3D) -> void:
 	_attack = attack
 	_source = source
 	_already_hit.clear()
+	Feel.on_swing(source)
 	visible = show_debug_mesh
 	if monitoring:
 		# Already live (back-to-back activation): area_entered won't re-fire for
