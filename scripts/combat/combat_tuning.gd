@@ -14,10 +14,11 @@ extends Resource
 @export var swing_recovery_time: float = 0.30
 ## Width of the sweep in front of the player (degrees).
 @export var swing_arc_degrees: float = 120.0
-## Start the next swing within this long of the last one ending and it swings back
-## the other way; any later and it starts from the right again (s).
-@export var swing_combo_window: float = 0.5
-## An attack press in this last part of recovery queues the next swing (s).
+## After a swing ends, attacking again within this long carries the combo on to
+## the next swing; any later and it starts again from swing 1 (s).
+@export var swing_combo_window: float = 1.0
+## The end of a swing's recovery: holding the button here chains the next
+## swing, and during the finisher only a press here queues a new combo (s).
 @export var swing_buffer_window: float = 0.15
 ## Forward step during the strike (m).
 @export var swing_lunge_distance: float = 0.2
@@ -25,6 +26,28 @@ extends Resource
 @export var hit_stop_time: float = 0.05
 ## How slow the game runs during the hit-stop.
 @export_range(0.0, 1.0, 0.01) var hit_stop_time_scale: float = 0.05
+
+## Keep swinging while the attack button is held (a press still works too).
+@export var swing_hold_to_combo: bool = true
+
+@export_group("Bat Finisher")
+## The third swing of the combo: a strong, wide sweep with a heavier recovery.
+## Its damage and knockback are stats.light_combo[2] (Light 3).
+@export var finisher_windup_time: float = 0.24
+@export var finisher_strike_time: float = 0.22
+## Longer than a normal swing: the finisher commits you.
+@export var finisher_recovery_time: float = 0.55
+## Into the recovery before a dodge can cancel it (s).
+@export var finisher_dodge_delay: float = 0.3
+@export var finisher_arc_degrees: float = 240.0
+@export var finisher_lunge_distance: float = 0.7
+## The hitbox reaches this much further than a normal swing.
+@export var finisher_reach_scale: float = 1.3
+## The body turns with the sweep: wound back this far before it, carried
+## through the other way after (degrees, total).
+@export var finisher_body_twist_degrees: float = 70.0
+## Freeze when the finisher connects (real seconds).
+@export var finisher_hit_stop_time: float = 0.09
 
 @export_group("Level Gap: Enemy Health")
 ## Health multiplier per level the enemy is above the player.

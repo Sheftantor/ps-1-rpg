@@ -2,7 +2,8 @@
 #   godot --headless --path . -s res://scripts/tools/build_bat_swing_clips.gd
 #
 # SwingRL is the Attack clip (right to left) and SwingLR the same clip played
-# backwards (left to right), each retimed to the phases in
+# backwards (left to right); SwingFinisher, the combo's third hit, is SwingRL at
+# the finisher's slower, heavier timing. Each is retimed to the phases in
 # res://resources/combat_tuning.tres: windup, a fast ease-out strike over the
 # clip's hit frames, and an ease-in-out recovery. The phase lengths are stored on
 # each clip ("phase_times") so the BatSwing state can retime them live if the
@@ -28,17 +29,20 @@ func _initialize() -> void:
 		for key: StringName in from.get_meta_list():
 			library.get_animation(clip_name).set_meta(key, from.get_meta(key))
 	var attack := library.get_animation(SOURCE_CLIP)
-	for clip_name: StringName in [&"SwingRL", &"SwingLR"]:
+	var normal: Array[float] = [TUNING.swing_windup_time, TUNING.swing_strike_time, TUNING.swing_recovery_time]
+	var finisher: Array[float] = [TUNING.finisher_windup_time, TUNING.finisher_strike_time, TUNING.finisher_recovery_time]
+	for clip_name: StringName in [&"SwingRL", &"SwingLR", &"SwingFinisher"]:
 		if library.has_animation(clip_name):
 			library.remove_animation(clip_name)
-	library.add_animation(&"SwingRL", _swing(attack, false))
-	library.add_animation(&"SwingLR", _swing(attack, true))
+	library.add_animation(&"SwingRL", _swing(attack, false, normal))
+	library.add_animation(&"SwingLR", _swing(attack, true, normal))
+	library.add_animation(&"SwingFinisher", _swing(attack, false, finisher))
 	var err := ResourceSaver.save(library, LIBRARY)
 	print("saved %s (error %d)" % [LIBRARY, err])
 	quit()
 
 
-func _swing(source: Animation, reverse: bool) -> Animation:
+func _swing(source: Animation, reverse: bool, durations: Array[float]) -> Animation:
 	var hit_frames: Vector2i = source.get_meta(&"hit_frames")
 	var strike_start := hit_frames.x * source.step
 	var strike_end := (hit_frames.y + 1) * source.step
@@ -46,7 +50,6 @@ func _swing(source: Animation, reverse: bool) -> Animation:
 	var spans: Array[Vector2] = [Vector2(0.0, strike_start), Vector2(strike_start, strike_end), Vector2(strike_end, source.length)]
 	if reverse:
 		spans = [Vector2(source.length, strike_end), Vector2(strike_end, strike_start), Vector2(strike_start, 0.0)]
-	var durations: Array[float] = [TUNING.swing_windup_time, TUNING.swing_strike_time, TUNING.swing_recovery_time]
 
 	var out := Animation.new()
 	out.step = 1.0 / FPS
