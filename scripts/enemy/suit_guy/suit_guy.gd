@@ -22,6 +22,10 @@ extends Enemy
 ## Of the windup, how long the gun is held at chest height before the shot (s);
 ## the rest is the raise. The shot still comes `windup` after the raise starts.
 @export_range(0.0, 1.0, 0.01) var aim_hold_seconds: float = 0.25
+## After a hit staggers him he holds fire for as long as the player keeps
+## attacking, then this long more (s) before he can shoot: his chance comes
+## after their attack, not during it.
+@export var hit_shot_delay: float = 0.6
 
 @export_group("Posture")
 ## Legs and torso length (arms untouched): 1 = the model as built. Taller or
@@ -87,6 +91,8 @@ const SIGHT_MASK: int = 1
 
 ## Counts down to the next shot; Engage starts the windup when it reaches zero.
 var shot_cooldown: float = 0.0
+## Set by a staggering hit; cleared once the player's attack is over.
+var _held_by_hit: bool = false
 
 @onready var _health_bar: Node3D = $HealthBar
 
@@ -105,6 +111,18 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	super(delta)
 	shot_cooldown = maxf(shot_cooldown - delta, 0.0)
+	if _held_by_hit:
+		var player := target as Player
+		if player != null and player.is_attacking():
+			shot_cooldown = maxf(shot_cooldown, hit_shot_delay)
+		else:
+			_held_by_hit = false
+
+
+## A hit staggered him: no shot until the player's attack ends plus hit_shot_delay.
+func hold_fire_from_hit() -> void:
+	_held_by_hit = true
+	shot_cooldown = maxf(shot_cooldown, hit_shot_delay)
 
 
 func suit_model() -> SuitModel:

@@ -9,7 +9,7 @@ extends Node
 ##   on_kill(target, xp)                         - Enemy._award_xp()
 ##   on_swing(attacker)                          - Hitbox.activate()
 ## Characters ask is_frozen(self) at the top of _physics_process, so hit stop
-## freezes only them (their animation players switch to manual meanwhile);
+## freezes only them (their animation players are disabled meanwhile);
 ## Engine.time_scale and the tree pause are left to gun mode.
 
 const SETTINGS_PATH := "res://settings/feel_settings.tres"
@@ -20,7 +20,7 @@ const BODY_HEIGHT := 1.4
 
 var settings: FeelSettings
 
-## Frozen node -> {until: usec, mixers: {AnimationMixer: original callback mode}}
+## Frozen node -> {until: usec, mixers: {AnimationMixer: original process mode}}
 var _frozen: Dictionary = {}
 var _trauma: float = 0.0
 var _shake_time: float = 0.0
@@ -131,8 +131,10 @@ func freeze(node: Node, seconds: float) -> void:
 		return
 	var mixers := {}
 	for mixer: Node in node.find_children("*", "AnimationMixer", true, false):
-		mixers[mixer] = (mixer as AnimationMixer).callback_mode_process
-		(mixer as AnimationMixer).callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		# Disabling the node pauses it in place; switching callback_mode_process
+		# to manual and back instead restarts the AnimationTree's one-shot clips.
+		mixers[mixer] = mixer.process_mode
+		mixer.process_mode = Node.PROCESS_MODE_DISABLED
 	_frozen[node] = {until = until, mixers = mixers}
 
 
@@ -146,7 +148,7 @@ func _update_freezes(now: int) -> void:
 			continue
 		for mixer: Node in _frozen[node].mixers:
 			if is_instance_valid(mixer):
-				(mixer as AnimationMixer).callback_mode_process = _frozen[node].mixers[mixer]
+				mixer.process_mode = _frozen[node].mixers[mixer]
 		_frozen.erase(node)
 
 

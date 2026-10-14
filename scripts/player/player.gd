@@ -328,6 +328,12 @@ func can_dodge() -> bool:
 	return stamina.has(stats.dodge_stamina_cost)
 
 
+## In a melee attack: the bat combo, the strong attack, or a skill using it.
+func is_attacking() -> bool:
+	var state := state_machine.current_name()
+	return state == PlayerState.LIGHT_ATTACK or state == PlayerState.HEAVY_ATTACK
+
+
 func wants_block() -> bool:
 	return Input.is_action_pressed(&"block")
 
