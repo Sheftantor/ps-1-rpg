@@ -1,6 +1,6 @@
 extends PlayerState
 ## Gun mode (gun_mode input, with a gun in the secondary slot and some stamina):
-## sheathes the sword, draws the gun and brings time to a stop so shots can be
+## sheathes the melee weapon, draws the gun and brings time to a stop so shots can be
 ## lined up. Time eases from normal to stats.gun_slow_time_scale over
 ## stats.gun_slowdown_time real seconds, then (stats.gun_pause_after_slowdown)
 ## the scene tree pauses with only the player, camera and HUD still running.
@@ -15,7 +15,7 @@ extends PlayerState
 ##   gun_undo takes one shot at the cursor target (or else the last one queued)
 ##     off the queue and refunds its cost,
 ##   attack_heavy executes the queue,
-##   gun_mode cancels: back to the sword with nothing fired.
+##   gun_mode cancels: back to the melee weapon with nothing fired.
 ## After stats.gun_drain_delay real seconds, bullet time drains stamina
 ## (stats.gun_energy_drain per second); it doesn't regenerate meanwhile. When it
 ## runs out the queue executes by itself and can't be cancelled. Executing fires
@@ -60,7 +60,7 @@ func enter(_msg: Dictionary) -> void:
 func exit() -> void:
 	_resume_time()
 	queue.clear()
-	# Presses made while aiming shouldn't leak into sword mode.
+	# Presses made while aiming shouldn't leak into melee mode.
 	player.consume_buffer()
 	player.process_mode = Node.PROCESS_MODE_INHERIT
 	player.set_gun_drawn(false)
@@ -74,7 +74,7 @@ func drives_animation() -> bool:
 	return true
 
 
-## Gun mode spends stamina; it doesn't refill until back in sword mode.
+## Gun mode spends stamina; it doesn't refill until back in melee mode.
 func stamina_regen_scale() -> float:
 	return 0.0
 

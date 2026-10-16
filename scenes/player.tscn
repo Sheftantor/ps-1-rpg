@@ -13,7 +13,7 @@
 [ext_resource type="Script" path="res://scripts/player/states/move.gd" id="11_move"]
 [ext_resource type="Script" path="res://scripts/player/states/dodge.gd" id="12_dodge"]
 [ext_resource type="Script" path="res://scripts/player/states/light_attack.gd" id="13_light_attack"]
-[ext_resource type="Script" path="res://scripts/player/states/bat_swing.gd" id="22_bat_swing"]
+[ext_resource type="Script" path="res://scripts/player/states/melee_swing.gd" id="22_melee_swing"]
 [ext_resource type="Script" path="res://scripts/player/states/heavy_attack.gd" id="14_heavy_attack"]
 [ext_resource type="Script" path="res://scripts/player/states/block.gd" id="15_block"]
 [ext_resource type="Script" path="res://scripts/player/states/hit_stun.gd" id="16_hit_stun"]
@@ -184,7 +184,7 @@ script = ExtResource("11_move")
 script = ExtResource("12_dodge")
 
 [node name="LightAttack" type="Node" parent="StateMachine"]
-script = ExtResource("22_bat_swing")
+script = ExtResource("22_melee_swing")
 
 [node name="HeavyAttack" type="Node" parent="StateMachine"]
 script = ExtResource("14_heavy_attack")

@@ -2,7 +2,7 @@ class_name Hurtbox
 extends Area3D
 ## The region of a character that can be hit. Hitboxes find it via collision layers
 ## and call receive_hit(); the owning character reacts to hit_received. Every hit
-## in the game (bat, gun, enemy attacks) comes through here, so this is where
+## in the game (melee weapon, gun, enemy attacks) comes through here, so this is where
 ## the combat feedback (Feel.on_hit) is told, with the damage actually taken.
 
 signal hit_received(attack: AttackData, source: Node3D)

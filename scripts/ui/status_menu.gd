@@ -70,6 +70,8 @@ func _ready() -> void:
 	# No bubble or description panel: tooltip mode.
 	_board = SlotBoard.new(null, null, null, "", "")
 	_model_view.gui_input.connect(_on_model_input)
+	_close_icon.follow_device = true
+	ActiveDevice.connect_changed(_on_device_changed)
 	# Same as the player: a private copy of the tree so its parameters are its own.
 	var anim_tree := _model.get_node(^"AnimationTree") as AnimationTree
 	anim_tree.tree_root = anim_tree.tree_root.duplicate(true)
@@ -119,11 +121,18 @@ func open() -> void:
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	player.hud.visible = false
-	_close_icon.gamepad = player.hud.using_gamepad
 	_turntable.rotation = Vector3.ZERO
 	_build(player)
 	_root.visible = true
-	if player.hud.using_gamepad and _main_slots.get_child_count() > 0:
+	_on_device_changed(ActiveDevice.using_gamepad)
+
+
+## Picking up the controller with nothing focused puts the cursor on the first slot.
+func _on_device_changed(gamepad: bool) -> void:
+	if not is_open or not gamepad or _main_slots.get_child_count() == 0:
+		return
+	var focused := _root.get_viewport().gui_get_focus_owner()
+	if focused == null or not _root.is_ancestor_of(focused):
 		(_main_slots.get_child(0) as Control).grab_focus.call_deferred()
 
 

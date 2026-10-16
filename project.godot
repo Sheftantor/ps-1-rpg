@@ -23,6 +23,8 @@ SceneManager="*res://scenes/scene_manager.tscn"
 SaveManager="*res://scripts/save/save_manager.gd"
 Win95Cursor="*res://scripts/ui/win95/win95_cursor.gd"
 Feel="*res://scripts/feel/feel.gd"
+ComboInput="*res://scripts/input/combo_input.gd"
+InputDevice="*res://scripts/input/input_device.gd"
 
 [beckett]
 

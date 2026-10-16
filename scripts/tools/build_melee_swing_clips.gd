@@ -1,12 +1,12 @@
-# Adds the bat swing clips to the player's (retargeted) animation library:
-#   godot --headless --path . -s res://scripts/tools/build_bat_swing_clips.gd
+# Adds the melee swing clips to the player's (retargeted) animation library:
+#   godot --headless --path . -s res://scripts/tools/build_melee_swing_clips.gd
 #
 # SwingRL is the Attack clip (right to left) and SwingLR the same clip played
 # backwards (left to right); SwingFinisher, the combo's third hit, is SwingRL at
 # the finisher's slower, heavier timing. Each is retimed to the phases in
 # res://resources/combat_tuning.tres: windup, a fast ease-out strike over the
 # clip's hit frames, and an ease-in-out recovery. The phase lengths are stored on
-# each clip ("phase_times") so the BatSwing state can retime them live if the
+# each clip ("phase_times") so the MeleeSwing state can retime them live if the
 # tuning changes later; rerun this after changing the source Attack clip.
 # Also copies the clip metadata (hit_frames, trail_frames) from the source
 # library, which the retarget to the Real_MainC rig had dropped.

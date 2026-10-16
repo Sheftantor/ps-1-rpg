@@ -67,9 +67,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -380.0
+offset_left = -440.0
 offset_top = -420.0
-offset_right = 380.0
+offset_right = 440.0
 offset_bottom = 420.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -112,9 +112,26 @@ autowrap_mode = 3
 layout_mode = 2
 text = "PLAYER  HP 100/100"
 
-[node name="Back" type="Button" parent="Root/Info"]
+[node name="Footer" type="HBoxContainer" parent="Root/Info"]
 layout_mode = 2
-size_flags_horizontal = 8
+theme_override_constants/separation = 12
+
+[node name="Hint" type="Label" parent="Root/Info/Footer"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+vertical_alignment = 1
+autowrap_mode = 3
+text = "Select a slot to change it."
+
+[node name="Reset" type="Button" parent="Root/Info/Footer"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "RESET DEFAULTS"
+
+[node name="Back" type="Button" parent="Root/Info/Footer"]
+layout_mode = 2
+size_flags_vertical = 4
 text = "BACK"
 
 [node name="Modal" type="Control" parent="Root"]

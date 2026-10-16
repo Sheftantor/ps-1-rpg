@@ -149,8 +149,8 @@ func level_gap() -> int:
 func scaled_max_health() -> int:
 	var player := _player()
 	var base := float(stats.max_health)
-	if stats.health_in_bat_hits > 0.0 and player != null:
-		base = stats.health_in_bat_hits * LevelScaling.bat_damage(player.stats)
+	if stats.health_in_melee_hits > 0.0 and player != null:
+		base = stats.health_in_melee_hits * LevelScaling.melee_damage(player.stats)
 	return maxi(1, roundi(base * LevelScaling.health_multiplier(level_gap())))
 
 

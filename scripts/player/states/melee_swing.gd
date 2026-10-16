@@ -1,5 +1,5 @@
 extends PlayerState
-## The bat combo: three swings, each one press (or keep the button held).
+## The melee combo (every melee weapon): three swings, each one press (or keep the button held).
 ## Swing 1 goes right-to-left, swing 2 left-to-right, swing 3 is the finisher: a
 ## strong, wide right-to-left sweep (finisher_arc_degrees) with a longer reach,
 ## a bigger step forward, the body twisting through it and
@@ -12,12 +12,12 @@ extends PlayerState
 ## to carry on with the next swing; after a longer pause, or after the
 ## finisher, the combo starts again from swing 1. During the finisher only a
 ## press (or hold) in the last swing_buffer_window of its recovery queues a
-## new combo. Each swing: windup (the bat pulls back) -> strike (a fast
+## new combo. Each swing: windup (the weapon pulls back) -> strike (a fast
 ## ease-out sweep; the arc hitbox is live and sweeps with it, with a small
 ## lunge) -> recovery. Only recovery can be cancelled, by the dodge.
 ## Damage and knockback: stats.light_combo[0], [1], [2] (Light 1-3). Timing in
 ## res://resources/combat_tuning.tres. Clips SwingRL / SwingLR / SwingFinisher,
-## built by res://scripts/tools/build_bat_swing_clips.gd from the Attack clip.
+## built by res://scripts/tools/build_melee_swing_clips.gd from the Attack clip.
 
 enum Phase { WINDUP, STRIKE, RECOVERY }
 

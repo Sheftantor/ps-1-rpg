@@ -33,8 +33,11 @@ const PORTRAIT_SLOT_SIZE := 80.0
 ## Queue slot portrait for an enemy whose stats have none.
 const PORTRAIT_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
 
-## Whether key labels show gamepad buttons; follows the last device used.
-var using_gamepad: bool = false
+## Whether key labels show gamepad buttons; follows the last device used
+## (ActiveDevice, the InputDevice autoload).
+var using_gamepad: bool:
+	get:
+		return ActiveDevice.using_gamepad
 
 var _message_timer: float = 0.0
 var _gun_drawn: bool = false
@@ -77,33 +80,13 @@ func _ready() -> void:
 	_targeting.visible = false
 	_prompt.text = ""
 	_interact.visible = false
-	_refresh_keybinds()
-
-
-## Switches the key labels between keyboard/mouse and gamepad as either is used.
-func _input(event: InputEvent) -> void:
-	var gamepad := using_gamepad
-	if event is InputEventJoypadButton:
-		gamepad = true
-	elif event is InputEventJoypadMotion:
-		if absf((event as InputEventJoypadMotion).axis_value) > 0.5:
-			gamepad = true
-	elif event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
-		gamepad = false
-	if gamepad != using_gamepad:
-		using_gamepad = gamepad
-		_refresh_keybinds()
+	# Key icons switch between keyboard/mouse and gamepad as either is used.
+	_interact_icon.follow_device = true
 
 
 ## Short name of the key/button bound to `action` on the current device.
 func key_label(action: StringName) -> String:
 	return InputBindings.label(action, using_gamepad)
-
-
-func _refresh_keybinds() -> void:
-	_interact_icon.gamepad = using_gamepad
-	if _targeting.visible:
-		_build_gun_prompts()
 
 
 func _process(delta: float) -> void:
@@ -222,7 +205,7 @@ func _build_gun_prompts() -> void:
 		var pair := HBoxContainer.new()
 		pair.add_theme_constant_override(&"separation", 8)
 		var icon := InputIcon.new()
-		icon.gamepad = using_gamepad
+		icon.follow_device = true
 		icon.press_phase = -0.15 * i
 		icon.action = GUN_PROMPTS[i][0]
 		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER

@@ -61,6 +61,16 @@ const TREE_JUMP_ARMS: StringName = &"parameters/JumpArms/blend_amount"
 const TREE_AIM: StringName = &"parameters/AimBlend/blend_amount"
 ## How fast the upper body raises/lowers the gun (blend per second).
 const AIM_BLEND_SPEED: float = 8.0
+## Blocking with a melee weapon: upper body into the Guard pose (0..1), and
+## how far a blocked hit has knocked it back toward GuardImpact (0..1). Built
+## by res://scripts/tools/build_guard_clips.gd.
+const TREE_GUARD: StringName = &"parameters/GuardBlend/blend_amount"
+const TREE_GUARD_RECOIL: StringName = &"parameters/GuardRecoil/blend_amount"
+## How fast the guard comes up and goes back down (blend per second).
+const GUARD_RAISE_SPEED: float = 9.0
+const GUARD_LOWER_SPEED: float = 6.0
+## How long a blocked hit's knock-back takes to settle back into the guard (s).
+const GUARD_RECOIL_TIME: float = 0.3
 ## Where the sheathed melee weapon rides while the gun is out, in Facing space: grip at
 ## the left hip, blade angled down and back.
 const SHEATH_OFFSET: Vector3 = Vector3(-0.22, 0.95, 0.08)
@@ -134,7 +144,7 @@ var _action_speed: float = 1.0
 var _action_slot: int = 0
 ## Whether the current airborne stretch started with a jump (not a ledge drop).
 var _jumped: bool = false
-## Primary weapon (bat, sword...), from the loadout.
+## Primary weapon (any melee weapon), from the loadout.
 var melee_weapon: MeleeWeaponData = null
 ## Secondary weapon slot (the melee weapon is always the primary). Null until a gun is picked up.
 var gun: WeaponData = null
@@ -143,6 +153,8 @@ var armor: Dictionary[ArmorData.Slot, ArmorData] = {}
 var _gun_model: Node3D = null
 var _aim_amount: float = 0.0
 var _aim_target: float = 0.0
+var _guard_amount: float = 0.0
+var _guard_recoil: float = 0.0
 var _melee_holder: Node3D = null
 var _melee_hand_transform: Transform3D
 var _hip_attachment: BoneAttachment3D = null
@@ -226,8 +238,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		# The loot window frees the cursor but the fight goes on: keys and the
-		# controller still act, only mouse-look waits.
-		if not LootWindow.is_open or event is InputEventMouse:
+		# controller still act, only mouse-look waits. The controller never needs
+		# the mouse captured, so it always acts.
+		var pad_event := event is InputEventJoypadButton or event is InputEventJoypadMotion
+		if event is InputEventMouse or not (LootWindow.is_open or pad_event):
 			return
 
 	if event is InputEventMouseMotion:
@@ -328,7 +342,7 @@ func can_dodge() -> bool:
 	return stamina.has(stats.dodge_stamina_cost)
 
 
-## In a melee attack: the bat combo, the strong attack, or a skill using it.
+## In a melee attack: the melee combo, the strong attack, or a skill using it.
 func is_attacking() -> bool:
 	var state := state_machine.current_name()
 	return state == PlayerState.LIGHT_ATTACK or state == PlayerState.HEAVY_ATTACK
@@ -414,6 +428,7 @@ func _on_hit_received(attack: AttackData, source: Node3D) -> void:
 		if stamina.spend(attack.damage * stats.block_stamina_per_damage):
 			last_hit_result = "blocked"
 			_flash(BLOCK_FLASH_COLOR)
+			_guard_recoil = 1.0
 			set_horizontal_velocity(push * stats.block_knockback_scale)
 			health.take_damage(roundi(attack.damage * stats.block_damage_multiplier))
 			return
@@ -947,18 +962,18 @@ func play_roll_animation(duration: float) -> void:
 	_play_action(ANIM_ROLL, _anim.get_animation(ANIM_ROLL).length / maxf(duration, 0.01))
 
 
-## Plays any action clip (e.g. the bat swings) in the one-shot slots at speed.
+## Plays any action clip (e.g. the melee swings) in the one-shot slots at speed.
 func play_action_clip(clip: StringName, speed: float) -> void:
 	_play_action(clip, speed)
 
 
-## Changes the running action clip's playback speed (the bat swing retimes each phase).
+## Changes the running action clip's playback speed (the melee swing retimes each phase).
 func set_action_speed(speed: float) -> void:
 	_action_speed = speed
 	_anim_tree.set("parameters/Action%sSpeed/scale" % ACTION_SLOTS[_action_slot], speed)
 
 
-## Phase lengths (windup, strike, recovery) built into a bat swing clip.
+## Phase lengths (windup, strike, recovery) built into a melee swing clip.
 func action_clip_phase_times(clip: StringName) -> Vector3:
 	return _anim.get_animation(clip).get_meta(&"phase_times", Vector3.ZERO)
 
@@ -1029,8 +1044,23 @@ func _update_animation(delta: float) -> void:
 	_weapon_trail.emitting = _action_frame_state(&"trail_frames") == 1
 	_aim_amount = move_toward(_aim_amount, _aim_target, AIM_BLEND_SPEED * delta)
 	_anim_tree.set(TREE_AIM, _aim_amount)
+	_update_guard_layer(delta)
 	_update_air_layer()
 	_update_locomotion_layer()
+
+
+## Raises the melee guard while blocking and lowers it after; a blocked hit
+## knocks it back toward the chest, easing back into the guard. Upper body
+## only, so the legs keep walking in whichever direction the player moves.
+func _update_guard_layer(delta: float) -> void:
+	var guarding := current_state().is_blocking() and melee_weapon != null
+	var speed := GUARD_RAISE_SPEED if guarding else GUARD_LOWER_SPEED
+	_guard_amount = move_toward(_guard_amount, 1.0 if guarding else 0.0, speed * delta)
+	_guard_recoil = move_toward(_guard_recoil, 0.0, delta / GUARD_RECOIL_TIME)
+	var raise := _guard_amount * _guard_amount * (3.0 - 2.0 * _guard_amount)
+	_anim_tree.set(TREE_GUARD, raise)
+	# Snaps back fast at first, settles gently.
+	_anim_tree.set(TREE_GUARD_RECOIL, _guard_recoil * _guard_recoil)
 
 
 ## Crossfades to the Jump clip once airborne (from its fall pose after a ledge

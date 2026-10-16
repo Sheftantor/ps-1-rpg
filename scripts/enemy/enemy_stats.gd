@@ -18,9 +18,9 @@ extends Resource
 ## ungeared player's max health; then scaled by the level gap (CombatTuning).
 ## 0 = use each attack's own damage, still scaled by the gap.
 @export_range(0.0, 1.0, 0.01) var damage_percent: float = 0.0
-## Max health at the same level as the player, in basic bat-swing hits; then
+## Max health at the same level as the player, in basic melee-swing hits; then
 ## scaled by the level gap. 0 = use max_health, still scaled by the gap.
-@export var health_in_bat_hits: float = 0.0
+@export var health_in_melee_hits: float = 0.0
 
 @export_group("Movement")
 @export var move_speed: float = 3.5
@@ -78,7 +78,7 @@ extends Resource
 ## Damage of every swing, all five the same (before level scaling; while
 ## damage_percent above is set, that decides the base instead).
 @export var attack_damage: int = 25
-## Length of each slow swing (1 and 2), split like the player's first bat
+## Length of each slow swing (1 and 2), split like the player's first melee
 ## swings: 17% windup, 21% strike (hitbox live), 62% recovery.
 @export var slow_swing_time: float = 0.9
 ## Length of each rapid swing (3 to 5): 25% windup, 55% strike, 20% recovery.

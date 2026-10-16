@@ -23,6 +23,6 @@ static func player_max_health_at(level: int, stats: PlayerStats) -> int:
 	return stats.max_health + stats.health_per_level * (level - stats.level)
 
 
-## Damage of one basic bat swing (the BatSwing state uses stats.light_combo[0]).
-static func bat_damage(stats: PlayerStats) -> int:
+## Damage of one basic melee swing (the MeleeSwing state uses stats.light_combo[0]).
+static func melee_damage(stats: PlayerStats) -> int:
 	return stats.light_combo[0].damage if not stats.light_combo.is_empty() else 1

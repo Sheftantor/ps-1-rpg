@@ -1,12 +1,12 @@
 class_name CombatTuning
 extends Resource
-## Combat feel and difficulty in one place: the player's bat swing and how enemies
+## Combat feel and difficulty in one place: the player's melee swing and how enemies
 ## scale with the level gap (enemy level - player level). Edit
 ## res://resources/combat_tuning.tres. Per-enemy bases (damage as a share of the
-## player's health, health in bat hits) are in each EnemyStats resource.
+## player's health, health in melee hits) are in each EnemyStats resource.
 
-@export_group("Bat Swing")
-## The bat pulls back (s).
+@export_group("Melee Swing")
+## The melee weapon pulls back (s).
 @export var swing_windup_time: float = 0.15
 ## The fast sweep across the front; the hitbox is live only now (s).
 @export var swing_strike_time: float = 0.18
@@ -26,7 +26,7 @@ extends Resource
 ## Keep swinging while the attack button is held (a press still works too).
 @export var swing_hold_to_combo: bool = true
 
-@export_group("Bat Finisher")
+@export_group("Melee Finisher")
 ## The third swing of the combo: a strong, wide sweep with a heavier recovery.
 ## Its damage and knockback are stats.light_combo[2] (Light 3).
 @export var finisher_windup_time: float = 0.24

@@ -1,6 +1,6 @@
 class_name WeaponData
 extends Resource
-## A gun the player can carry in the secondary weapon slot (the sword is always
+## A gun the player can carry in the secondary weapon slot (the melee weapon is always
 ## the primary). Fired from gun mode's time-stop targeting (GunAim state).
 
 @export var display_name: String = ""
@@ -11,7 +11,7 @@ extends Resource
 ## Model shown in the hand while drawn and spinning on the ground as a pickup.
 @export var model: PackedScene
 ## Damage and knockback of one shot, delivered through the target's Hurtbox
-## like a sword hit.
+## like a melee hit.
 @export var shot: AttackData
 ## Enemies within this distance (m) can be targeted.
 @export var lock_range: float = 20.0

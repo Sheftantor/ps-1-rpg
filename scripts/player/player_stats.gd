@@ -90,11 +90,13 @@ extends Resource
 @export_range(1, 8) var gun_max_queued_shots: int = 4
 ## Seconds between queued shots as they fire.
 @export var gun_shot_interval: float = 0.3
-## Real seconds holding the gun after the last shot before drawing the sword again.
+## Real seconds holding the gun after the last shot before drawing the melee weapon again.
 @export var gun_fire_recovery: float = 0.35
 
 @export_group("Block")
-@export var block_move_speed: float = 2.5
+## Guarded walking speed (m/s), kept under the walk clip's pace (1.7) so the
+## legs step slowly in every direction while the guard is up.
+@export var block_move_speed: float = 1.3
 ## Fraction of a blocked hit's damage that still gets through.
 @export_range(0.0, 1.0) var block_damage_multiplier: float = 0.1
 ## Stamina spent per point of damage blocked. Too little stamina breaks the guard.

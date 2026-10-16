@@ -47,12 +47,10 @@ const PROMPT_PIXEL_SCALE := 2
 
 var _player: Player = null
 var _pickup: Pickup = null
-var _gamepad: bool = false
 ## Whether the mouse was driving the camera when the window opened.
 var _mouse_was_captured: bool = false
 ## Slot -> the sack entry it shows.
 var _entries: Dictionary[Control, Resource] = {}
-var _prompt_icons: Array[InputIcon] = []
 
 @onready var _root: Control = $Root
 @onready var _window: Control = $Root/Window
@@ -64,6 +62,7 @@ func _ready() -> void:
 	_root.visible = false
 	_grid.columns = columns
 	_build_prompts()
+	ActiveDevice.connect_changed(_on_device_changed)
 
 
 func _exit_tree() -> void:
@@ -73,7 +72,6 @@ func _exit_tree() -> void:
 func _input(event: InputEvent) -> void:
 	if not is_open:
 		return
-	_track_device(event)
 	if event.is_action_pressed(&"interact"):
 		# Interact at a different sack opens that one instead; here, takes all.
 		var nearest := _player.nearest_interactable()
@@ -142,7 +140,7 @@ func open(pickup: Pickup) -> void:
 	_player.health.damaged.connect(_on_player_damaged)
 	_build()
 	_root.visible = true
-	_set_gamepad(_player.hud.using_gamepad)
+	_on_device_changed(ActiveDevice.using_gamepad)
 
 
 func close() -> void:
@@ -171,27 +169,21 @@ func _on_player_damaged(_amount: int) -> void:
 
 # --- Device / prompts -------------------------------------------------------------
 
-## Follows the last device used.
-func _track_device(event: InputEvent) -> void:
-	var gamepad := _gamepad
-	if event is InputEventJoypadButton:
-		gamepad = true
-	elif event is InputEventJoypadMotion:
-		if absf((event as InputEventJoypadMotion).axis_value) > 0.5:
-			gamepad = true
-	elif event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
-		gamepad = false
-	if gamepad != _gamepad:
-		_set_gamepad(gamepad)
-
-
-func _set_gamepad(gamepad: bool) -> void:
-	_gamepad = gamepad
-	_player.hud.using_gamepad = gamepad
-	for icon: InputIcon in _prompt_icons:
-		icon.gamepad = gamepad
-	if gamepad and _focused_slot() == null and _grid.get_child_count() > 0:
-		(_grid.get_child(0) as Control).grab_focus.call_deferred()
+## Follows the last device used (prompt icons follow it themselves): on the
+## controller a slot always has the cursor and its tooltip; on the mouse the
+## focus tooltip goes, leaving hover to show them.
+func _on_device_changed(gamepad: bool) -> void:
+	if not is_open:
+		return
+	var slot := _focused_slot()
+	if not gamepad:
+		if slot != null:
+			ItemTooltip.service().leave(slot)
+	elif slot == null:
+		if _grid.get_child_count() > 0:
+			(_grid.get_child(0) as Control).grab_focus.call_deferred()
+	else:
+		ItemTooltip.service().focus(slot, _entries[slot])
 
 
 ## Icon + word per PROMPTS entry; the clickable ones act on a left click.
@@ -203,10 +195,10 @@ func _build_prompts() -> void:
 		var icon := InputIcon.new()
 		icon.action = PROMPTS[i][0]
 		icon.pixel_scale = PROMPT_PIXEL_SCALE
+		icon.follow_device = true
 		icon.press_phase = -0.15 * i
 		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		pair.add_child(icon)
-		_prompt_icons.append(icon)
 		var word := Label.new()
 		word.text = PROMPTS[i][1]
 		word.theme_type_variation = &"HintLabel"
@@ -263,11 +255,11 @@ func _slot(entry: Resource) -> IconSlot:
 	slot.mouse_exited.connect(tooltip.leave.bind(slot))
 	slot.focus_entered.connect(func() -> void:
 		slot.set_selected(true)
-		if _gamepad:
+		if ActiveDevice.using_gamepad:
 			tooltip.focus(slot, entry))
 	slot.focus_exited.connect(func() -> void:
 		slot.set_selected(false)
-		if _gamepad:
+		if ActiveDevice.using_gamepad:
 			tooltip.leave(slot))
 	slot.gui_input.connect(_on_slot_input.bind(slot))
 	# Left-drag the slot onto the HUD's loadout window to take it.
@@ -326,7 +318,7 @@ func _take(entry: Resource, index: int) -> void:
 		close()
 		return
 	_build()
-	if _gamepad and index >= 0 and _grid.get_child_count() > 0:
+	if ActiveDevice.using_gamepad and index >= 0 and _grid.get_child_count() > 0:
 		(_grid.get_child(mini(index, _grid.get_child_count() - 1)) as Control).grab_focus()
 
 

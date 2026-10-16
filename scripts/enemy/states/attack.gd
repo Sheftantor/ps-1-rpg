@@ -1,7 +1,7 @@
 extends EnemyState
 ## The combo: five horizontal claw sweeps, alternating left, right, left, right,
 ## left. Swings 1 and 2 are slow (stats.slow_swing_time, split like the player's
-## first bat swings), 3 to 5 rapid (stats.rapid_swing_time, barely any recovery).
+## first melee swings), 3 to 5 rapid (stats.rapid_swing_time, barely any recovery).
 ## The hitbox is live only in each swing's strike phase, and every swing deals
 ## the same damage (Enemy.combo_attack()). Tracks the player through each windup,
 ## lunges forward on each strike. After swing 5: Recover. A hit cancels it at any
