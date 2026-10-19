@@ -2,33 +2,32 @@
 
 [ext_resource type="Script" uid="uid://b8tucuckieblf" path="res://scripts/player/player.gd" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/player_model.tscn" id="2_model"]
-[ext_resource type="Resource" path="res://resources/player/player_stats.tres" id="3_stats"]
+[ext_resource type="Resource" uid="uid://di6l0e5kjipjr" path="res://resources/player/player_stats.tres" id="3_stats"]
 [ext_resource type="Script" uid="uid://ddr3jmrv1sw61" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
 [ext_resource type="Script" uid="uid://dm4ka8v6bajrj" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
 [ext_resource type="Script" uid="uid://b0a6txu5u8use" path="res://scripts/combat/health.gd" id="6_health"]
-[ext_resource type="Resource" path="res://resources/player/player_loadout.tres" id="7_loadout"]
-[ext_resource type="Script" path="res://scripts/combat/stamina.gd" id="8_stamina"]
+[ext_resource type="Resource" uid="uid://81xcfs8mflc7" path="res://resources/player/player_loadout.tres" id="7_loadout"]
+[ext_resource type="Script" uid="uid://vywddamvniva" path="res://scripts/combat/stamina.gd" id="8_stamina"]
 [ext_resource type="Script" uid="uid://l8o5mpopl6tw" path="res://scripts/state_machine/state_machine.gd" id="9_machine"]
-[ext_resource type="Script" path="res://scripts/player/states/idle.gd" id="10_idle"]
-[ext_resource type="Script" path="res://scripts/player/states/move.gd" id="11_move"]
-[ext_resource type="Script" path="res://scripts/player/states/dodge.gd" id="12_dodge"]
-[ext_resource type="Script" path="res://scripts/player/states/light_attack.gd" id="13_light_attack"]
-[ext_resource type="Script" path="res://scripts/player/states/melee_swing.gd" id="22_melee_swing"]
-[ext_resource type="Script" path="res://scripts/player/states/heavy_attack.gd" id="14_heavy_attack"]
-[ext_resource type="Script" path="res://scripts/player/states/block.gd" id="15_block"]
-[ext_resource type="Script" path="res://scripts/player/states/hit_stun.gd" id="16_hit_stun"]
-[ext_resource type="Script" path="res://scripts/player/states/dead.gd" id="17_dead"]
-[ext_resource type="Script" path="res://scripts/player/states/gun_aim.gd" id="19_gun_aim"]
+[ext_resource type="Script" uid="uid://cujy2fcj3ep0w" path="res://scripts/player/states/idle.gd" id="10_idle"]
+[ext_resource type="Script" uid="uid://3tav6sai2cfl" path="res://scripts/player/states/move.gd" id="11_move"]
+[ext_resource type="Script" uid="uid://b40v7eaonakui" path="res://scripts/player/states/dodge.gd" id="12_dodge"]
+[ext_resource type="Script" uid="uid://bjcqjbgr2wk8p" path="res://scripts/player/states/heavy_attack.gd" id="14_heavy_attack"]
+[ext_resource type="Script" uid="uid://bvjussi6rfcvy" path="res://scripts/player/states/block.gd" id="15_block"]
+[ext_resource type="Script" uid="uid://bcgh87gpqngkb" path="res://scripts/player/states/hit_stun.gd" id="16_hit_stun"]
+[ext_resource type="Script" uid="uid://bvh30x3bheqxc" path="res://scripts/player/states/dead.gd" id="17_dead"]
+[ext_resource type="Script" uid="uid://cou2pacgpsjxe" path="res://scripts/player/states/gun_aim.gd" id="19_gun_aim"]
 [ext_resource type="PackedScene" path="res://scenes/player_hud.tscn" id="20_player_hud"]
-[ext_resource type="Script" path="res://scripts/combat/range_dome.gd" id="21_range_dome"]
-[ext_resource type="PackedScene" path="res://scenes/player_health_bar.tscn" id="99_health_bar"]
-[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="98_pause"]
-[ext_resource type="PackedScene" path="res://scenes/status_menu.tscn" id="97_status"]
-[ext_resource type="PackedScene" path="res://scenes/inventory_menu.tscn" id="96_inventory"]
+[ext_resource type="Script" uid="uid://dgokxetn1pb23" path="res://scripts/combat/range_dome.gd" id="21_range_dome"]
+[ext_resource type="Script" uid="uid://dwhyyq3qvw6v" path="res://scripts/player/states/melee_swing.gd" id="22_melee_swing"]
 [ext_resource type="PackedScene" path="res://scenes/loot_window.tscn" id="95_loot"]
-[ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
-[ext_resource type="Script" path="res://scripts/player/player_saveable.gd" id="99_saveable"]
-[ext_resource type="Script" path="res://scripts/player/states/orb_touch.gd" id="100_orb_touch"]
+[ext_resource type="PackedScene" path="res://scenes/inventory_menu.tscn" id="96_inventory"]
+[ext_resource type="PackedScene" path="res://scenes/status_menu.tscn" id="97_status"]
+[ext_resource type="Script" uid="uid://dkhf2p0uftw3b" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="98_pause"]
+[ext_resource type="PackedScene" path="res://scenes/player_health_bar.tscn" id="99_health_bar"]
+[ext_resource type="Script" uid="uid://dm20yh22cisft" path="res://scripts/player/player_saveable.gd" id="99_saveable"]
+[ext_resource type="Script" uid="uid://ca1q0862w5kf8" path="res://scripts/player/states/orb_touch.gd" id="100_orb_touch"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -104,7 +103,7 @@ shape = SubResource("BoxShape3D_hitbox")
 [node name="DebugMesh" type="MeshInstance3D" parent="Facing/Hitbox" unique_id=1630489511]
 mesh = SubResource("BoxMesh_hitbox")
 
-[node name="SwingHitbox" type="Area3D" parent="Facing"]
+[node name="SwingHitbox" type="Area3D" parent="Facing" unique_id=25870521]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.75)
 collision_layer = 0
 collision_mask = 16
@@ -112,27 +111,27 @@ monitoring = false
 monitorable = false
 script = ExtResource("4_hitbox")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/SwingHitbox"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/SwingHitbox" unique_id=1745637260]
 shape = SubResource("BoxShape3D_swing")
 
-[node name="DebugMesh" type="MeshInstance3D" parent="Facing/SwingHitbox"]
+[node name="DebugMesh" type="MeshInstance3D" parent="Facing/SwingHitbox" unique_id=652806958]
 mesh = SubResource("BoxMesh_swing")
 
-[node name="SwingArc" type="Node3D" parent="Facing"]
+[node name="SwingArc" type="Node3D" parent="Facing" unique_id=1167823193]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
-[node name="ArcHitbox" type="Area3D" parent="Facing/SwingArc"]
+[node name="ArcHitbox" type="Area3D" parent="Facing/SwingArc" unique_id=1055681101]
 collision_layer = 0
 collision_mask = 16
 monitoring = false
 monitorable = false
 script = ExtResource("4_hitbox")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/SwingArc/ArcHitbox"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/SwingArc/ArcHitbox" unique_id=547324100]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.85)
 shape = SubResource("BoxShape3D_arc")
 
-[node name="DebugMesh" type="MeshInstance3D" parent="Facing/SwingArc/ArcHitbox"]
+[node name="DebugMesh" type="MeshInstance3D" parent="Facing/SwingArc/ArcHitbox" unique_id=437986034]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.85)
 mesh = SubResource("BoxMesh_arc")
 
@@ -167,61 +166,61 @@ top_level = true
 visible = false
 mesh = SubResource("PrismMesh_marker")
 
-[node name="Stamina" type="Node" parent="."]
+[node name="Stamina" type="Node" parent="." unique_id=2104997401]
 script = ExtResource("8_stamina")
 
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+[node name="StateMachine" type="Node" parent="." unique_id=255968731 node_paths=PackedStringArray("initial_state")]
 script = ExtResource("9_machine")
 initial_state = NodePath("Idle")
 
-[node name="Idle" type="Node" parent="StateMachine"]
+[node name="Idle" type="Node" parent="StateMachine" unique_id=1741541261]
 script = ExtResource("10_idle")
 
-[node name="Move" type="Node" parent="StateMachine"]
+[node name="Move" type="Node" parent="StateMachine" unique_id=1218211540]
 script = ExtResource("11_move")
 
-[node name="Dodge" type="Node" parent="StateMachine"]
+[node name="Dodge" type="Node" parent="StateMachine" unique_id=1444066021]
 script = ExtResource("12_dodge")
 
-[node name="LightAttack" type="Node" parent="StateMachine"]
+[node name="LightAttack" type="Node" parent="StateMachine" unique_id=636865476]
 script = ExtResource("22_melee_swing")
 
-[node name="HeavyAttack" type="Node" parent="StateMachine"]
+[node name="HeavyAttack" type="Node" parent="StateMachine" unique_id=1575246452]
 script = ExtResource("14_heavy_attack")
 
-[node name="Block" type="Node" parent="StateMachine"]
+[node name="Block" type="Node" parent="StateMachine" unique_id=389041050]
 script = ExtResource("15_block")
 
-[node name="HitStun" type="Node" parent="StateMachine"]
+[node name="HitStun" type="Node" parent="StateMachine" unique_id=1896708301]
 script = ExtResource("16_hit_stun")
 
-[node name="Dead" type="Node" parent="StateMachine"]
+[node name="Dead" type="Node" parent="StateMachine" unique_id=2021162232]
 script = ExtResource("17_dead")
 
-[node name="GunAim" type="Node" parent="StateMachine"]
+[node name="GunAim" type="Node" parent="StateMachine" unique_id=1959359959]
 script = ExtResource("19_gun_aim")
 
-[node name="OrbTouch" type="Node" parent="StateMachine"]
+[node name="OrbTouch" type="Node" parent="StateMachine" unique_id=1936052348]
 script = ExtResource("100_orb_touch")
 
-[node name="PlayerHud" parent="." instance=ExtResource("20_player_hud")]
+[node name="PlayerHud" parent="." unique_id=1542474058 instance=ExtResource("20_player_hud")]
 
-[node name="RangeDome" type="MeshInstance3D" parent="."]
+[node name="RangeDome" type="MeshInstance3D" parent="." unique_id=1599607215]
 script = ExtResource("21_range_dome")
 
-[node name="HealthBar" parent="." instance=ExtResource("99_health_bar")]
+[node name="HealthBar" parent="." unique_id=1782785630 instance=ExtResource("99_health_bar")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
 
-[node name="PauseMenu" parent="." instance=ExtResource("98_pause")]
+[node name="PauseMenu" parent="." unique_id=1507446533 instance=ExtResource("98_pause")]
 
-[node name="StatusMenu" parent="." instance=ExtResource("97_status")]
+[node name="StatusMenu" parent="." unique_id=950250927 instance=ExtResource("97_status")]
 
-[node name="InventoryMenu" parent="." instance=ExtResource("96_inventory")]
+[node name="InventoryMenu" parent="." unique_id=1364596505 instance=ExtResource("96_inventory")]
 
-[node name="LootWindow" parent="." instance=ExtResource("95_loot")]
+[node name="LootWindow" parent="." unique_id=1305117931 instance=ExtResource("95_loot")]
 
-[node name="BlobShadow" type="MeshInstance3D" parent="."]
+[node name="BlobShadow" type="MeshInstance3D" parent="." unique_id=1838548616]
 script = ExtResource("98_blob_shadow")
 
-[node name="Saveable" type="Node" parent="."]
+[node name="Saveable" type="Node" parent="." unique_id=1237793087]
 script = ExtResource("99_saveable")
