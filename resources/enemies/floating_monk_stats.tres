@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="EnemyStats" format=3 uid="uid://fjpod0wn5c8t"]
+
+[ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="1_attack"]
+[ext_resource type="Texture2D" uid="uid://dkl3dod8hq5cm" path="res://textures/ui/icons/placeholder_portrait.png" id="2_lnhsc"]
+[ext_resource type="Script" uid="uid://e4ea8tpb76l5" path="res://scripts/enemy/enemy_stats.gd" id="2_stats"]
+
+[sub_resource type="Resource" id="Resource_strike"]
+script = ExtResource("1_attack")
+display_name = "Many-Hand Strike"
+knockback = 2.5
+hit_stun_multiplier = 0.8
+lunge_speed = 2.5
+
+[resource]
+script = ExtResource("2_stats")
+max_health = 300
+level = 6
+display_name = "Floating Monk"
+damage_percent = 0.1
+health_in_melee_hits = 24.0
+move_speed = 2.0
+acceleration = 14.0
+turn_speed = 7.0
+detection_radius = 16.0
+lose_interest_radius = 26.0
+attacks = Array[ExtResource("1_attack")]([SubResource("Resource_strike")])
+stagger_time = 0.6
+stagger_friction = 12.0
+slow_swing_time = 0.6
+rapid_swing_time = 0.32
+telegraph_time = 0.45
+vulnerable_time = 1.6
+vulnerable_damage_multiplier = 1.5
+combo_cooldown = 2.5
+combo_stagger_immune = true

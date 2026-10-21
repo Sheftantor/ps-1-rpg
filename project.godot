@@ -38,6 +38,7 @@ window/size/viewport_height=1080
 window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/stretch/scale_mode="integer"
 
 [editor_plugins]
 
@@ -64,11 +65,20 @@ theme/custom="res://resources/ui/win95/win95_dark.tres"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 
 [shader_globals]
 
 ps1_snap_resolution={
 "type": "float",
-"value": 240.0
+"value": 360.0
+}
+ps1_snap_strength={
+"type": "float",
+"value": 1.0
+}
+ps1_affine_warp={
+"type": "float",
+"value": 0.0
 }

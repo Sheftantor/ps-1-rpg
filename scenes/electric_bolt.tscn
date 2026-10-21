@@ -1,0 +1,74 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pistol_bolt.gd" id="1_bolt"]
+[ext_resource type="Script" path="res://scripts/combat/electric_flicker.gd" id="2_flicker"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_core"]
+shading_mode = 0
+albedo_color = Color(0.85, 0.97, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_arc"]
+shading_mode = 0
+albedo_color = Color(0.3, 0.8, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_trail"]
+shading_mode = 0
+albedo_color = Color(0.15, 0.45, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_core"]
+material = SubResource("StandardMaterial3D_core")
+radius = 0.09
+height = 0.18
+radial_segments = 6
+rings = 3
+
+[sub_resource type="BoxMesh" id="BoxMesh_arc"]
+material = SubResource("StandardMaterial3D_arc")
+size = Vector3(0.36, 0.025, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_trail"]
+material = SubResource("StandardMaterial3D_trail")
+size = Vector3(0.04, 0.04, 0.9)
+
+[node name="ElectricBolt" type="Node3D"]
+script = ExtResource("1_bolt")
+speed = 15.0
+knockback = 3.0
+trail_length = 1.0
+
+[node name="Core" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_core")
+
+[node name="Sparks" type="Node3D" parent="."]
+script = ExtResource("2_flicker")
+
+[node name="ArcA" type="MeshInstance3D" parent="Sparks"]
+cast_shadow = 0
+mesh = SubResource("BoxMesh_arc")
+
+[node name="ArcB" type="MeshInstance3D" parent="Sparks"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_arc")
+
+[node name="Glow" type="OmniLight3D" parent="."]
+light_color = Color(0.4, 0.8, 1, 1)
+light_energy = 2.0
+omni_range = 2.5
+
+[node name="Trail" type="Node3D" parent="."]
+
+[node name="Streak" type="MeshInstance3D" parent="Trail"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.45)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_trail")
+
+[node name="Sparks" type="Node3D" parent="Trail"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+script = ExtResource("2_flicker")
+
+[node name="Arc" type="MeshInstance3D" parent="Trail/Sparks"]
+transform = Transform3D(0.5, 0, 0, 0, 1, 0, 0, 0, 8, 0, 0, 0)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_arc")

@@ -55,7 +55,8 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	var key := event as InputEventKey
-	if key != null and key.pressed and not key.echo and key.physical_keycode == TOGGLE_KEY:
+	# Shift+F9 is the PS1Renderer's effect toggle.
+	if key != null and key.pressed and not key.echo and not key.shift_pressed and key.physical_keycode == TOGGLE_KEY:
 		toggle()
 		get_viewport().set_input_as_handled()
 

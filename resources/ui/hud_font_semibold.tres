@@ -1,7 +1,6 @@
-[gd_resource type="FontVariation" load_steps=2 format=3]
+[gd_resource type="FontVariation" format=3 uid="uid://eyn8locx0ea7"]
 
 [ext_resource type="FontFile" uid="uid://cgbjatqrhx5wq" path="res://Import/MGS1 HUD.ttf" id="1_font"]
 
 [resource]
 base_font = ExtResource("1_font")
-variation_embolden = 0.3

@@ -1,0 +1,42 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/characters/FloatingFigure.gd" id="1_figure"]
+[ext_resource type="Resource" path="res://resources/idle_pose_default.tres" id="2_pose"]
+[ext_resource type="PackedScene" uid="uid://3gjilgsqum3l" path="res://Import/Character/Suit_Enemy1/Multi_Arm_Man.glb" id="3_model"]
+
+[node name="FloatingFigure" type="Node3D"]
+script = ExtResource("1_figure")
+pose = ExtResource("2_pose")
+
+[node name="Float" type="Node3D" parent="."]
+
+[node name="Model" parent="Float" instance=ExtResource("3_model")]
+
+[node name="Pivots" type="Node3D" parent="Float"]
+
+[node name="Body" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7156, -0.0024)
+
+[node name="Main Blue Right Arm" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1444, 0.7359, -0.0472)
+
+[node name="Main Blue Left Arm" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1444, 0.7359, -0.0472)
+
+[node name="Yellow Right Arm" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1404, 0.801, -0.0478)
+
+[node name="Red Left Arm" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1404, 0.801, -0.0478)
+
+[node name="Green Right Arm" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1113, 0.6695, -0.0479)
+
+[node name="Purple Left Arm" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1125, 0.6697, -0.0467)
+
+[node name="Main Purple Right Leg" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0555, 0.4072, -0.0058)
+
+[node name="Main Orange Left Leg" type="Node3D" parent="Float/Pivots"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0566, 0.4074, -0.0053)

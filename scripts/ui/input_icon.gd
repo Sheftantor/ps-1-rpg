@@ -58,6 +58,9 @@ const KEY_LETTER_COLORS := [Color8(0xd5, 0xd5, 0xd5), Color8(0xff, 0xff, 0xff), 
 ## font size per pixel_scale (sized to match the sheet's own key letters).
 const CHAR_WIDTH := 6
 const TEXT_SIZE_PER_SCALE := 13
+## The pixel font's em in font pixels: sizes are snapped to whole multiples of
+## it so every font pixel covers a whole number of screen pixels.
+const PIXEL_FONT_GRID := 16
 ## Shorter printed names for keys whose own name would make a very long cap.
 const KEY_NAMES := {
 	KEY_BACKSPACE: "BKSP", KEY_CAPSLOCK: "CAPS", KEY_PAGEUP: "PGUP", KEY_PAGEDOWN: "PGDN",
@@ -328,8 +331,8 @@ func _printed(text: String, face: Rect2i, x: int) -> Label:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.text = text
 	var settings := label_settings.duplicate() as LabelSettings
-	settings.font_size = TEXT_SIZE_PER_SCALE * pixel_scale
-	settings.shadow_offset = Vector2.ONE * (pixel_scale / 2.0)
+	settings.font_size = PIXEL_FONT_GRID * maxi(1, roundi(TEXT_SIZE_PER_SCALE * pixel_scale / float(PIXEL_FONT_GRID)))
+	settings.shadow_offset = Vector2.ONE * maxi(1, pixel_scale / 2)
 	label.label_settings = settings
 	# A line box taller than the cap face, centred on it, so the text sits in the
 	# middle of the key instead of overflowing from its top edge.

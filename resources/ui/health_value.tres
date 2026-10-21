@@ -1,10 +1,9 @@
-[gd_resource type="LabelSettings" load_steps=2 format=3]
+[gd_resource type="LabelSettings" format=3 uid="uid://bgx6lak0fo82k"]
 
 [ext_resource type="FontFile" uid="uid://cgbjatqrhx5wq" path="res://Import/MGS1 HUD.ttf" id="1_font"]
 
 [resource]
 font = ExtResource("1_font")
-font_size = 56
-font_color = Color(1, 1, 1, 1)
+font_size = 64
 outline_size = 16
 outline_color = Color(0, 0, 0, 1)

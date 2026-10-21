@@ -3,18 +3,19 @@ class_name EnemyHudLayout
 extends Node
 ## Sizes and positions the parts of an enemy's floating HUD
 ## (res://scenes/enemy_health_bar.tscn); a child of the EnemyHealthBar root.
-## Scales change the real font and outline sizes (rounded to whole pixels) rather
-## than scaling the Controls, so the pixel font stays crisp. The label boxes
+## Scales change the real font and outline sizes rather than scaling the
+## Controls, so the pixel font stays crisp: font sizes snap to whole multiples of
+## the font's 16 px em (each font pixel = a whole number of screen pixels). The label boxes
 ## shrink by the same amount. The health number hangs just under the level
 ## badge (number_gap apart) whatever their sizes. Applies live in the editor.
 ## Only enemy HUDs have this; the player's bar is unaffected.
 
-## The health number: font, outline and box. 1.0 = the original 56 px font.
+## The health number: font, outline and box. 1.0 = the 64 px font (0.5 = 32 px).
 @export_range(0.2, 1.5, 0.05) var health_number_scale: float = 0.5:
 	set(value):
 		health_number_scale = value
 		_refresh()
-## The level number over the health number. 1.0 = the original 40 px font.
+## The level number over the health number. 1.0 = the 48 px font.
 @export_range(0.2, 1.5, 0.05) var level_badge_scale: float = 1.0:
 	set(value):
 		level_badge_scale = value
@@ -41,6 +42,8 @@ const BADGE_RECT := Rect2(197, 102, 46, 46)
 ## Roughly half a digit's drawn height as a fraction of the font size (this
 ## font's digits are about 70% of it), used to stack the two numbers.
 const DIGIT_HALF_HEIGHT := 0.35
+## The pixel font's em in font pixels (MGS1 HUD: 1024 units, 64 per pixel).
+const PIXEL_FONT_GRID := 16
 
 
 func _ready() -> void:
@@ -72,7 +75,7 @@ func _refresh() -> void:
 
 func _scaled(base: LabelSettings, factor: float) -> LabelSettings:
 	var settings := base.duplicate() as LabelSettings
-	settings.font_size = maxi(1, roundi(base.font_size * factor))
+	settings.font_size = PIXEL_FONT_GRID * maxi(1, roundi(base.font_size * factor / PIXEL_FONT_GRID))
 	if base.outline_size > 0:
 		settings.outline_size = maxi(1, roundi(base.outline_size * factor))
 	return settings

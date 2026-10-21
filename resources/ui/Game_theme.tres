@@ -122,7 +122,7 @@ axis_stretch_vertical = 1
 
 [resource]
 default_font = ExtResource("1_ed4vw")
-default_font_size = 22
+default_font_size = 16
 Button/colors/font_color = Color(0, 0, 0, 1)
 Button/colors/font_disabled_color = Color(0, 0, 0, 1)
 Button/styles/disabled = SubResource("StyleBoxTexture_raised")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PS1Settings" format=3]
+
+[ext_resource type="Script" path="res://scripts/rendering/ps1_settings.gd" id="1_ps1"]
+
+[resource]
+script = ExtResource("1_ps1")
+internal_resolution = 0
+vertex_snap_strength = 1.0
+dither_enabled = true
+color_depth_bits = 5
+affine_warp_amount = 0.0

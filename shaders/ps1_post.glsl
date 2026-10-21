@@ -3,7 +3,8 @@
 
 // PS1 framebuffer emulation for PS1PostEffect: pixelates the frame to a low
 // virtual resolution (nearest-neighbor, no smoothing), then quantizes each
-// low-res pixel to a reduced color depth (no dithering).
+// low-res pixel to a reduced color depth, optionally with a 4x4 ordered dither
+// like the PS1's 15-bit output.
 // One invocation owns one low-res pixel block, so the in-place write is race-free.
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
@@ -15,11 +16,20 @@ layout(push_constant, std430) uniform Params {
 	float block_size;
 	// Levels per color channel (PS1 framebuffer was 15-bit, i.e. 32 levels). 0 disables.
 	float color_levels;
-	float pad0;
+	// 1 = ordered dither before quantizing, 0 = plain quantize.
+	float dither;
 	float pad1;
 	float pad2;
 	float pad3;
 } params;
+
+// PS1 GPU dither matrix, in units of one quantization step (-4..3 out of 8 steps).
+const float DITHER[16] = float[16](
+	-4.0, 0.0, -3.0, 1.0,
+	2.0, -2.0, 3.0, -1.0,
+	-3.0, 1.0, -4.0, 0.0,
+	3.0, -1.0, 2.0, -2.0
+);
 
 void main() {
 	ivec2 block = ivec2(gl_GlobalInvocationID.xy);
@@ -36,6 +46,9 @@ void main() {
 		// Quantize in sRGB space so banding is spread evenly like real hardware.
 		float levels = params.color_levels - 1.0;
 		vec3 srgb = pow(clamp(color.rgb, 0.0, 1.0), vec3(1.0 / 2.2));
+		if (params.dither > 0.5) {
+			srgb += DITHER[(block.y & 3) * 4 + (block.x & 3)] / 8.0 / levels;
+		}
 		srgb = clamp(floor(srgb * levels + 0.5) / levels, 0.0, 1.0);
 		color.rgb = pow(srgb, vec3(2.2));
 	}

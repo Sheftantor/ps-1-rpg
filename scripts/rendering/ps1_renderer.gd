@@ -4,17 +4,39 @@ extends Node
 ## - swaps plain StandardMaterial3Ds (e.g. imported .glb models) for the PS1
 ##   shader as they enter the tree, so they get vertex snapping and PS1 lighting.
 ## Set metadata "ps1_keep_materials" = true on a node to opt it (and its children) out.
+## Every look value comes from res://settings/ps1_settings.tres (PS1Settings).
+## The compositor runs inside the 3D render, before any CanvasLayer is drawn, so
+## the UI is never pixelated. Shift+F9 (debug) switches the whole look off and on.
 
+const SETTINGS_PATH := "res://settings/ps1_settings.tres"
+## F9 alone opens the Feel panel (FeelPanel), so the toggle needs Shift.
+const TOGGLE_KEY := KEY_F9
 const COMPOSITOR: Compositor = preload("res://resources/rendering/ps1_compositor.tres")
 const PS1_SHADER: Shader = preload("res://shaders/ps1.gdshader")
 const PS1_DOUBLE_SIDED_SHADER: Shader = preload("res://shaders/ps1_double_sided.gdshader")
 const KEEP_MATERIALS_META := &"ps1_keep_materials"
+
+var settings: PS1Settings
+## False while the debug toggle has the look switched off.
+var effect_enabled: bool = true
 
 var _converted: Dictionary[Material, Material] = {}
 
 
 func _enter_tree() -> void:
 	get_tree().node_added.connect(_on_node_added)
+	settings = load(SETTINGS_PATH) as PS1Settings
+	if settings == null:
+		settings = PS1Settings.new()
+	settings.changed.connect(apply_settings)
+	apply_settings()
+
+
+func _input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if OS.is_debug_build() and key != null and key.pressed and not key.echo 			and key.shift_pressed and key.physical_keycode == TOGGLE_KEY:
+		set_effect_enabled(not effect_enabled)
+		get_viewport().set_input_as_handled()
 
 
 func _process(_delta: float) -> void:
@@ -23,12 +45,25 @@ func _process(_delta: float) -> void:
 		camera.compositor = COMPOSITOR
 
 
-## Changes the virtual resolution for both vertex snapping and pixelation.
-func set_virtual_height(height: int) -> void:
-	RenderingServer.global_shader_parameter_set(&"ps1_snap_resolution", float(height))
+## Turns the whole PS1 look (post effect, vertex snap, affine warp) on or off.
+func set_effect_enabled(enabled: bool) -> void:
+	effect_enabled = enabled
+	apply_settings()
+	print("PS1 effect ", "on" if enabled else "off")
+
+
+## Pushes the settings resource to the post effect and the shader globals.
+func apply_settings() -> void:
+	var on := effect_enabled
+	RenderingServer.global_shader_parameter_set(&"ps1_snap_resolution", float(settings.get_virtual_height()))
+	RenderingServer.global_shader_parameter_set(&"ps1_snap_strength", settings.vertex_snap_strength if on else 0.0)
+	RenderingServer.global_shader_parameter_set(&"ps1_affine_warp", settings.affine_warp_amount if on else 0.0)
 	for effect in COMPOSITOR.compositor_effects:
 		if effect is PS1PostEffect:
-			effect.virtual_height = height
+			effect.enabled = on
+			effect.virtual_height = settings.get_virtual_height()
+			effect.dither = settings.dither_enabled
+			effect.color_levels = 0 if settings.color_depth_bits >= 8 else 1 << settings.color_depth_bits
 
 
 func _on_node_added(node: Node) -> void:
