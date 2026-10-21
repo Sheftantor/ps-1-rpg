@@ -36,6 +36,15 @@ offset_bottom = 106.0
 theme_type_variation = &"HeadingLabel"
 text = "INVENTORY"
 
+[node name="Wallet" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 106.0
+offset_right = 556.0
+offset_bottom = 146.0
+theme_type_variation = &"SectionLabel"
+text = "CASH  $0"
+
 [node name="Hint" type="HBoxContainer" parent="Root"]
 layout_mode = 1
 anchors_preset = 1

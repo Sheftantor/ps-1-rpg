@@ -14,6 +14,8 @@ extends CharacterBody3D
 signal level_changed(level: int)
 ## Emitted when XP, the level or stat points change (HUD XP bar, status screen).
 signal progress_changed
+## Emitted when the wallet changes (shop screen, inventory).
+signal money_changed(money: int)
 
 const ACTION_LIGHT: StringName = &"attack_light"
 const ACTION_HEAVY: StringName = &"attack_heavy"
@@ -117,6 +119,8 @@ var lock_target: Enemy = null
 var inventory: Array[ItemStack] = []
 ## Index into inventory of the item use_item spends; next_item steps it.
 var selected_item: int = 0
+## Cash in the wallet. Starts at loadout.starting_money; kills add to it, shops spend it.
+var money: int = 0
 ## Set by states each tick for their visual cue (wind-up, i-frames, guard).
 var state_flash: Color = NO_COLOR
 ## What happened to the last incoming hit, for the debug HUD.
@@ -195,6 +199,7 @@ func _ready() -> void:
 
 	for stack: ItemStack in loadout.inventory:
 		inventory.append(stack.duplicate() as ItemStack)
+	money = loadout.starting_money
 	_equip_from_loadout()
 
 	_debug_hit = AttackData.new()
@@ -698,10 +703,34 @@ func _refresh_xp_hud() -> void:
 ## Called by an enemy as it dies. Returns the XP gained.
 func award_kill(enemy_level: int) -> int:
 	var gained := Leveling.kill_xp(enemy_level, level, stats)
+	var cash := stats.kill_cash_per_level * maxi(1, enemy_level)
+	var parts := PackedStringArray()
 	if gained > 0:
-		hud.flash_message("+%d XP" % gained)
+		parts.append("+%d XP" % gained)
+	if cash > 0:
+		parts.append("+$%d" % cash)
+		add_money(cash)
+	if not parts.is_empty():
+		hud.flash_message("   ".join(parts))
+	if gained > 0:
 		gain_xp(gained)
 	return gained
+
+
+func add_money(amount: int) -> void:
+	if amount == 0:
+		return
+	money = maxi(0, money + amount)
+	money_changed.emit(money)
+
+
+## Takes amount out of the wallet. False (and nothing spent) if there isn't enough.
+func spend_money(amount: int) -> bool:
+	if amount < 0 or amount > money:
+		return false
+	money -= amount
+	money_changed.emit(money)
+	return true
 
 
 ## WoW-style level-up: more max health and energy (the gain is added to the
@@ -741,6 +770,7 @@ func save_state() -> Dictionary:
 		gun = gun,
 		inventory = inventory.duplicate(),
 		selected_item = selected_item,
+		money = money,
 	}
 
 
@@ -758,6 +788,8 @@ func load_state(state: Dictionary) -> void:
 	gun = state.gun
 	inventory.assign(state.inventory)
 	selected_item = state.selected_item
+	money = int(state.get("money", money))
+	money_changed.emit(money)
 	_refresh_item_hud()
 	progress_changed.emit()
 
@@ -803,6 +835,20 @@ func take_loot(pickup: Pickup, entry: Resource) -> void:
 		add_item(stack)
 		hud.flash_message("GOT %s X%d" % [stack.item.display_name.to_upper(), stack.count])
 	pickup.remove(entry)
+
+
+## Takes count of item out of the inventory (selling). False if fewer are carried.
+func remove_item(item: ItemData, count: int = 1) -> bool:
+	for held: ItemStack in inventory:
+		if held.item == item:
+			if held.count < count:
+				return false
+			held.count -= count
+			if held.count <= 0:
+				inventory.erase(held)
+			_refresh_item_hud()
+			return true
+	return false
 
 
 ## Adds loot to the inventory, stacking onto a slot holding the same item.

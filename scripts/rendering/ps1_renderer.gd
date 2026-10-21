@@ -4,6 +4,8 @@ extends Node
 ## - swaps plain StandardMaterial3Ds (e.g. imported .glb models) for the PS1
 ##   shader as they enter the tree, so they get vertex snapping and PS1 lighting.
 ## Set metadata "ps1_keep_materials" = true on a node to opt it (and its children) out.
+## Set metadata "ps1_no_vertex_snap" = true to keep its vertices off the snap grid
+## (big flat ground: its few huge triangles slide in steps and tiles split apart).
 ## Every look value comes from res://settings/ps1_settings.tres (PS1Settings).
 ## The compositor runs inside the 3D render, before any CanvasLayer is drawn, so
 ## the UI is never pixelated. Shift+F9 (debug) switches the whole look off and on.
@@ -15,12 +17,14 @@ const COMPOSITOR: Compositor = preload("res://resources/rendering/ps1_compositor
 const PS1_SHADER: Shader = preload("res://shaders/ps1.gdshader")
 const PS1_DOUBLE_SIDED_SHADER: Shader = preload("res://shaders/ps1_double_sided.gdshader")
 const KEEP_MATERIALS_META := &"ps1_keep_materials"
+const NO_SNAP_META := &"ps1_no_vertex_snap"
 
 var settings: PS1Settings
 ## False while the debug toggle has the look switched off.
 var effect_enabled: bool = true
 
 var _converted: Dictionary[Material, Material] = {}
+var _converted_no_snap: Dictionary[Material, Material] = {}
 
 
 func _enter_tree() -> void:
@@ -68,21 +72,23 @@ func apply_settings() -> void:
 
 func _on_node_added(node: Node) -> void:
 	var mesh_instance := node as MeshInstance3D
-	if mesh_instance == null or mesh_instance.mesh == null or _is_opted_out(node):
+	if mesh_instance == null or mesh_instance.mesh == null or _has_meta_up(node, KEEP_MATERIALS_META):
 		return
+	var snap := not _has_meta_up(node, NO_SNAP_META)
 	if mesh_instance.material_override != null:
-		mesh_instance.material_override = _to_ps1(mesh_instance.material_override)
+		mesh_instance.material_override = _to_ps1(mesh_instance.material_override, snap)
 		return
 	for surface in mesh_instance.mesh.get_surface_count():
 		var material := mesh_instance.get_active_material(surface)
-		var converted := _to_ps1(material)
+		var converted := _to_ps1(material, snap)
 		if converted != material:
 			mesh_instance.set_surface_override_material(surface, converted)
 
 
-func _is_opted_out(node: Node) -> bool:
+## Whether node or any of its ancestors has meta set to true.
+func _has_meta_up(node: Node, meta: StringName) -> bool:
 	while node != null:
-		if node.get_meta(KEEP_MATERIALS_META, false):
+		if node.get_meta(meta, false):
 			return true
 		node = node.get_parent()
 	return false
@@ -90,24 +96,26 @@ func _is_opted_out(node: Node) -> bool:
 
 ## Returns a PS1 shader copy of an opaque, lit StandardMaterial3D, or the
 ## material unchanged. Transparent and unshaded materials (debug volumes,
-## markers) are left alone.
-func _to_ps1(material: Material) -> Material:
+## markers) are left alone. snap false turns the shader's vertex_snap off.
+func _to_ps1(material: Material, snap: bool = true) -> Material:
 	var base := material as BaseMaterial3D
 	if base == null \
 			or base.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED \
 			or base.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED:
 		return material
-	if _converted.has(base):
-		return _converted[base]
+	var cache := _converted if snap else _converted_no_snap
+	if cache.has(base):
+		return cache[base]
 
 	var ps1 := ShaderMaterial.new()
 	ps1.shader = PS1_DOUBLE_SIDED_SHADER if base.cull_mode == BaseMaterial3D.CULL_DISABLED else PS1_SHADER
 	ps1.set_shader_parameter(&"albedo_color", base.albedo_color)
 	ps1.set_shader_parameter(&"albedo_texture", base.albedo_texture)
 	ps1.set_shader_parameter(&"uv_scale", Vector2(base.uv1_scale.x, base.uv1_scale.y))
+	ps1.set_shader_parameter(&"vertex_snap", snap)
 	if base.emission_enabled:
 		ps1.set_shader_parameter(&"emission_color", base.emission)
 		ps1.set_shader_parameter(&"emission_texture", base.emission_texture)
 		ps1.set_shader_parameter(&"emission_energy", base.emission_energy_multiplier)
-	_converted[base] = ps1
+	cache[base] = ps1
 	return ps1

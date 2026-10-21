@@ -26,9 +26,9 @@ signal game_loaded(slot: int)
 ## Bump when the save layout changes, and upgrade older files in _migrate().
 const SAVE_VERSION: int = 1
 const SLOTS: Array[String] = ["save_01", "save_02", "save_03"]
-const NEW_GAME_SCENE: String = "res://scenes/test_plaza.tscn"
+const NEW_GAME_SCENE: String = "res://scenes/areas/area_terrace_street.tscn"
 ## The loading screen's title for a new game (the area NEW_GAME_SCENE is).
-const NEW_GAME_AREA_NAME: String = "Times Square"
+const NEW_GAME_AREA_NAME: String = "Terrace Street"
 const START_MENU_SCENE: String = "res://scenes/start_menu.tscn"
 const SAVEABLE_GROUP: StringName = &"saveable"
 

@@ -6,4 +6,5 @@
 script = ExtResource("1_item")
 display_name = "Potion"
 description = "A small vial of medicine. Patches you up mid-fight."
+price = 10
 heal_amount = 40

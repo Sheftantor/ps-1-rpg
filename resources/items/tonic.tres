@@ -6,4 +6,5 @@
 script = ExtResource("1_item")
 display_name = "Tonic"
 description = "A bitter energy drink. Refills your energy at once."
+price = 8
 stamina_restore = 100.0

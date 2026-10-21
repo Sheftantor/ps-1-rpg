@@ -1,0 +1,1593 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Import/Environment/env_beacon_tower.glb" id="e1"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_highrise_a.glb" id="e2"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_highrise_b.glb" id="e3"]
+[ext_resource type="Script" path="res://scripts/world/rain.gd" id="e4"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="e5"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_road_straight.glb" id="e6"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_sidewalk.glb" id="e7"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_street_lamp.glb" id="e8"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_lamp_cone.glb" id="e9"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_phone_box.glb" id="e10"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_bus_shelter.glb" id="e11"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_billboard.glb" id="e12"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_car_hatch.glb" id="e13"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_bollard.glb" id="e14"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_wheelie_bin.glb" id="e15"]
+[ext_resource type="PackedScene" path="res://scenes/suit_guy.tscn" id="e16"]
+[ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="e17"]
+[ext_resource type="PackedScene" path="res://scenes/floating_monk.tscn" id="e18"]
+[ext_resource type="Script" path="res://scripts/commands/item_stack.gd" id="e19"]
+[ext_resource type="Resource" path="res://resources/items/tonic.tres" id="e20"]
+[ext_resource type="PackedScene" path="res://scenes/pickup.tscn" id="e21"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_alley_gate.glb" id="e22"]
+[ext_resource type="Script" path="res://scripts/world/area_exit.gd" id="e23"]
+[ext_resource type="PackedScene" path="res://Import/Environment/env_chainlink_fence.glb" id="e24"]
+
+[sub_resource type="Environment" id="s1"]
+background_mode = 1
+background_color = Color(0.07, 0.085, 0.22, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.34, 0.36, 0.62, 1)
+ambient_light_energy = 0.95
+tonemap_mode = 0
+fog_enabled = true
+fog_mode = 0
+fog_light_color = Color(0.1, 0.1, 0.22, 1)
+fog_light_energy = 1.0
+fog_density = 0.011
+fog_sky_affect = 1.0
+adjustment_enabled = true
+adjustment_brightness = 1.18
+adjustment_contrast = 1.1
+adjustment_saturation = 1.15
+
+[sub_resource type="BoxShape3D" id="s2"]
+size = Vector3(240, 1, 300)
+
+[sub_resource type="PlaneMesh" id="s3"]
+size = Vector2(240, 300)
+
+[sub_resource type="StandardMaterial3D" id="s4"]
+albedo_color = Color(0.06, 0.07, 0.08, 1)
+roughness = 1.0
+
+[sub_resource type="BoxShape3D" id="s5"]
+size = Vector3(1, 12, 140)
+
+[sub_resource type="BoxShape3D" id="s6"]
+size = Vector3(84, 12, 1)
+
+[sub_resource type="SphereMesh" id="s7"]
+radius = 9.0
+height = 18.0
+radial_segments = 12
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="s8"]
+shading_mode = 0
+disable_fog = true
+albedo_color = Color(0.95, 0.4, 0.28, 1)
+
+[sub_resource type="BoxShape3D" id="s9"]
+size = Vector3(4, 44, 4)
+
+[sub_resource type="BoxShape3D" id="s10"]
+size = Vector3(3, 0.3, 8)
+
+[sub_resource type="BoxShape3D" id="s11"]
+size = Vector3(0.5483, 0.1, 8)
+
+[sub_resource type="BoxShape3D" id="s12"]
+size = Vector3(10, 47.6, 14)
+
+[sub_resource type="BoxShape3D" id="s13"]
+size = Vector3(12, 68, 12)
+
+[sub_resource type="BoxShape3D" id="s14"]
+size = Vector3(0.3, 6.4, 0.3)
+
+[sub_resource type="BoxShape3D" id="s15"]
+size = Vector3(1, 2.5, 1)
+
+[sub_resource type="BoxShape3D" id="s16"]
+size = Vector3(3, 2.4, 0.1)
+
+[sub_resource type="BoxShape3D" id="s17"]
+size = Vector3(0.4, 6, 0.4)
+
+[sub_resource type="BoxShape3D" id="s18"]
+size = Vector3(1.7, 1.45, 3.8)
+
+[sub_resource type="BoxShape3D" id="s19"]
+size = Vector3(0.2, 0.9, 0.2)
+
+[sub_resource type="BoxShape3D" id="s20"]
+size = Vector3(0.6, 1.1, 0.7)
+
+[sub_resource type="Resource" id="s21"]
+script = ExtResource("e19")
+item = ExtResource("e20")
+count = 3
+
+[sub_resource type="BoxShape3D" id="s22"]
+size = Vector3(1.6, 2, 0.8)
+
+[sub_resource type="BoxShape3D" id="s23"]
+size = Vector3(6, 3, 0.3)
+
+[sub_resource type="BoxShape3D" id="s24"]
+size = Vector3(1, 12, 8)
+
+[node name="Downtown" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("s1")
+
+[node name="Moonlight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.3716, 0.3346, 0, 0.6691, 0.7431, -0.5, -0.6436, 0.5795, 0, 30, 0)
+light_color = Color(0.5, 0.58, 0.95, 1)
+light_energy = 0.75
+shadow_enabled = true
+directional_shadow_max_distance = 70.0
+
+[node name="Set" type="Node3D" parent="."]
+
+[node name="Loot" type="Node3D" parent="."]
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -12)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Col" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("s2")
+
+[node name="Visual" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0)
+mesh = SubResource("s3")
+surface_material_override/0 = SubResource("s4")
+
+[node name="Bounds" type="StaticBody3D" parent="."]
+
+[node name="West" type="CollisionShape3D" parent="Bounds"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 5, -14)
+shape = SubResource("s5")
+
+[node name="East" type="CollisionShape3D" parent="Bounds"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41, 5, -14)
+shape = SubResource("s5")
+
+[node name="South" type="CollisionShape3D" parent="Bounds"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 52)
+shape = SubResource("s6")
+
+[node name="North" type="CollisionShape3D" parent="Bounds"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, -74)
+shape = SubResource("s6")
+
+[node name="Moon" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62, 58, -165)
+mesh = SubResource("s7")
+material_override = SubResource("s8")
+cast_shadow = 0
+metadata/ps1_keep_materials = true
+
+[node name="beacon_tower" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -158)
+
+[node name="Model" parent="Set/beacon_tower" instance=ExtResource("e1")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/beacon_tower"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22, 0)
+shape = SubResource("s9")
+
+[node name="highrise_a" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -79.5153, 0, 38)
+
+[node name="Model" parent="Set/highrise_a" instance=ExtResource("e2")]
+
+[node name="highrise_b" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 73.6497, 0, 19.5172)
+
+[node name="Model" parent="Set/highrise_b" instance=ExtResource("e3")]
+
+[node name="highrise_b2" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -43.5404, 0, -0.9918)
+
+[node name="Model" parent="Set/highrise_b2" instance=ExtResource("e3")]
+
+[node name="highrise_b3" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 61.6232, 0, -10.9822)
+
+[node name="Model" parent="Set/highrise_b3" instance=ExtResource("e3")]
+
+[node name="highrise_b4" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -52.7294, 0, -40.8565)
+
+[node name="Model" parent="Set/highrise_b4" instance=ExtResource("e3")]
+
+[node name="highrise_a2" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 65.3007, 0, -33.2308)
+
+[node name="Model" parent="Set/highrise_a2" instance=ExtResource("e2")]
+
+[node name="highrise_a3" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -60.5184, 0, -46.5237)
+
+[node name="Model" parent="Set/highrise_a3" instance=ExtResource("e2")]
+
+[node name="highrise_b5" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 73.5163, 0, -62.2044)
+
+[node name="Model" parent="Set/highrise_b5" instance=ExtResource("e3")]
+
+[node name="highrise_a4" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -43.5433, 0, -104.926)
+
+[node name="Model" parent="Set/highrise_a4" instance=ExtResource("e2")]
+
+[node name="highrise_b6" type="Node3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 47.8036, 0, -129.2896)
+
+[node name="Model" parent="Set/highrise_b6" instance=ExtResource("e3")]
+
+[node name="Rain" type="Node3D" parent="."]
+script = ExtResource("e4")
+
+[node name="Player" parent="." instance=ExtResource("e5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 38)
+
+[node name="road_straight" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 44)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight" instance=ExtResource("e6")]
+
+[node name="sidewalk" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, 44)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk2" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, 44)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk2" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk2"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk2"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight2" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 36)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight2" instance=ExtResource("e6")]
+
+[node name="sidewalk3" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, 36)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk3" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk3"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk3"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk4" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, 36)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk4" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk4"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk4"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight3" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 28)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight3" instance=ExtResource("e6")]
+
+[node name="sidewalk5" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, 28)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk5" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk5"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk5"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk6" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, 28)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk6" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk6"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk6"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight4" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight4" instance=ExtResource("e6")]
+
+[node name="sidewalk7" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, 20)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk7" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk7"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk7"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk8" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, 20)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk8" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk8"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk8"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight5" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight5" instance=ExtResource("e6")]
+
+[node name="sidewalk9" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, 12)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk9" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk9"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk9"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk10" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, 12)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk10" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk10"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk10"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight6" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight6" instance=ExtResource("e6")]
+
+[node name="sidewalk11" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, 4)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk11" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk11"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk11"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk11"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk12" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, 4)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk12" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk12"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk12"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk12"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight7" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight7" instance=ExtResource("e6")]
+
+[node name="sidewalk13" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -4)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk13" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk13"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk13"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk13"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk14" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -4)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk14" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk14"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk14"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk14"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight8" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight8" instance=ExtResource("e6")]
+
+[node name="sidewalk15" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -12)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk15" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk15"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk15"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk15"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk16" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -12)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk16" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk16"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk16"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk16"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight9" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight9" instance=ExtResource("e6")]
+
+[node name="sidewalk17" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -20)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk17" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk17"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk17"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk17"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk18" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -20)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk18" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk18"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk18"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk18"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight10" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -28)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight10" instance=ExtResource("e6")]
+
+[node name="sidewalk19" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -28)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk19" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk19"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk19"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk19"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk20" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -28)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk20" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk20"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk20"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk20"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight11" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -36)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight11" instance=ExtResource("e6")]
+
+[node name="sidewalk21" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -36)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk21" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk21"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk21"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk21"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk22" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -36)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk22" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk22"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk22"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk22"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight12" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -44)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight12" instance=ExtResource("e6")]
+
+[node name="sidewalk23" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -44)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk23" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk23"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk23"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk23"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk24" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -44)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk24" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk24"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk24"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk24"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight13" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -52)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight13" instance=ExtResource("e6")]
+
+[node name="sidewalk25" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -52)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk25" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk25"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk25"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk25"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk26" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -52)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk26" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk26"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk26"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk26"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight14" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -60)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight14" instance=ExtResource("e6")]
+
+[node name="sidewalk27" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -60)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk27" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk27"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk27"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk27"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk28" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -60)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk28" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk28"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk28"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk28"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="road_straight15" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -68)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/road_straight15" instance=ExtResource("e6")]
+
+[node name="sidewalk29" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, 0, -68)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk29" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk29"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk29"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk29"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="sidewalk30" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, 0, -68)
+metadata/ps1_no_vertex_snap = true
+
+[node name="Model" parent="Set/sidewalk30" instance=ExtResource("e7")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/sidewalk30"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("s10")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/sidewalk30"]
+transform = Transform3D(0.9119, -0.4104, 0, 0.4104, 0.9119, 0, 0, 0, 1, -1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/sidewalk30"]
+transform = Transform3D(0.9119, 0.4104, 0, -0.4104, 0.9119, 0, 0, 0, 1, 1.7295, 0.0669, 0)
+shape = SubResource("s11")
+
+[node name="highrise_b7" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14.2, 0, 39)
+
+[node name="Model" parent="Set/highrise_b7" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a5" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -13.2, 0, 28)
+
+[node name="Model" parent="Set/highrise_a5" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b8" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14.2, 0, 17)
+
+[node name="Model" parent="Set/highrise_b8" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a6" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -13.2, 0, 6)
+
+[node name="Model" parent="Set/highrise_a6" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b9" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14.2, 0, -5)
+
+[node name="Model" parent="Set/highrise_b9" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a7" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -13.2, 0, -16)
+
+[node name="Model" parent="Set/highrise_a7" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b10" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14.2, 0, -27)
+
+[node name="Model" parent="Set/highrise_b10" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a8" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -13.2, 0, -38)
+
+[node name="Model" parent="Set/highrise_a8" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b11" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14.2, 0, -49)
+
+[node name="Model" parent="Set/highrise_b11" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b11"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a9" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -13.2, 0, -60)
+
+[node name="Model" parent="Set/highrise_a9" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b12" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -14.2, 0, -71)
+
+[node name="Model" parent="Set/highrise_b12" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b12"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a10" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 13.2, 0, 38)
+
+[node name="Model" parent="Set/highrise_a10" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b13" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 14.2, 0, 27)
+
+[node name="Model" parent="Set/highrise_b13" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b13"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a11" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 13.2, 0, 16)
+
+[node name="Model" parent="Set/highrise_a11" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a11"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b14" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 14.2, 0, 5)
+
+[node name="Model" parent="Set/highrise_b14" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b14"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a12" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 13.2, 0, -6)
+
+[node name="Model" parent="Set/highrise_a12" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a12"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b15" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 14.2, 0, -17)
+
+[node name="Model" parent="Set/highrise_b15" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b15"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a13" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 13.2, 0, -28)
+
+[node name="Model" parent="Set/highrise_a13" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a13"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b16" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 14.2, 0, -39)
+
+[node name="Model" parent="Set/highrise_b16" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b16"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a14" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 13.2, 0, -50)
+
+[node name="Model" parent="Set/highrise_a14" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a14"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="highrise_b17" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 14.2, 0, -61)
+
+[node name="Model" parent="Set/highrise_b17" instance=ExtResource("e3")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_b17"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.8, 0)
+shape = SubResource("s12")
+
+[node name="highrise_a15" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 13.2, 0, -72)
+
+[node name="Model" parent="Set/highrise_a15" instance=ExtResource("e2")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/highrise_a15"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34, 0)
+shape = SubResource("s13")
+
+[node name="street_lamp" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, 38)
+
+[node name="Model" parent="Set/street_lamp" instance=ExtResource("e8")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/street_lamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+shape = SubResource("s14")
+
+[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
+light_color = Color(1, 0.69, 0.38, 1)
+light_energy = 2.2
+omni_range = 11
+omni_attenuation = 1.3
+
+[node name="Cone" parent="Set/street_lamp" instance=ExtResource("e9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="street_lamp2" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, 24)
+
+[node name="Model" parent="Set/street_lamp2" instance=ExtResource("e8")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/street_lamp2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+shape = SubResource("s14")
+
+[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
+light_color = Color(1, 0.69, 0.38, 1)
+light_energy = 2.2
+omni_range = 11
+omni_attenuation = 1.3
+
+[node name="Cone" parent="Set/street_lamp2" instance=ExtResource("e9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="street_lamp3" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, 10)
+
+[node name="Model" parent="Set/street_lamp3" instance=ExtResource("e8")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/street_lamp3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+shape = SubResource("s14")
+
+[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
+light_color = Color(1, 0.69, 0.38, 1)
+light_energy = 2.2
+omni_range = 11
+omni_attenuation = 1.3
+
+[node name="Cone" parent="Set/street_lamp3" instance=ExtResource("e9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="street_lamp4" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, -4)
+
+[node name="Model" parent="Set/street_lamp4" instance=ExtResource("e8")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/street_lamp4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+shape = SubResource("s14")
+
+[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
+light_color = Color(1, 0.69, 0.38, 1)
+light_energy = 2.2
+omni_range = 11
+omni_attenuation = 1.3
+
+[node name="Cone" parent="Set/street_lamp4" instance=ExtResource("e9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="street_lamp5" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, -18)
+
+[node name="Model" parent="Set/street_lamp5" instance=ExtResource("e8")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/street_lamp5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+shape = SubResource("s14")
+
+[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
+light_color = Color(1, 0.69, 0.38, 1)
+light_energy = 2.2
+omni_range = 11
+omni_attenuation = 1.3
+
+[node name="Cone" parent="Set/street_lamp5" instance=ExtResource("e9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="street_lamp6" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, -32)
+
+[node name="Model" parent="Set/street_lamp6" instance=ExtResource("e8")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/street_lamp6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+shape = SubResource("s14")
+
+[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
+light_color = Color(1, 0.69, 0.38, 1)
+light_energy = 2.2
+omni_range = 11
+omni_attenuation = 1.3
+
+[node name="Cone" parent="Set/street_lamp6" instance=ExtResource("e9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="street_lamp7" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, -46)
+
+[node name="Model" parent="Set/street_lamp7" instance=ExtResource("e8")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/street_lamp7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+shape = SubResource("s14")
+
+[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
+light_color = Color(1, 0.69, 0.38, 1)
+light_energy = 2.2
+omni_range = 11
+omni_attenuation = 1.3
+
+[node name="Cone" parent="Set/street_lamp7" instance=ExtResource("e9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="street_lamp8" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, -60)
+
+[node name="Model" parent="Set/street_lamp8" instance=ExtResource("e8")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/street_lamp8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+shape = SubResource("s14")
+
+[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
+light_color = Color(1, 0.69, 0.38, 1)
+light_energy = 2.2
+omni_range = 11
+omni_attenuation = 1.3
+
+[node name="Cone" parent="Set/street_lamp8" instance=ExtResource("e9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="phone_box" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.6, 0, 30)
+
+[node name="Model" parent="Set/phone_box" instance=ExtResource("e10")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/phone_box"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+shape = SubResource("s15")
+
+[node name="phone_box2" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.6, 0, -26)
+
+[node name="Model" parent="Set/phone_box2" instance=ExtResource("e10")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/phone_box2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+shape = SubResource("s15")
+
+[node name="bus_shelter" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6, 0, 6)
+
+[node name="Model" parent="Set/bus_shelter" instance=ExtResource("e11")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/bus_shelter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.8)
+shape = SubResource("s16")
+
+[node name="billboard" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 8, 0, -12)
+
+[node name="Model" parent="Set/billboard" instance=ExtResource("e12")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/billboard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+shape = SubResource("s17")
+
+[node name="billboard2" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -8, 0, -52)
+
+[node name="Model" parent="Set/billboard2" instance=ExtResource("e12")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/billboard2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+shape = SubResource("s17")
+
+[node name="car_hatch" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, 26)
+
+[node name="Model" parent="Set/car_hatch" instance=ExtResource("e13")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/car_hatch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0)
+shape = SubResource("s18")
+
+[node name="car_hatch2" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -2.6, 0, 0)
+
+[node name="Model" parent="Set/car_hatch2" instance=ExtResource("e13")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/car_hatch2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0)
+shape = SubResource("s18")
+
+[node name="car_hatch3" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, -36)
+
+[node name="Model" parent="Set/car_hatch3" instance=ExtResource("e13")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/car_hatch3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0)
+shape = SubResource("s18")
+
+[node name="car_hatch4" type="StaticBody3D" parent="Set"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -2.6, 0, -58)
+
+[node name="Model" parent="Set/car_hatch4" instance=ExtResource("e13")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/car_hatch4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0)
+shape = SubResource("s18")
+
+[node name="bollard" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0, 20)
+
+[node name="Model" parent="Set/bollard" instance=ExtResource("e14")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/bollard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("s19")
+
+[node name="bollard2" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0, 18)
+
+[node name="Model" parent="Set/bollard2" instance=ExtResource("e14")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/bollard2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("s19")
+
+[node name="wheelie_bin" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.7, 0, 24)
+
+[node name="Model" parent="Set/wheelie_bin" instance=ExtResource("e15")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/wheelie_bin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("s20")
+
+[node name="bollard3" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0, -10)
+
+[node name="Model" parent="Set/bollard3" instance=ExtResource("e14")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/bollard3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("s19")
+
+[node name="bollard4" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0, -12)
+
+[node name="Model" parent="Set/bollard4" instance=ExtResource("e14")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/bollard4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("s19")
+
+[node name="wheelie_bin2" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.7, 0, -6)
+
+[node name="Model" parent="Set/wheelie_bin2" instance=ExtResource("e15")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/wheelie_bin2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("s20")
+
+[node name="bollard5" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0, -40)
+
+[node name="Model" parent="Set/bollard5" instance=ExtResource("e14")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/bollard5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("s19")
+
+[node name="bollard6" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0, -42)
+
+[node name="Model" parent="Set/bollard6" instance=ExtResource("e14")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/bollard6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("s19")
+
+[node name="wheelie_bin3" type="StaticBody3D" parent="Set"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.7, 0, -36)
+
+[node name="Model" parent="Set/wheelie_bin3" instance=ExtResource("e15")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/wheelie_bin3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("s20")
+
+[node name="SuitA" parent="Enemies" instance=ExtResource("e16")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -3, 0.15, 26)
+level_override = 6
+
+[node name="GruntB" parent="Enemies" instance=ExtResource("e17")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 3, 0.15, 16)
+level_override = 6
+body_tint = Color(0.58, 0.42, 0.72, 1)
+
+[node name="MonkC" parent="Enemies" instance=ExtResource("e18")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 1.4, 0)
+level_override = 7
+
+[node name="SuitD" parent="Enemies" instance=ExtResource("e16")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 4, 0.15, -20)
+level_override = 7
+
+[node name="GruntE" parent="Enemies" instance=ExtResource("e17")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -3, 0.15, -34)
+level_override = 7
+body_tint = Color(1, 0.5, 0.42, 1)
+
+[node name="MonkF" parent="Enemies" instance=ExtResource("e18")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 1.4, -52)
+level_override = 8
+
+[node name="DowntownTonic" parent="Loot" instance=ExtResource("e21")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.3, 0.3, -8)
+item = SubResource("s21")
+
+[node name="alley_gate" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -70)
+
+[node name="Model" parent="Set/alley_gate" instance=ExtResource("e22")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/alley_gate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/alley_gate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/alley_gate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("s23")
+
+[node name="alley_gate2" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, -70)
+
+[node name="Model" parent="Set/alley_gate2" instance=ExtResource("e22")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/alley_gate2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/alley_gate2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/alley_gate2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("s23")
+
+[node name="alley_gate3" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -70)
+
+[node name="Model" parent="Set/alley_gate3" instance=ExtResource("e22")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/alley_gate3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/alley_gate3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/alley_gate3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("s23")
+
+[node name="alley_gate4" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -70)
+
+[node name="Model" parent="Set/alley_gate4" instance=ExtResource("e22")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/alley_gate4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/alley_gate4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/alley_gate4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("s23")
+
+[node name="alley_gate5" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -70)
+
+[node name="Model" parent="Set/alley_gate5" instance=ExtResource("e22")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/alley_gate5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/alley_gate5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/alley_gate5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("s23")
+
+[node name="alley_gate6" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -70)
+
+[node name="Model" parent="Set/alley_gate6" instance=ExtResource("e22")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/alley_gate6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/alley_gate6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/alley_gate6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("s23")
+
+[node name="alley_gate7" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 0, -70)
+
+[node name="Model" parent="Set/alley_gate7" instance=ExtResource("e22")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/alley_gate7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/alley_gate7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/alley_gate7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("s23")
+
+[node name="alley_gate8" type="StaticBody3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, -70)
+
+[node name="Model" parent="Set/alley_gate8" instance=ExtResource("e22")]
+
+[node name="Col0" type="CollisionShape3D" parent="Set/alley_gate8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col1" type="CollisionShape3D" parent="Set/alley_gate8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 0)
+shape = SubResource("s22")
+
+[node name="Col2" type="CollisionShape3D" parent="Set/alley_gate8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("s23")
+
+[node name="Gates" type="Node3D" parent="."]
+
+[node name="FromSouth" type="Marker3D" parent="Gates" groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 38)
+
+[node name="FromNorth" type="Marker3D" parent="Gates" groups=["spawn_points"]]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.25, -58)
+
+[node name="NorthGate" type="Area3D" parent="Gates"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -68)
+script = ExtResource("e23")
+target_scene = "res://scenes/test_plaza.tscn"
+target_spawn = &"FromSouth"
+area_name = "Times Square"
+size = Vector3(16, 4, 1.5)
+
+[node name="SouthGate" type="Area3D" parent="Gates"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 46)
+script = ExtResource("e23")
+target_scene = "res://scenes/areas/area_underpass.tscn"
+target_spawn = &"FromNorth"
+area_name = "The Underpass"
+size = Vector3(16, 4, 1.5)
+
+[node name="StreetBounds" type="StaticBody3D" parent="."]
+
+[node name="Wall" type="CollisionShape3D" parent="StreetBounds"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7, 5, 48)
+shape = SubResource("s24")
+
+[node name="chainlink_fence" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.3, 0, 44)
+
+[node name="Model" parent="Set/chainlink_fence" instance=ExtResource("e24")]
+
+[node name="Wall2" type="CollisionShape3D" parent="StreetBounds"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.7, 5, 48)
+shape = SubResource("s24")
+
+[node name="chainlink_fence2" type="Node3D" parent="Set"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 0, 44)
+
+[node name="Model" parent="Set/chainlink_fence2" instance=ExtResource("e24")]

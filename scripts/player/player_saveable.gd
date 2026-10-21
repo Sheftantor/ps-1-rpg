@@ -44,6 +44,7 @@ func get_save_data() -> Dictionary:
 		energy = state.stamina,
 		inventory = inventory,
 		selected_item = state.selected_item,
+		money = state.money,
 		gun = _path(state.gun),
 		melee_weapon = _path(player.melee_weapon),
 		armor = armor,
@@ -85,6 +86,7 @@ func apply_save_data(data: Dictionary) -> void:
 		gun = _load(data.get("gun", "")) as WeaponData,
 		inventory = inventory,
 		selected_item = clampi(int(data.get("selected_item", 0)), 0, maxi(0, inventory.size() - 1)),
+		money = maxi(0, int(data.get("money", current.money))),
 	})
 
 	# Gear. Only the gun can change in play today; the melee weapon and armour

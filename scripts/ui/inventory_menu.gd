@@ -24,6 +24,7 @@ var _stacks: Dictionary[IconSlot, ItemStack] = {}
 @onready var _weapons: HBoxContainer = $Root/Window/Layout/Weapons
 @onready var _bag: GridContainer = $Root/Window/Layout/Bag
 @onready var _close_icon: InputIcon = $Root/Hint/Icon
+@onready var _wallet: Label = $Root/Wallet
 
 
 func _ready() -> void:
@@ -100,6 +101,7 @@ func _build() -> void:
 			child.queue_free()
 	_board.clear()
 	_stacks.clear()
+	_wallet.text = "CASH  $%d" % _player.money
 	_board.add_weapons(_weapons, _player)
 	for i in BAG_SLOTS:
 		if i < _player.inventory.size():
