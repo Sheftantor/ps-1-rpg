@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://w7uth6qlkiiu"]
 
+[ext_resource type="Texture2D" uid="uid://viruet0paj1h" path="res://textures/ui/icons/placeholder_item.png" id="1_36hb1"]
 [ext_resource type="Script" uid="uid://b134nsxh5ksou" path="res://scripts/commands/item_data.gd" id="1_item"]
 
 [resource]
