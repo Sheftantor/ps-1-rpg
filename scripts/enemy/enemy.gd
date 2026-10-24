@@ -11,6 +11,8 @@ const WALK_ANIM_MIN_SPEED: float = 0.15
 const TUNING: CombatTuning = preload("res://resources/combat_tuning.tres")
 const KNOCKDOWN_POSE := preload("res://scripts/combat/knockdown_pose.gd")
 const FLAIL_LIMBS := preload("res://scripts/enemy/flail_limbs.gd")
+## Height above the feet the loot sack pops out from as the enemy dies (m).
+const LOOT_DROP_HEIGHT: float = 1.0
 
 @export var stats: EnemyStats
 ## Size (world X/Z, m) of the box around the spawn point the enemy wanders in
@@ -72,6 +74,7 @@ func _ready() -> void:
 	model.set_tint(body_tint)
 	_facing_rest_position = facing.position
 	health.died.connect(_award_xp)
+	health.died.connect(_drop_loot)
 	hurtbox.hit_received.connect(_on_hit_received)
 	state_machine.start(self)
 
@@ -151,6 +154,20 @@ func _award_xp() -> void:
 	var player := get_tree().get_first_node_in_group(&"player") as Player
 	var xp := player.award_kill(level()) if player != null else 0
 	Feel.on_kill(self, xp)
+
+
+## Drops a loot sack rolled from stats' Loot group: cash on stats.cash_chance,
+## and each loot line on its own chance. Nothing rolled, no sack.
+func _drop_loot() -> void:
+	var cash := 0
+	if randf() < stats.cash_chance:
+		cash = randi_range(stats.cash_per_level_min, maxi(stats.cash_per_level_min, stats.cash_per_level_max)) 				* maxi(1, level())
+	var stacks: Array[ItemStack] = []
+	for drop: LootDrop in stats.loot:
+		var stack := drop.roll() if drop != null else null
+		if stack != null:
+			stacks.append(stack)
+	Pickup.drop(get_tree(), global_position + Vector3.UP * LOOT_DROP_HEIGHT, cash, stacks)
 
 
 func level() -> int:

@@ -705,19 +705,12 @@ func _refresh_xp_hud() -> void:
 	hud.set_xp(level, xp, xp_to_next())
 
 
-## Called by an enemy as it dies. Returns the XP gained.
+## Called by an enemy as it dies. Returns the XP gained. Cash comes from the
+## loot sack it drops, not the kill.
 func award_kill(enemy_level: int) -> int:
 	var gained := Leveling.kill_xp(enemy_level, level, stats)
-	var cash := stats.kill_cash_per_level * maxi(1, enemy_level)
-	var parts := PackedStringArray()
 	if gained > 0:
-		parts.append("+%d XP" % gained)
-	if cash > 0:
-		parts.append("+$%d" % cash)
-		add_money(cash)
-	if not parts.is_empty():
-		hud.flash_message("   ".join(parts))
-	if gained > 0:
+		hud.flash_message("+%d XP" % gained)
 		gain_xp(gained)
 	return gained
 
@@ -826,9 +819,13 @@ func interact() -> void:
 
 
 ## Takes one entry out of a loot sack: a weapon goes in the gun slot, items
-## into the inventory. Called by the loot window.
+## into the inventory, cash into the wallet. Called by the loot window.
 func take_loot(pickup: Pickup, entry: Resource) -> void:
-	if entry is WeaponData:
+	if entry is LootCash:
+		var cash := (entry as LootCash).amount
+		add_money(cash)
+		hud.flash_message("+$%d" % cash)
+	elif entry is WeaponData:
 		gun = entry as WeaponData
 		if _gun_model != null:
 			_gun_model.queue_free()

@@ -11,7 +11,7 @@ extends CanvasLayer
 ## the equipped piece for that slot.
 ##
 ## Content is a Resource (ItemStack, ItemData, WeaponData, MeleeWeaponData,
-## ArmorData) or, for an empty slot, {title, body}. Only real item fields are
+## ArmorData, LootCash) or, for an empty slot, {title, body}. Only real item fields are
 ## shown, and lines with no data are left out: the item has no rarity, level
 ## requirement or sell value yet, so names use the common colour.
 
@@ -220,7 +220,10 @@ func _fill(box: VBoxContainer, content: Variant, header := "") -> void:
 		_line(box, String(content.get("body", "")), &"TooltipLabel", FLAVOR, true, true)
 		return
 	var player := _player()
-	if content is ItemStack:
+	if content is LootCash:
+		_line(box, "Cash", &"", COMMON)
+		_line(box, "$%d" % (content as LootCash).amount, &"TooltipLabel", GOOD)
+	elif content is ItemStack:
 		var stack := content as ItemStack
 		_item(box, stack.item)
 		if stack.count > 1:

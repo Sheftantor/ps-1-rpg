@@ -38,8 +38,6 @@ extends Resource
 @export var health_per_level: int = 10
 @export var energy_per_level: float = 5.0
 @export var stat_points_per_level: int = 1
-## Cash dropped by a kill: this x the enemy's level (0 turns kill cash off).
-@export var kill_cash_per_level: int = 3
 
 @export_group("Stamina")
 ## Per second, once regeneration resumes.

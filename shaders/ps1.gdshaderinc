@@ -14,6 +14,11 @@ global uniform float ps1_affine_warp;
 instance uniform vec4 flash_color : source_color = vec4(0.0);
 // Per-instance color multiplier, e.g. so buildings sharing a facade material differ.
 instance uniform vec4 tint : source_color = vec4(1.0);
+#ifdef PS1_FADE
+// Dithered fade-out (ps1_fade.gdshader only): 1 = solid, 0 = gone. Set with
+// set_instance_shader_parameter(&"fade", value).
+instance uniform float fade : hint_range(0.0, 1.0) = 1.0;
+#endif
 
 group_uniforms surface;
 uniform vec4 albedo_color : source_color = vec4(1.0);
@@ -50,6 +55,9 @@ uniform vec4 window_warm_color : source_color = vec4(1.0, 0.76, 0.42, 1.0);
 uniform vec4 window_cool_color : source_color = vec4(0.5, 0.6, 0.64, 1.0);
 uniform float window_cool_ratio : hint_range(0.0, 1.0) = 0.3;
 uniform float window_energy : hint_range(0.0, 8.0) = 1.0;
+// Daylight glass: unlit window texels take this colour (alpha = strength),
+// each pane a little lighter or darker, like sky reflected in the glass.
+uniform vec4 glass_reflect_color : source_color = vec4(0.0);
 
 varying flat vec3 object_origin;
 // UV * w and w, both perspective-interpolated: their ratio interpolates linearly
@@ -100,6 +108,11 @@ void fragment() {
 		vec2 cell = floor(uv * checker_size);
 		color *= mix(vec3(1.0), checker_color.rgb, mod(cell.x + cell.y, 2.0));
 	}
+	if (glass_reflect_color.a > 0.0 && albedo_tex.a < 0.5) {
+		vec2 pane = floor(uv * window_grid) + object_origin.xz * 0.731 + object_origin.y;
+		vec3 sky = glass_reflect_color.rgb * mix(0.78, 1.12, hash(pane + 5.0));
+		color = mix(color, sky * tint.rgb, glass_reflect_color.a);
+	}
 	ALBEDO = mix(color, flash_color.rgb, flash_color.a);
 
 	vec3 emission = emission_color.rgb * texture(emission_texture, uv).rgb * emission_energy;
@@ -117,4 +130,14 @@ void fragment() {
 	}
 	// Keep flashes readable on the shadowed side of the mesh.
 	EMISSION = mix(emission, ALBEDO * 0.8, flash_color.a);
+#ifdef PS1_FADE
+	// Screen-door transparency on a 4x4 ordered dither, one cell per virtual
+	// pixel: stays opaque (no sorting) and reads as a PS1 fade.
+	const float BAYER[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0,
+			3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+	ivec2 cell = ivec2(floor(FRAGCOORD.xy / max(1.0, VIEWPORT_SIZE.y / ps1_snap_resolution))) % 4;
+	if (fade < (BAYER[cell.y * 4 + cell.x] + 0.5) / 16.0) {
+		discard;
+	}
+#endif
 }

@@ -3,7 +3,8 @@ extends CanvasLayer
 ## Player HUD: top-left health and energy bars with values, the full-width XP
 ## bar along the bottom (SegmentedXpBar), the bottom-left
 ## loadout window (LoadoutPanel: both weapons, then the carried items with the
-## selected one under the cursor), pickup prompt and short messages, plus the gun-mode targeting
+## selected one under the cursor), pickup prompt, the stack of short messages
+## just above the loadout window (flash_message()), plus the gun-mode targeting
 ## overlay (connector web, reticle with target and range-state labels, mode
 ## label, queued-shot portrait slots centered under it, action prompts). Structure and logic only: layout,
 ## colors and fonts live in res://scenes/player_hud.tscn and
@@ -11,8 +12,17 @@ extends CanvasLayer
 
 const SEGMENTED_XP_BAR := preload("res://scripts/ui/segmented_xp_bar.gd")
 
-## Seconds a flash_message() stays up before the prompt comes back.
-@export var message_time: float = 1.2
+## Seconds a flash_message() stays up, including its fade.
+@export var message_time: float = 2.0
+## Fade-out at the end of a message (s).
+@export var message_fade: float = 0.35
+## Messages that arrive together (e.g. TAKE ALL) leave one after another, oldest
+## first, this far apart (s).
+@export var message_stagger: float = 0.4
+## Oldest messages are dropped beyond this many lines.
+@export var max_messages: int = 6
+## Gap between the message stack and the top of the loadout window (pixels).
+@export var message_gap: float = 8.0
 @export var in_range_text: String = "IN RANGE"
 @export var out_of_range_text: String = "TOO FAR"
 ## Reticle label for a target that isn't queued yet.
@@ -42,7 +52,8 @@ var using_gamepad: bool:
 	get:
 		return ActiveDevice.using_gamepad
 
-var _message_timer: float = 0.0
+## Shown messages, oldest first: [label, seconds left].
+var _message_lines: Array = []
 var _gun_drawn: bool = false
 # Last set_loadout() arguments, redrawn when the drawn weapon changes.
 var _melee: MeleeWeaponData = null
@@ -61,7 +72,7 @@ var _level_up_tween: Tween = null
 @onready var _xp_bar_alpha: float = _xp_bar.modulate.a
 @onready var _level_up: Label = $Root/LevelUp
 @onready var _loadout: LoadoutPanelScript = $Root/LoadoutPanel
-@onready var _prompt: Label = $Root/Prompt
+@onready var _messages: VBoxContainer = $Root/Messages
 ## Interact prompt: an InputIcon for the bound input plus a one-word verb.
 @onready var _interact: Control = $Root/Interact
 @onready var _interact_icon: InputIcon = $Root/Interact/Icon
@@ -80,7 +91,6 @@ var _level_up_tween: Tween = null
 func _ready() -> void:
 	_place_target_panel()
 	_targeting.visible = false
-	_prompt.text = ""
 	_interact.visible = false
 	# Key icons switch between keyboard/mouse and gamepad as either is used.
 	_interact_icon.follow_device = true
@@ -92,10 +102,7 @@ func key_label(action: StringName) -> String:
 
 
 func _process(delta: float) -> void:
-	if _message_timer > 0.0:
-		_message_timer -= delta
-		if _message_timer <= 0.0:
-			_prompt.text = ""
+	_update_messages(delta)
 
 
 ## Top-left stat block; connected to Health.changed / Stamina.changed.
@@ -179,9 +186,31 @@ func set_interact(action: StringName, verb: String) -> void:
 	_interact_verb.text = verb.to_upper()
 
 
+## Adds a line to the message stack above the loadout window. Newest at the
+## bottom; each leaves after message_time, never before the one above it.
 func flash_message(text: String) -> void:
-	_prompt.text = text
-	_message_timer = message_time
+	var label := Win95MessageLabel.new()
+	label.text = text
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_messages.add_child(label)
+	var time := message_time
+	if not _message_lines.is_empty():
+		time = maxf(time, _message_lines.back()[1] + message_stagger)
+	_message_lines.append([label, time])
+	while _message_lines.size() > max_messages:
+		_message_lines.pop_front()[0].queue_free()
+
+
+func _update_messages(delta: float) -> void:
+	# The loadout window grows with the inventory: keep the stack sitting on it.
+	_messages.offset_bottom = _loadout.offset_top - message_gap
+	_messages.offset_top = _messages.offset_bottom - _messages.get_combined_minimum_size().y
+	for line: Array in _message_lines:
+		line[1] -= delta
+		(line[0] as Control).modulate.a = clampf(line[1] / message_fade, 0.0, 1.0)
+	while not _message_lines.is_empty() and _message_lines[0][1] <= 0.0:
+		_message_lines.pop_front()[0].queue_free()
 
 
 ## Gun mode has its own prompt row; its queue sits top center.

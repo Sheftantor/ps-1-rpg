@@ -22,6 +22,16 @@ extends Resource
 ## scaled by the level gap. 0 = use max_health, still scaled by the gap.
 @export var health_in_melee_hits: float = 0.0
 
+@export_group("Loot")
+## On death the enemy drops a loot sack (Pickup) holding what's rolled here;
+## nothing rolled, no sack. Chance (0-1) that there's cash in it.
+@export_range(0.0, 1.0, 0.01) var cash_chance: float = 0.5
+## Cash when there is some: a random amount in this range, times the enemy's level.
+@export var cash_per_level_min: int = 2
+@export var cash_per_level_max: int = 5
+## Items, each rolled on its own chance.
+@export var loot: Array[LootDrop] = []
+
 @export_group("Movement")
 @export var move_speed: float = 3.5
 @export var strafe_speed: float = 2.2

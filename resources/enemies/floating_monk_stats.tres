@@ -3,6 +3,9 @@
 [ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="1_attack"]
 [ext_resource type="Texture2D" uid="uid://dkl3dod8hq5cm" path="res://textures/ui/icons/placeholder_portrait.png" id="2_lnhsc"]
 [ext_resource type="Script" uid="uid://e4ea8tpb76l5" path="res://scripts/enemy/enemy_stats.gd" id="2_stats"]
+[ext_resource type="Script" path="res://scripts/commands/loot_drop.gd" id="90_drop"]
+[ext_resource type="Resource" path="res://resources/items/potion.tres" id="91_potion"]
+[ext_resource type="Resource" path="res://resources/items/tonic.tres" id="92_tonic"]
 
 [sub_resource type="Resource" id="Resource_strike"]
 script = ExtResource("1_attack")
@@ -10,6 +13,17 @@ display_name = "Many-Hand Strike"
 knockback = 2.5
 hit_stun_multiplier = 0.8
 lunge_speed = 2.5
+
+[sub_resource type="Resource" id="LootDrop_potion"]
+script = ExtResource("90_drop")
+item = ExtResource("91_potion")
+chance = 0.4
+count_max = 2
+
+[sub_resource type="Resource" id="LootDrop_tonic"]
+script = ExtResource("90_drop")
+item = ExtResource("92_tonic")
+chance = 0.3
 
 [resource]
 script = ExtResource("2_stats")
@@ -34,3 +48,7 @@ vulnerable_time = 1.6
 vulnerable_damage_multiplier = 1.5
 combo_cooldown = 2.5
 combo_stagger_immune = true
+cash_chance = 1.0
+cash_per_level_min = 4
+cash_per_level_max = 8
+loot = Array[ExtResource("90_drop")]([SubResource("LootDrop_potion"), SubResource("LootDrop_tonic")])

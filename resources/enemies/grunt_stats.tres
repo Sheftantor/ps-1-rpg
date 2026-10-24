@@ -3,6 +3,10 @@
 [ext_resource type="Script" uid="uid://e4ea8tpb76l5" path="res://scripts/enemy/enemy_stats.gd" id="1_stats"]
 [ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="2_attack"]
 [ext_resource type="Texture2D" uid="uid://bfpoa80ynm2q5" path="res://textures/ui/icons/mincer_portrait.png" id="2_ilybo"]
+[ext_resource type="Script" path="res://scripts/commands/loot_drop.gd" id="90_drop"]
+[ext_resource type="Resource" path="res://resources/items/hot_dog.tres" id="91_hot_dog"]
+[ext_resource type="Resource" path="res://resources/items/slush.tres" id="92_slush"]
+[ext_resource type="Resource" path="res://resources/items/bandages.tres" id="93_bandages"]
 
 [sub_resource type="Resource" id="Resource_slash"]
 script = ExtResource("2_attack")
@@ -21,6 +25,22 @@ telegraph_pulse_rate = 3.0
 animation = &"Slash"
 hit_window = Vector2(0.067, 0.333)
 
+[sub_resource type="Resource" id="LootDrop_hot_dog"]
+script = ExtResource("90_drop")
+item = ExtResource("91_hot_dog")
+chance = 0.3
+count_max = 2
+
+[sub_resource type="Resource" id="LootDrop_slush"]
+script = ExtResource("90_drop")
+item = ExtResource("92_slush")
+chance = 0.2
+
+[sub_resource type="Resource" id="LootDrop_bandages"]
+script = ExtResource("90_drop")
+item = ExtResource("93_bandages")
+chance = 0.15
+
 [resource]
 script = ExtResource("1_stats")
 display_name = "Mincer"
@@ -30,3 +50,4 @@ health_in_melee_hits = 7.0
 move_speed = 1.8
 strafe_speed = 1.0
 attacks = Array[ExtResource("2_attack")]([SubResource("Resource_slash")])
+loot = Array[ExtResource("90_drop")]([SubResource("LootDrop_hot_dog"), SubResource("LootDrop_slush"), SubResource("LootDrop_bandages")])

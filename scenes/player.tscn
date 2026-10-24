@@ -28,6 +28,7 @@
 [ext_resource type="PackedScene" path="res://scenes/player_health_bar.tscn" id="99_health_bar"]
 [ext_resource type="Script" uid="uid://dm20yh22cisft" path="res://scripts/player/player_saveable.gd" id="99_saveable"]
 [ext_resource type="Script" uid="uid://ca1q0862w5kf8" path="res://scripts/player/states/orb_touch.gd" id="100_orb_touch"]
+[ext_resource type="Script" path="res://scripts/player/states/loot_bend.gd" id="101_loot_bend"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -202,6 +203,9 @@ script = ExtResource("19_gun_aim")
 
 [node name="OrbTouch" type="Node" parent="StateMachine" unique_id=1936052348]
 script = ExtResource("100_orb_touch")
+
+[node name="LootBend" type="Node" parent="StateMachine"]
+script = ExtResource("101_loot_bend")
 
 [node name="PlayerHud" parent="." unique_id=1542474058 instance=ExtResource("20_player_hud")]
 

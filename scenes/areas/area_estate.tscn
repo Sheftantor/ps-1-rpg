@@ -1,54 +1,66 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://Import/Environment/env_beacon_tower.glb" id="e1"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_highrise_a.glb" id="e2"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_highrise_b.glb" id="e3"]
-[ext_resource type="Script" path="res://scripts/world/rain.gd" id="e4"]
+
+[ext_resource type="Environment" path="res://resources/rendering/city_day_environment.tres" id="e4"]
+
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="e5"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_road_straight.glb" id="e6"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_sidewalk.glb" id="e7"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_grass_verge.glb" id="e8"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_terrace_a.glb" id="e9"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_terrace_b.glb" id="e10"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_terrace_c.glb" id="e11"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_tower_block_orange.glb" id="e12"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_tower_block_green.glb" id="e13"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_street_lamp.glb" id="e14"]
-[ext_resource type="PackedScene" path="res://Import/Environment/env_lamp_cone.glb" id="e15"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_tree_a.glb" id="e16"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_bush.glb" id="e17"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_tree_b.glb" id="e18"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_bus_shelter.glb" id="e19"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_bench.glb" id="e20"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_car_hatch.glb" id="e21"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_chainlink_fence.glb" id="e22"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_wheelie_bin.glb" id="e23"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_dumpster.glb" id="e24"]
+
 [ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="e25"]
+
 [ext_resource type="PackedScene" path="res://scenes/suit_guy.tscn" id="e26"]
+
 [ext_resource type="Script" path="res://scripts/commands/item_stack.gd" id="e27"]
+
 [ext_resource type="Resource" path="res://resources/items/tonic.tres" id="e28"]
+
 [ext_resource type="PackedScene" path="res://scenes/pickup.tscn" id="e29"]
+
 [ext_resource type="PackedScene" path="res://Import/Environment/env_alley_gate.glb" id="e30"]
+
 [ext_resource type="Script" path="res://scripts/world/area_exit.gd" id="e31"]
 
-[sub_resource type="Environment" id="s1"]
-background_mode = 1
-background_color = Color(0.07, 0.085, 0.22, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.28, 0.36, 0.5, 1)
-ambient_light_energy = 0.95
-tonemap_mode = 0
-fog_enabled = true
-fog_mode = 0
-fog_light_color = Color(0.07, 0.11, 0.18, 1)
-fog_light_energy = 1.0
-fog_density = 0.014
-fog_sky_affect = 1.0
-adjustment_enabled = true
-adjustment_brightness = 1.18
-adjustment_contrast = 1.1
-adjustment_saturation = 1.15
+[ext_resource type="Script" path="res://scripts/city/city_building.gd" id="city_building"]
 
 [sub_resource type="BoxShape3D" id="s2"]
 size = Vector3(240, 1, 300)
@@ -145,12 +157,12 @@ size = Vector3(1, 12, 8)
 [node name="Estate" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("s1")
+environment = ExtResource("e4")
 
-[node name="Moonlight" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866, -0.3716, 0.3346, 0, 0.6691, 0.7431, -0.5, -0.6436, 0.5795, 0, 30, 0)
-light_color = Color(0.5, 0.58, 0.95, 1)
-light_energy = 0.75
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.81915206, -0.43938506, 0.36868784, 0, 0.64278764, 0.76604444, -0.57357645, -0.62750685, 0.5265408, 0, 30, 0)
+light_color = Color(1, 0.95, 0.84, 1)
+light_energy = 1.5
 shadow_enabled = true
 directional_shadow_max_distance = 70.0
 
@@ -205,59 +217,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52, 0, -150)
 [node name="Col0" type="CollisionShape3D" parent="Set/beacon_tower"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22, 0)
 shape = SubResource("s9")
-
-[node name="highrise_a" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -49.7047, 0, 38)
-
-[node name="Model" parent="Set/highrise_a" instance=ExtResource("e2")]
-
-[node name="highrise_b" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 47.3701, 0, 23.2764)
-
-[node name="Model" parent="Set/highrise_b" instance=ExtResource("e3")]
-
-[node name="highrise_b2" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -71.7031, 0, 9.0441)
-
-[node name="Model" parent="Set/highrise_b2" instance=ExtResource("e3")]
-
-[node name="highrise_b3" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 78.3794, 0, -9.7501)
-
-[node name="Model" parent="Set/highrise_b3" instance=ExtResource("e3")]
-
-[node name="highrise_a2" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -77.2835, 0, -34.4462)
-
-[node name="Model" parent="Set/highrise_a2" instance=ExtResource("e2")]
-
-[node name="highrise_b4" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 68.3246, 0, -33.4532)
-
-[node name="Model" parent="Set/highrise_b4" instance=ExtResource("e3")]
-
-[node name="highrise_a3" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -63.5822, 0, -57.1845)
-
-[node name="Model" parent="Set/highrise_a3" instance=ExtResource("e2")]
-
-[node name="highrise_a4" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 47.2212, 0, -64.6858)
-
-[node name="Model" parent="Set/highrise_a4" instance=ExtResource("e2")]
-
-[node name="highrise_a5" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -67.9354, 0, -103.3916)
-
-[node name="Model" parent="Set/highrise_a5" instance=ExtResource("e2")]
-
-[node name="highrise_b5" type="Node3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 47.3781, 0, -109.2316)
-
-[node name="Model" parent="Set/highrise_b5" instance=ExtResource("e3")]
-
-[node name="Rain" type="Node3D" parent="."]
-script = ExtResource("e4")
 
 [node name="Player" parent="." instance=ExtResource("e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 38)
@@ -1432,267 +1391,6 @@ metadata/ps1_no_vertex_snap = true
 
 [node name="Model" parent="Set/grass_verge90" instance=ExtResource("e8")]
 
-[node name="terrace_a" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, 41)
-
-[node name="Model" parent="Set/terrace_a" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_b" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, 35)
-
-[node name="Model" parent="Set/terrace_b" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_c" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, 29)
-
-[node name="Model" parent="Set/terrace_c" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
-[node name="terrace_a2" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, 23)
-
-[node name="Model" parent="Set/terrace_a2" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_b2" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, 17)
-
-[node name="Model" parent="Set/terrace_b2" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_c2" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, 11)
-
-[node name="Model" parent="Set/terrace_c2" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
-[node name="tower_block_orange" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -22.2, 0, -4)
-
-[node name="Model" parent="Set/tower_block_orange" instance=ExtResource("e12")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/tower_block_orange"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0)
-shape = SubResource("s14")
-
-[node name="terrace_b3" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, -19)
-
-[node name="Model" parent="Set/terrace_b3" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_c3" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, -25)
-
-[node name="Model" parent="Set/terrace_c3" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
-[node name="terrace_a3" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, -31)
-
-[node name="Model" parent="Set/terrace_a3" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_b4" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, -37)
-
-[node name="Model" parent="Set/terrace_b4" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_c4" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, -43)
-
-[node name="Model" parent="Set/terrace_c4" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
-[node name="terrace_a4" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, -49)
-
-[node name="Model" parent="Set/terrace_a4" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_b5" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -19.7, 0, -55)
-
-[node name="Model" parent="Set/terrace_b5" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_a5" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, 41)
-
-[node name="Model" parent="Set/terrace_a5" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_b6" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, 35)
-
-[node name="Model" parent="Set/terrace_b6" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b6"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_c5" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, 29)
-
-[node name="Model" parent="Set/terrace_c5" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
-[node name="terrace_a6" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, 23)
-
-[node name="Model" parent="Set/terrace_a6" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a6"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="tower_block_green" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 22.2, 0, 11)
-
-[node name="Model" parent="Set/tower_block_green" instance=ExtResource("e13")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/tower_block_green"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
-shape = SubResource("s15")
-
-[node name="terrace_c6" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -1)
-
-[node name="Model" parent="Set/terrace_c6" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c6"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
-[node name="terrace_a7" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -7)
-
-[node name="Model" parent="Set/terrace_a7" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_b7" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -13)
-
-[node name="Model" parent="Set/terrace_b7" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_c7" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -19)
-
-[node name="Model" parent="Set/terrace_c7" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
-[node name="terrace_a8" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -25)
-
-[node name="Model" parent="Set/terrace_a8" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a8"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_b8" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -31)
-
-[node name="Model" parent="Set/terrace_b8" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b8"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_c8" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -37)
-
-[node name="Model" parent="Set/terrace_c8" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c8"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
-[node name="terrace_a9" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -43)
-
-[node name="Model" parent="Set/terrace_a9" instance=ExtResource("e9")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_a9"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_b9" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -49)
-
-[node name="Model" parent="Set/terrace_b9" instance=ExtResource("e10")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_b9"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
-shape = SubResource("s12")
-
-[node name="terrace_c9" type="StaticBody3D" parent="Set"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 19.7, 0, -55)
-
-[node name="Model" parent="Set/terrace_c9" instance=ExtResource("e11")]
-
-[node name="Col0" type="CollisionShape3D" parent="Set/terrace_c9"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0)
-shape = SubResource("s13")
-
 [node name="street_lamp" type="StaticBody3D" parent="Set"]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, 36)
 
@@ -1701,16 +1399,6 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, 36)
 [node name="Col0" type="CollisionShape3D" parent="Set/street_lamp"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
 shape = SubResource("s16")
-
-[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
-light_color = Color(1, 0.69, 0.38, 1)
-light_energy = 2.2
-omni_range = 11
-omni_attenuation = 1.3
-
-[node name="Cone" parent="Set/street_lamp" instance=ExtResource("e15")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
 
 [node name="street_lamp2" type="StaticBody3D" parent="Set"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, 18)
@@ -1721,16 +1409,6 @@ transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, 18)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
 shape = SubResource("s16")
 
-[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
-light_color = Color(1, 0.69, 0.38, 1)
-light_energy = 2.2
-omni_range = 11
-omni_attenuation = 1.3
-
-[node name="Cone" parent="Set/street_lamp2" instance=ExtResource("e15")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
-
 [node name="street_lamp3" type="StaticBody3D" parent="Set"]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, 0)
 
@@ -1739,16 +1417,6 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, 0)
 [node name="Col0" type="CollisionShape3D" parent="Set/street_lamp3"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
 shape = SubResource("s16")
-
-[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
-light_color = Color(1, 0.69, 0.38, 1)
-light_energy = 2.2
-omni_range = 11
-omni_attenuation = 1.3
-
-[node name="Cone" parent="Set/street_lamp3" instance=ExtResource("e15")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
 
 [node name="street_lamp4" type="StaticBody3D" parent="Set"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, -18)
@@ -1759,16 +1427,6 @@ transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, -18)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
 shape = SubResource("s16")
 
-[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
-light_color = Color(1, 0.69, 0.38, 1)
-light_energy = 2.2
-omni_range = 11
-omni_attenuation = 1.3
-
-[node name="Cone" parent="Set/street_lamp4" instance=ExtResource("e15")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
-
 [node name="street_lamp5" type="StaticBody3D" parent="Set"]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, -36)
 
@@ -1778,16 +1436,6 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -6.8, 0, -36)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
 shape = SubResource("s16")
 
-[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
-light_color = Color(1, 0.69, 0.38, 1)
-light_energy = 2.2
-omni_range = 11
-omni_attenuation = 1.3
-
-[node name="Cone" parent="Set/street_lamp5" instance=ExtResource("e15")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
-
 [node name="street_lamp6" type="StaticBody3D" parent="Set"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, -56)
 
@@ -1796,16 +1444,6 @@ transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6.8, 0, -56)
 [node name="Col0" type="CollisionShape3D" parent="Set/street_lamp6"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
 shape = SubResource("s16")
-
-[node name="LampLight" type="OmniLight3D" parent="Set/street_lamp6"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, -1.1)
-light_color = Color(1, 0.69, 0.38, 1)
-light_energy = 2.2
-omni_range = 11
-omni_attenuation = 1.3
-
-[node name="Cone" parent="Set/street_lamp6" instance=ExtResource("e15")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
 
 [node name="tree_a" type="StaticBody3D" parent="Set"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 0, 30)
@@ -2266,3 +1904,318 @@ shape = SubResource("s29")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.3, 0, 44)
 
 [node name="Model" parent="Set/chainlink_fence14" instance=ExtResource("e22")]
+
+[node name="Buildings" type="Node3D" parent="."]
+
+[node name="Building0" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, 44)
+script = ExtResource("city_building")
+style = 1
+width_cells = 1
+depth_cells = 2
+floors = 6
+tint = Color(0.992966, 0.990854, 0.989798, 1)
+fire_escape = true
+
+[node name="Building1" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, 40)
+script = ExtResource("city_building")
+style = 1
+width_cells = 1
+depth_cells = 2
+floors = 6
+tint = Color(0.93626, 0.919401, 0.910971, 1)
+fire_escape = true
+
+[node name="Building2" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, 36)
+script = ExtResource("city_building")
+depth_cells = 2
+floors = 7
+tint = Color(0.985621, 0.970266, 0.962588, 1)
+
+[node name="Building3" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, 28)
+script = ExtResource("city_building")
+width_cells = 3
+depth_cells = 2
+tint = Color(0.944104, 0.911766, 0.895597, 1)
+fire_escape = true
+
+[node name="Building4" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, 16)
+script = ExtResource("city_building")
+depth_cells = 2
+floors = 7
+tint = Color(0.978112, 0.954493, 0.942684, 1)
+
+[node name="Building5" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, -15)
+script = ExtResource("city_building")
+depth_cells = 2
+tint = Color(0.920708, 0.888725, 0.872734, 1)
+water_tower = true
+
+[node name="Building6" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, -23)
+script = ExtResource("city_building")
+depth_cells = 2
+floors = 6
+tint = Color(0.886424, 0.873645, 0.867256, 1)
+
+[node name="Building7" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, -31)
+script = ExtResource("city_building")
+style = 1
+depth_cells = 2
+floors = 6
+tint = Color(0.954844, 0.920481, 0.903299, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building8" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, -39)
+script = ExtResource("city_building")
+style = 1
+width_cells = 1
+depth_cells = 2
+floors = 5
+tint = Color(0.96823, 0.957866, 0.952684, 1)
+
+[node name="Building9" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, -43)
+script = ExtResource("city_building")
+depth_cells = 2
+floors = 7
+tint = Color(0.942694, 0.939995, 0.938646, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building10" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -15.950001, 0, -51)
+script = ExtResource("city_building")
+style = 1
+depth_cells = 2
+floors = 7
+tint = Color(0.999071, 0.989295, 0.984407, 1)
+fire_escape = true
+
+[node name="Building11" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -58)
+script = ExtResource("city_building")
+width_cells = 1
+depth_cells = 2
+floors = 5
+tint = Color(0.935826, 0.903436, 0.887242, 1)
+
+[node name="Building12" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -54)
+script = ExtResource("city_building")
+style = 1
+depth_cells = 2
+floors = 7
+tint = Color(0.992361, 0.971245, 0.960687, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building13" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -46)
+script = ExtResource("city_building")
+style = 1
+width_cells = 3
+depth_cells = 2
+tint = Color(0.941482, 0.929392, 0.923347, 1)
+water_tower = true
+
+[node name="Building14" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -34)
+script = ExtResource("city_building")
+width_cells = 1
+depth_cells = 2
+floors = 6
+tint = Color(0.915169, 0.876165, 0.856663, 1)
+
+[node name="Building15" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -30)
+script = ExtResource("city_building")
+style = 1
+width_cells = 3
+depth_cells = 2
+tint = Color(0.876849, 0.865414, 0.859697, 1)
+fire_escape = true
+
+[node name="Building16" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -18)
+script = ExtResource("city_building")
+style = 1
+width_cells = 1
+depth_cells = 2
+tint = Color(0.969405, 0.968364, 0.967843, 1)
+
+[node name="Building17" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -14)
+script = ExtResource("city_building")
+style = 1
+width_cells = 1
+depth_cells = 2
+floors = 6
+tint = Color(0.974245, 0.93806, 0.919968, 1)
+water_tower = true
+
+[node name="Building18" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -10)
+script = ExtResource("city_building")
+depth_cells = 2
+tint = Color(0.98678, 0.962531, 0.950406, 1)
+fire_escape = true
+
+[node name="Building19" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, -2)
+script = ExtResource("city_building")
+width_cells = 1
+depth_cells = 2
+floors = 5
+tint = Color(0.966607, 0.955318, 0.949673, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building20" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, 20)
+script = ExtResource("city_building")
+style = 1
+width_cells = 1
+depth_cells = 2
+floors = 5
+tint = Color(0.947399, 0.928925, 0.919689, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building21" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, 24)
+script = ExtResource("city_building")
+width_cells = 1
+depth_cells = 2
+floors = 6
+tint = Color(0.876353, 0.873152, 0.871551, 1)
+
+[node name="Building22" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, 28)
+script = ExtResource("city_building")
+style = 1
+width_cells = 3
+depth_cells = 2
+floors = 7
+tint = Color(0.876599, 0.866062, 0.860793, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building23" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 15.950001, 0, 40)
+script = ExtResource("city_building")
+style = 1
+width_cells = 1
+depth_cells = 2
+tint = Color(0.908295, 0.877971, 0.862809, 1)
+fire_escape = true
+water_tower = true
+
+[node name="Building24" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -43.7047, 0, 44)
+script = ExtResource("city_building")
+style = 2
+width_cells = 3
+floors = 23
+tint = Color(0.935184, 0.935184, 0.935184, 1)
+
+[node name="Building25" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 40.3701, 0, 17.2764)
+script = ExtResource("city_building")
+style = 3
+width_cells = 3
+depth_cells = 4
+floors = 16
+tint = Color(0.956342, 0.956342, 0.956342, 1)
+
+[node name="Building26" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -64.7031, 0, 15.0441)
+script = ExtResource("city_building")
+style = 3
+width_cells = 3
+depth_cells = 4
+floors = 16
+tint = Color(0.978437, 0.978437, 0.978437, 1)
+
+[node name="Building27" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 71.3794, 0, -15.7501)
+script = ExtResource("city_building")
+style = 3
+width_cells = 3
+depth_cells = 4
+floors = 16
+tint = Color(0.881589, 0.881589, 0.881589, 1)
+
+[node name="Building28" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -71.2835, 0, -28.446201)
+script = ExtResource("city_building")
+style = 2
+width_cells = 3
+floors = 23
+tint = Color(0.946692, 0.946692, 0.946692, 1)
+
+[node name="Building29" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 61.3246, 0, -39.4532)
+script = ExtResource("city_building")
+style = 2
+width_cells = 3
+depth_cells = 4
+floors = 16
+tint = Color(0.998912, 0.998912, 0.998912, 1)
+
+[node name="Building30" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -57.5822, 0, -51.1845)
+script = ExtResource("city_building")
+style = 3
+width_cells = 3
+floors = 23
+tint = Color(0.953699, 0.953699, 0.953699, 1)
+
+[node name="Building31" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 41.2212, 0, -70.6858)
+script = ExtResource("city_building")
+style = 2
+width_cells = 3
+floors = 23
+tint = Color(0.982073, 0.982073, 0.982073, 1)
+
+[node name="Building32" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -61.935402, 0, -97.3916)
+script = ExtResource("city_building")
+style = 3
+width_cells = 3
+floors = 23
+tint = Color(0.90939, 0.90939, 0.90939, 1)
+
+[node name="Building33" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 40.3781, 0, -115.2316)
+script = ExtResource("city_building")
+style = 2
+width_cells = 3
+depth_cells = 4
+floors = 16
+tint = Color(0.982678, 0.982678, 0.982678, 1)
+
+[node name="Building34" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -16.2, 0, 8)
+script = ExtResource("city_building")
+style = 3
+width_cells = 6
+floors = 9
+tint = Color(0.897657, 0.897657, 0.897657, 1)
+
+[node name="Building35" type="Node3D" parent="Buildings"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 16.2, 0, 1)
+script = ExtResource("city_building")
+style = 2
+width_cells = 5
+floors = 11
+tint = Color(0.929271, 0.929271, 0.929271, 1)

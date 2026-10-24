@@ -26,7 +26,7 @@ static var is_open: bool = false
 ## Also close when the player takes damage.
 @export var close_on_damage: bool = false
 ## Loot slot size as a fraction of the inventory's (IconSlot.SIZE).
-@export_range(0.3, 1.5, 0.05) var loot_slot_scale: float = 0.65
+@export_range(0.3, 1.5, 0.05) var loot_slot_scale: float = 1.0
 ## Slots per row; more rows grow downward.
 @export_range(1, 12) var columns: int = 4:
 	set(value):
@@ -76,7 +76,7 @@ func _input(event: InputEvent) -> void:
 		# Interact at a different sack opens that one instead; here, takes all.
 		var nearest := _player.nearest_interactable()
 		if nearest is Pickup and nearest != _pickup:
-			open(nearest as Pickup)
+			nearest.interact(_player)
 		else:
 			_take_all()
 		get_viewport().set_input_as_handled()
@@ -268,6 +268,8 @@ func _slot(entry: Resource) -> IconSlot:
 
 
 static func _count(entry: Resource) -> int:
+	if entry is LootCash:
+		return (entry as LootCash).amount
 	return (entry as ItemStack).count if entry is ItemStack else 0
 
 
