@@ -1,11 +1,15 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/floating_health_bar.gd" id="1_bar"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
 [ext_resource type="LabelSettings" path="res://resources/ui/damage_number.tres" id="5_number"]
-[ext_resource type="LabelSettings" path="res://resources/ui/health_value.tres" id="6_value"]
+[ext_resource type="Script" path="res://scripts/ui/pixel_health_bar.gd" id="6_bar"]
 [ext_resource type="Script" path="res://scripts/ui/enemy_level_badge.gd" id="7_badge"]
 [ext_resource type="LabelSettings" path="res://resources/ui/level_badge.tres" id="8_badge_text"]
+[ext_resource type="Script" path="res://scripts/ui/enemy_hud_visibility.gd" id="20_visibility"]
+[ext_resource type="Script" path="res://scripts/ui/enemy_hud_layout.gd" id="21_layout"]
+
+[ext_resource type="Script" path="res://scripts/ui/screen_space_billboard.gd" id="22_billboard"]
 
 [node name="EnemyHealthBar" type="Node3D"]
 script = ExtResource("1_bar")
@@ -36,16 +40,15 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("2_theme")
 
-[node name="HealthValue" type="Label" parent="Canvas/Root"]
+[node name="Bar" type="Range" parent="Canvas/Root"]
 layout_mode = 0
-offset_left = 120.0
-offset_top = 116.0
-offset_right = 320.0
-offset_bottom = 196.0
-text = "80"
-label_settings = ExtResource("6_value")
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_left = 188.0
+offset_top = 142.0
+offset_right = 252.0
+offset_bottom = 156.0
+mouse_filter = 2
+value = 80.0
+script = ExtResource("6_bar")
 
 [node name="LevelBadge" type="Control" parent="Canvas/Root"]
 layout_mode = 0
@@ -79,3 +82,12 @@ text = "25"
 label_settings = ExtResource("5_number")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Visibility" type="Node" parent="."]
+script = ExtResource("20_visibility")
+
+[node name="Layout" type="Node" parent="."]
+script = ExtResource("21_layout")
+
+[node name="ScreenSpace" type="Node" parent="."]
+script = ExtResource("22_billboard")

@@ -14,6 +14,8 @@ extends CharacterBody3D
 signal level_changed(level: int)
 ## Emitted when XP, the level or stat points change (HUD XP bar, status screen).
 signal progress_changed
+## Emitted when the wallet changes (shop screen, inventory).
+signal money_changed(money: int)
 
 const ACTION_LIGHT: StringName = &"attack_light"
 const ACTION_HEAVY: StringName = &"attack_heavy"
@@ -61,6 +63,16 @@ const TREE_JUMP_ARMS: StringName = &"parameters/JumpArms/blend_amount"
 const TREE_AIM: StringName = &"parameters/AimBlend/blend_amount"
 ## How fast the upper body raises/lowers the gun (blend per second).
 const AIM_BLEND_SPEED: float = 8.0
+## Blocking with a melee weapon: upper body into the Guard pose (0..1), and
+## how far a blocked hit has knocked it back toward GuardImpact (0..1). Built
+## by res://scripts/tools/build_guard_clips.gd.
+const TREE_GUARD: StringName = &"parameters/GuardBlend/blend_amount"
+const TREE_GUARD_RECOIL: StringName = &"parameters/GuardRecoil/blend_amount"
+## How fast the guard comes up and goes back down (blend per second).
+const GUARD_RAISE_SPEED: float = 9.0
+const GUARD_LOWER_SPEED: float = 6.0
+## How long a blocked hit's knock-back takes to settle back into the guard (s).
+const GUARD_RECOIL_TIME: float = 0.3
 ## Where the sheathed melee weapon rides while the gun is out, in Facing space: grip at
 ## the left hip, blade angled down and back.
 const SHEATH_OFFSET: Vector3 = Vector3(-0.22, 0.95, 0.08)
@@ -107,6 +119,8 @@ var lock_target: Enemy = null
 var inventory: Array[ItemStack] = []
 ## Index into inventory of the item use_item spends; next_item steps it.
 var selected_item: int = 0
+## Cash in the wallet. Starts at loadout.starting_money; kills add to it, shops spend it.
+var money: int = 0
 ## Set by states each tick for their visual cue (wind-up, i-frames, guard).
 var state_flash: Color = NO_COLOR
 ## What happened to the last incoming hit, for the debug HUD.
@@ -134,7 +148,7 @@ var _action_speed: float = 1.0
 var _action_slot: int = 0
 ## Whether the current airborne stretch started with a jump (not a ledge drop).
 var _jumped: bool = false
-## Primary weapon (bat, sword...), from the loadout.
+## Primary weapon (any melee weapon), from the loadout.
 var melee_weapon: MeleeWeaponData = null
 ## Secondary weapon slot (the melee weapon is always the primary). Null until a gun is picked up.
 var gun: WeaponData = null
@@ -143,6 +157,8 @@ var armor: Dictionary[ArmorData.Slot, ArmorData] = {}
 var _gun_model: Node3D = null
 var _aim_amount: float = 0.0
 var _aim_target: float = 0.0
+var _guard_amount: float = 0.0
+var _guard_recoil: float = 0.0
 var _melee_holder: Node3D = null
 var _melee_hand_transform: Transform3D
 var _hip_attachment: BoneAttachment3D = null
@@ -168,6 +184,8 @@ var _hip_attachment: BoneAttachment3D = null
 @onready var _camera_rig: Node3D = $CameraRig
 @onready var _spring_arm: SpringArm3D = $CameraRig/SpringArm3D
 @onready var _lock_on_marker: Node3D = $LockOnMarker
+## The free camera's distance; lock-on pulls in to stats.lock_on_camera_distance.
+@onready var _free_camera_distance: float = _spring_arm.spring_length
 
 
 func _ready() -> void:
@@ -183,6 +201,7 @@ func _ready() -> void:
 
 	for stack: ItemStack in loadout.inventory:
 		inventory.append(stack.duplicate() as ItemStack)
+	money = loadout.starting_money
 	_equip_from_loadout()
 
 	_debug_hit = AttackData.new()
@@ -224,7 +243,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.is_pressed():
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			get_viewport().set_input_as_handled()
-		return
+			return
+		# The loot window frees the cursor but the fight goes on: keys and the
+		# controller still act, only mouse-look waits. The controller never needs
+		# the mouse captured, so it always acts.
+		var pad_event := event is InputEventJoypadButton or event is InputEventJoypadMotion
+		if event is InputEventMouse or not (LootWindow.is_open or pad_event):
+			return
 
 	if event is InputEventMouseMotion:
 		if state_machine.current_name() == PlayerState.GUN_AIM:
@@ -260,6 +285,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Hit stop (Feel): the player alone holds still for a moment.
+	if Feel.is_frozen(self):
+		return
 	# Gun mode keeps the player processing through pauses; the pause menu stops it.
 	if GameMenus.any_open():
 		return
@@ -271,7 +299,7 @@ func _physics_process(delta: float) -> void:
 	# While gun mode has the world paused, the player keeps processing but must not
 	# fall (or build up fall speed to release all at once on resume).
 	if not is_on_floor() and not get_tree().paused:
-		velocity.y -= _gravity * delta
+		velocity.y -= _gravity * current_state().gravity_scale() * delta
 	state_machine.physics_update(delta)
 	# Gun mode pauses the tree (and physics) while the player keeps processing.
 	if not get_tree().paused:
@@ -319,6 +347,12 @@ func _clear_buffer() -> void:
 
 func can_dodge() -> bool:
 	return stamina.has(stats.dodge_stamina_cost)
+
+
+## In a melee attack: the melee combo, the strong attack, or a skill using it.
+func is_attacking() -> bool:
+	var state := state_machine.current_name()
+	return state == PlayerState.LIGHT_ATTACK or state == PlayerState.HEAVY_ATTACK
 
 
 func wants_block() -> bool:
@@ -401,6 +435,7 @@ func _on_hit_received(attack: AttackData, source: Node3D) -> void:
 		if stamina.spend(attack.damage * stats.block_stamina_per_damage):
 			last_hit_result = "blocked"
 			_flash(BLOCK_FLASH_COLOR)
+			_guard_recoil = 1.0
 			set_horizontal_velocity(push * stats.block_knockback_scale)
 			health.take_damage(roundi(attack.damage * stats.block_damage_multiplier))
 			return
@@ -415,7 +450,8 @@ func _on_hit_received(attack: AttackData, source: Node3D) -> void:
 	_clear_buffer()
 	_post_hit_timer = stats.post_hit_invulnerability
 	state_machine.transition_to(PlayerState.HIT_STUN, {"knockback": push, "guard_break": guard_broken,
-			"stun_scale": attack.hit_stun_multiplier})
+			"stun_scale": attack.hit_stun_multiplier, "knockdown": attack.knockdown,
+			"away": _knockback_direction(source)})
 
 
 func _debug_hurt() -> void:
@@ -512,12 +548,14 @@ func _apply_stick_look(delta: float) -> void:
 ## While locked on, swing the camera behind the player facing the target so both stay framed.
 func _update_lock_on_camera(delta: float) -> void:
 	_lock_on_marker.visible = lock_target != null
+	var weight := 1.0 - exp(-stats.lock_on_camera_speed * delta)
+	var distance: float = stats.lock_on_camera_distance if lock_target != null else _free_camera_distance
+	_spring_arm.spring_length = lerpf(_spring_arm.spring_length, distance, weight)
 	if lock_target == null:
 		return
 	_lock_on_marker.global_position = lock_target.global_position + Vector3.UP * LOCK_ON_MARKER_HEIGHT
 	var to_target := lock_target.global_position - global_position
 	to_target.y = 0.0
-	var weight := 1.0 - exp(-stats.lock_on_camera_speed * delta)
 	if to_target.length_squared() > 0.01:
 		var yaw := atan2(-to_target.x, -to_target.z)
 		_camera_rig.rotation.y = lerp_angle(_camera_rig.rotation.y, yaw, weight)
@@ -667,12 +705,37 @@ func _refresh_xp_hud() -> void:
 	hud.set_xp(level, xp, xp_to_next())
 
 
-## Called by an enemy as it dies.
-func award_kill(enemy_level: int) -> void:
+## Called by an enemy as it dies. Returns the XP gained.
+func award_kill(enemy_level: int) -> int:
 	var gained := Leveling.kill_xp(enemy_level, level, stats)
+	var cash := stats.kill_cash_per_level * maxi(1, enemy_level)
+	var parts := PackedStringArray()
 	if gained > 0:
-		hud.flash_message("+%d XP" % gained)
+		parts.append("+%d XP" % gained)
+	if cash > 0:
+		parts.append("+$%d" % cash)
+		add_money(cash)
+	if not parts.is_empty():
+		hud.flash_message("   ".join(parts))
+	if gained > 0:
 		gain_xp(gained)
+	return gained
+
+
+func add_money(amount: int) -> void:
+	if amount == 0:
+		return
+	money = maxi(0, money + amount)
+	money_changed.emit(money)
+
+
+## Takes amount out of the wallet. False (and nothing spent) if there isn't enough.
+func spend_money(amount: int) -> bool:
+	if amount < 0 or amount > money:
+		return false
+	money -= amount
+	money_changed.emit(money)
+	return true
 
 
 ## WoW-style level-up: more max health and energy (the gain is added to the
@@ -712,6 +775,7 @@ func save_state() -> Dictionary:
 		gun = gun,
 		inventory = inventory.duplicate(),
 		selected_item = selected_item,
+		money = money,
 	}
 
 
@@ -729,6 +793,8 @@ func load_state(state: Dictionary) -> void:
 	gun = state.gun
 	inventory.assign(state.inventory)
 	selected_item = state.selected_item
+	money = int(state.get("money", money))
+	money_changed.emit(money)
 	_refresh_item_hud()
 	progress_changed.emit()
 
@@ -774,6 +840,20 @@ func take_loot(pickup: Pickup, entry: Resource) -> void:
 		add_item(stack)
 		hud.flash_message("GOT %s X%d" % [stack.item.display_name.to_upper(), stack.count])
 	pickup.remove(entry)
+
+
+## Takes count of item out of the inventory (selling). False if fewer are carried.
+func remove_item(item: ItemData, count: int = 1) -> bool:
+	for held: ItemStack in inventory:
+		if held.item == item:
+			if held.count < count:
+				return false
+			held.count -= count
+			if held.count <= 0:
+				inventory.erase(held)
+			_refresh_item_hud()
+			return true
+	return false
 
 
 ## Adds loot to the inventory, stacking onto a slot holding the same item.
@@ -933,6 +1013,22 @@ func play_roll_animation(duration: float) -> void:
 	_play_action(ANIM_ROLL, _anim.get_animation(ANIM_ROLL).length / maxf(duration, 0.01))
 
 
+## Plays any action clip (e.g. the melee swings) in the one-shot slots at speed.
+func play_action_clip(clip: StringName, speed: float) -> void:
+	_play_action(clip, speed)
+
+
+## Changes the running action clip's playback speed (the melee swing retimes each phase).
+func set_action_speed(speed: float) -> void:
+	_action_speed = speed
+	_anim_tree.set("parameters/Action%sSpeed/scale" % ACTION_SLOTS[_action_slot], speed)
+
+
+## Phase lengths (windup, strike, recovery) built into a melee swing clip.
+func action_clip_phase_times(clip: StringName) -> Vector3:
+	return _anim.get_animation(clip).get_meta(&"phase_times", Vector3.ZERO)
+
+
 ## Frames in the Roll clip; the roll's i-frames are counted in these.
 func roll_clip_frames() -> int:
 	var clip := _anim.get_animation(ANIM_ROLL)
@@ -999,18 +1095,37 @@ func _update_animation(delta: float) -> void:
 	_weapon_trail.emitting = _action_frame_state(&"trail_frames") == 1
 	_aim_amount = move_toward(_aim_amount, _aim_target, AIM_BLEND_SPEED * delta)
 	_anim_tree.set(TREE_AIM, _aim_amount)
+	_update_guard_layer(delta)
 	_update_air_layer()
 	_update_locomotion_layer()
+
+
+## Raises the melee guard while blocking and lowers it after; a blocked hit
+## knocks it back toward the chest, easing back into the guard. Upper body
+## only, so the legs keep walking in whichever direction the player moves.
+func _update_guard_layer(delta: float) -> void:
+	var guarding := current_state().is_blocking() and melee_weapon != null
+	var speed := GUARD_RAISE_SPEED if guarding else GUARD_LOWER_SPEED
+	_guard_amount = move_toward(_guard_amount, 1.0 if guarding else 0.0, speed * delta)
+	_guard_recoil = move_toward(_guard_recoil, 0.0, delta / GUARD_RECOIL_TIME)
+	var raise := _guard_amount * _guard_amount * (3.0 - 2.0 * _guard_amount)
+	_anim_tree.set(TREE_GUARD, raise)
+	# Snaps back fast at first, settles gently.
+	_anim_tree.set(TREE_GUARD_RECOIL, _guard_recoil * _guard_recoil)
 
 
 ## Crossfades to the Jump clip once airborne (from its fall pose after a ledge
 ## drop) and raises the arms with the jump curve: none at takeoff, fully up at
 ## the apex, back down as the fall speeds up again.
 func _update_air_layer() -> void:
-	var in_air: bool = _anim_tree.get(TREE_AIR_STATE) == "air"
+	var air_state: StringName = _anim_tree.get(TREE_AIR_STATE)
+	var in_air := air_state == &"air"
 	if is_on_floor():
 		_jumped = false
-		if in_air:
+		# Also when the layer hasn't started yet (""): a player placed right on
+		# the floor (e.g. loading a save) never leaves the ground to start it,
+		# and the whole tree outputs nothing (T-pose) until it does.
+		if air_state != &"ground":
 			_anim_tree.set(TREE_AIR_REQUEST, "ground")
 	elif not in_air:
 		var jumping := velocity.y > 0.0 and _air_time <= FALL_ANIM_DELAY

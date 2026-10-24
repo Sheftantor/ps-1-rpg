@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="ShopStock" load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/shop/shop_stock.gd" id="1_stock"]
+[ext_resource type="Script" path="res://scripts/shop/shop_entry.gd" id="2_entry"]
+[ext_resource type="Resource" path="res://resources/items/hot_dog.tres" id="it_hot_dog"]
+[ext_resource type="Resource" path="res://resources/items/slush.tres" id="it_slush"]
+[ext_resource type="Resource" path="res://resources/items/canned_coffee.tres" id="it_canned_coffee"]
+[ext_resource type="Resource" path="res://resources/items/bandages.tres" id="it_bandages"]
+[ext_resource type="Resource" path="res://resources/items/potion.tres" id="it_potion"]
+[ext_resource type="Resource" path="res://resources/items/tonic.tres" id="it_tonic"]
+
+[sub_resource type="Resource" id="entry_hot_dog"]
+script = ExtResource("2_entry")
+item = ExtResource("it_hot_dog")
+
+[sub_resource type="Resource" id="entry_slush"]
+script = ExtResource("2_entry")
+item = ExtResource("it_slush")
+
+[sub_resource type="Resource" id="entry_canned_coffee"]
+script = ExtResource("2_entry")
+item = ExtResource("it_canned_coffee")
+
+[sub_resource type="Resource" id="entry_bandages"]
+script = ExtResource("2_entry")
+item = ExtResource("it_bandages")
+
+[sub_resource type="Resource" id="entry_potion"]
+script = ExtResource("2_entry")
+item = ExtResource("it_potion")
+
+[sub_resource type="Resource" id="entry_tonic"]
+script = ExtResource("2_entry")
+item = ExtResource("it_tonic")
+
+[resource]
+script = ExtResource("1_stock")
+shop_name = "6-12"
+greeting = "Welcome to 6-12. Open all night, every night. Don't mind the rain."
+thanks_line = "Thank you, come again."
+broke_line = "Come back when you've got the cash, friend."
+sold_line = "Yeah, I can move that."
+entries = Array[ExtResource("2_entry")]([SubResource("entry_hot_dog"), SubResource("entry_slush"), SubResource("entry_canned_coffee"), SubResource("entry_bandages"), SubResource("entry_potion"), SubResource("entry_tonic")])
+buys_items = true
+sell_rate = 0.5

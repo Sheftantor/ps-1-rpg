@@ -1,26 +1,153 @@
 [gd_resource type="Theme" format=3 uid="uid://cusc4v6m2xc6u"]
 
 [ext_resource type="FontFile" uid="uid://bmylgkk6gtohf" path="res://Import/MGS1 Codec.ttf" id="1_ed4vw"]
+[ext_resource type="Texture2D" uid="uid://c1833rva8bi5u" path="res://addons/windows_95_theme/Windows_95_panel1.png" id="2_raised"]
+[ext_resource type="Texture2D" uid="uid://xpia3nv1ivsg" path="res://addons/windows_95_theme/Windows_95_panel2.png" id="3_focus"]
+[ext_resource type="Texture2D" uid="uid://decstt4wbp31w" path="res://addons/windows_95_theme/Windows_95_panel5.png" id="4_pressed"]
+[ext_resource type="Texture2D" uid="uid://b15rexdw7nmn7" path="res://addons/windows_95_theme/Windows_95_panel7.png" id="5_navy"]
+[ext_resource type="Texture2D" uid="uid://drtyqsu3p4y1j" path="res://addons/windows_95_theme/Windows_95_panel8.png" id="6_grabber"]
+[ext_resource type="Texture2D" uid="uid://c7m07tr4c0ajt" path="res://addons/windows_95_theme/Windows_95_panel9.png" id="7_track"]
+[ext_resource type="Texture2D" uid="uid://dxx6bs8aqtahq" path="res://addons/windows_95_theme/Windows_95_panel12.png" id="8_sunken"]
+[ext_resource type="Texture2D" uid="uid://bglwmc1p0g780" path="res://addons/windows_95_theme/Windows_95_panel13.png" id="9_sunken_grey"]
+[ext_resource type="Texture2D" uid="uid://d2x4us7finahw" path="res://addons/windows_95_theme/Windows_95_panel6.png" id="10_tooltip"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v5hth"]
-bg_color = Color(0.10516318, 0.090766884, 0.07984165, 1)
-border_width_left = 6
-border_width_top = 6
-border_width_right = 6
-border_width_bottom = 6
-border_blend = true
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-expand_margin_left = 2.0
-expand_margin_top = 2.0
-expand_margin_right = 2.0
-expand_margin_bottom = 2.0
-shadow_size = 7
-anti_aliasing_size = 5.348
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_raised"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("2_raised")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_focus"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("3_focus")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_pressed"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("4_pressed")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_grabber"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("6_grabber")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_track"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("7_track")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_sunken"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("8_sunken")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_sunken_grey"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("9_sunken_grey")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_navy"]
+texture = ExtResource("5_navy")
+texture_margin_left = 1.0
+texture_margin_top = 1.0
+texture_margin_right = 1.0
+texture_margin_bottom = 1.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tooltip"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("10_tooltip")
+texture_margin_left = 1.0
+texture_margin_top = 1.0
+texture_margin_right = 1.0
+texture_margin_bottom = 1.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
 
 [resource]
 default_font = ExtResource("1_ed4vw")
-default_font_size = 22
-Panel/styles/panel = SubResource("StyleBoxFlat_v5hth")
+default_font_size = 16
+Button/colors/font_color = Color(0, 0, 0, 1)
+Button/colors/font_disabled_color = Color(0, 0, 0, 1)
+Button/styles/disabled = SubResource("StyleBoxTexture_raised")
+Button/styles/disabled_mirrored = SubResource("StyleBoxTexture_raised")
+Button/styles/focus = SubResource("StyleBoxTexture_focus")
+Button/styles/hover = SubResource("StyleBoxTexture_raised")
+Button/styles/normal = SubResource("StyleBoxTexture_raised")
+Button/styles/pressed = SubResource("StyleBoxTexture_pressed")
+HScrollBar/styles/grabber = SubResource("StyleBoxTexture_grabber")
+HScrollBar/styles/grabber_highlight = SubResource("StyleBoxTexture_grabber")
+HScrollBar/styles/grabber_pressed = SubResource("StyleBoxTexture_grabber")
+HScrollBar/styles/scroll = SubResource("StyleBoxTexture_track")
+HScrollBar/styles/scroll_focus = SubResource("StyleBoxTexture_track")
+LineEdit/styles/focus = SubResource("StyleBoxTexture_sunken")
+LineEdit/styles/normal = SubResource("StyleBoxTexture_sunken")
+LineEdit/styles/read_only = SubResource("StyleBoxTexture_sunken_grey")
+Panel/styles/panel = SubResource("StyleBoxTexture_raised")
+PanelContainer/styles/panel = SubResource("StyleBoxTexture_raised")
+PopupMenu/styles/hover = SubResource("StyleBoxTexture_navy")
+PopupMenu/styles/panel = SubResource("StyleBoxTexture_raised")
+ProgressBar/styles/background = SubResource("StyleBoxTexture_sunken")
+ProgressBar/styles/fill = SubResource("StyleBoxTexture_navy")
+TooltipPanel/styles/panel = SubResource("StyleBoxTexture_tooltip")
+VScrollBar/styles/grabber = SubResource("StyleBoxTexture_grabber")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxTexture_grabber")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxTexture_grabber")
+VScrollBar/styles/scroll = SubResource("StyleBoxTexture_track")
+VScrollBar/styles/scroll_focus = SubResource("StyleBoxTexture_track")

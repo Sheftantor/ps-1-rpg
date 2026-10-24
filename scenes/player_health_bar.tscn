@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/floating_health_bar.gd" id="1_bar"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" path="res://resources/ui/player_health_fill.tres" id="4_gradient"]
 [ext_resource type="LabelSettings" path="res://resources/ui/player_damage_number.tres" id="5_number"]
 [ext_resource type="LabelSettings" path="res://resources/ui/player_health_value.tres" id="6_value"]
+
+[ext_resource type="Script" path="res://scripts/ui/screen_space_billboard.gd" id="22_billboard"]
 
 [node name="PlayerHealthBar" type="Node3D"]
 script = ExtResource("1_bar")
@@ -66,3 +68,6 @@ text = "25"
 label_settings = ExtResource("5_number")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ScreenSpace" type="Node" parent="."]
+script = ExtResource("22_billboard")

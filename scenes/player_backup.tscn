@@ -1,0 +1,193 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://b8tucuckieblf" path="res://scripts/player/player.gd" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/player_model.tscn" id="2_model"]
+[ext_resource type="Resource" path="res://resources/player/player_stats.tres" id="3_stats"]
+[ext_resource type="Script" uid="uid://ddr3jmrv1sw61" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
+[ext_resource type="Script" uid="uid://dm4ka8v6bajrj" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
+[ext_resource type="Script" uid="uid://b0a6txu5u8use" path="res://scripts/combat/health.gd" id="6_health"]
+[ext_resource type="Resource" path="res://resources/player/player_loadout.tres" id="7_loadout"]
+[ext_resource type="Script" path="res://scripts/combat/stamina.gd" id="8_stamina"]
+[ext_resource type="Script" uid="uid://l8o5mpopl6tw" path="res://scripts/state_machine/state_machine.gd" id="9_machine"]
+[ext_resource type="Script" path="res://scripts/player/states/idle.gd" id="10_idle"]
+[ext_resource type="Script" path="res://scripts/player/states/move.gd" id="11_move"]
+[ext_resource type="Script" path="res://scripts/player/states/dodge.gd" id="12_dodge"]
+[ext_resource type="Script" path="res://scripts/player/states/light_attack.gd" id="13_light_attack"]
+[ext_resource type="Script" path="res://scripts/player/states/heavy_attack.gd" id="14_heavy_attack"]
+[ext_resource type="Script" path="res://scripts/player/states/block.gd" id="15_block"]
+[ext_resource type="Script" path="res://scripts/player/states/hit_stun.gd" id="16_hit_stun"]
+[ext_resource type="Script" path="res://scripts/player/states/dead.gd" id="17_dead"]
+[ext_resource type="Script" path="res://scripts/player/states/gun_aim.gd" id="19_gun_aim"]
+[ext_resource type="PackedScene" path="res://scenes/player_hud.tscn" id="20_player_hud"]
+[ext_resource type="Script" path="res://scripts/combat/range_dome.gd" id="21_range_dome"]
+[ext_resource type="PackedScene" path="res://scenes/player_health_bar.tscn" id="99_health_bar"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="98_pause"]
+[ext_resource type="PackedScene" path="res://scenes/status_menu.tscn" id="97_status"]
+[ext_resource type="PackedScene" path="res://scenes/inventory_menu.tscn" id="96_inventory"]
+[ext_resource type="PackedScene" path="res://scenes/loot_window.tscn" id="95_loot"]
+[ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
+size = Vector3(1.2, 1.2, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_debug"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.6, 0.2, 0.35)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hitbox"]
+material = SubResource("StandardMaterial3D_debug")
+size = Vector3(1.2, 1.2, 1.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_swing"]
+size = Vector3(2.4, 0.6, 1.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_swing"]
+material = SubResource("StandardMaterial3D_debug")
+size = Vector3(2.4, 0.6, 1.5)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.45
+height = 1.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+shading_mode = 0
+albedo_color = Color(1, 0.2, 0.2, 1)
+
+[sub_resource type="PrismMesh" id="PrismMesh_marker"]
+material = SubResource("StandardMaterial3D_marker")
+size = Vector3(0.35, 0.35, 0.08)
+
+[node name="Player" type="CharacterBody3D" unique_id=454185796]
+collision_layer = 2
+collision_mask = 5
+floor_max_angle = 1.0471976
+floor_snap_length = 0.25
+script = ExtResource("1_player")
+stats = ExtResource("3_stats")
+loadout = ExtResource("7_loadout")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1848658058]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Facing" type="Node3D" parent="." unique_id=1734982898]
+
+[node name="Model" parent="Facing" unique_id=560092991 instance=ExtResource("2_model")]
+transform = Transform3D(-1.8, 0, 0, 0, 1.8, 0, 0, 0, -1.8, 0, 0, 0)
+
+[node name="Hitbox" type="Area3D" parent="Facing" unique_id=482295950]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1)
+collision_layer = 0
+collision_mask = 16
+monitoring = false
+monitorable = false
+script = ExtResource("4_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/Hitbox" unique_id=830540535]
+shape = SubResource("BoxShape3D_hitbox")
+
+[node name="DebugMesh" type="MeshInstance3D" parent="Facing/Hitbox" unique_id=1630489511]
+mesh = SubResource("BoxMesh_hitbox")
+
+[node name="SwingHitbox" type="Area3D" parent="Facing"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.75)
+collision_layer = 0
+collision_mask = 16
+monitoring = false
+monitorable = false
+script = ExtResource("4_hitbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/SwingHitbox"]
+shape = SubResource("BoxShape3D_swing")
+
+[node name="DebugMesh" type="MeshInstance3D" parent="Facing/SwingHitbox"]
+mesh = SubResource("BoxMesh_swing")
+
+[node name="Hurtbox" type="Area3D" parent="." unique_id=1919024979]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hurtbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox" unique_id=513532303]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="Health" type="Node" parent="." unique_id=1967515924]
+script = ExtResource("6_health")
+
+[node name="CameraRig" type="Node3D" parent="." unique_id=271155626]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraRig" unique_id=1841811412]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 0, 0, 0)
+spring_length = 4.5
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/SpringArm3D" unique_id=828223536]
+current = true
+fov = 70.0
+
+[node name="LockOnMarker" type="MeshInstance3D" parent="." unique_id=1665562181]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0)
+top_level = true
+visible = false
+mesh = SubResource("PrismMesh_marker")
+
+[node name="Stamina" type="Node" parent="."]
+script = ExtResource("8_stamina")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("9_machine")
+initial_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("10_idle")
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("11_move")
+
+[node name="Dodge" type="Node" parent="StateMachine"]
+script = ExtResource("12_dodge")
+
+[node name="LightAttack" type="Node" parent="StateMachine"]
+script = ExtResource("13_light_attack")
+
+[node name="HeavyAttack" type="Node" parent="StateMachine"]
+script = ExtResource("14_heavy_attack")
+
+[node name="Block" type="Node" parent="StateMachine"]
+script = ExtResource("15_block")
+
+[node name="HitStun" type="Node" parent="StateMachine"]
+script = ExtResource("16_hit_stun")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("17_dead")
+
+[node name="GunAim" type="Node" parent="StateMachine"]
+script = ExtResource("19_gun_aim")
+
+[node name="PlayerHud" parent="." instance=ExtResource("20_player_hud")]
+
+[node name="RangeDome" type="MeshInstance3D" parent="."]
+script = ExtResource("21_range_dome")
+
+[node name="HealthBar" parent="." instance=ExtResource("99_health_bar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
+
+[node name="PauseMenu" parent="." instance=ExtResource("98_pause")]
+
+[node name="StatusMenu" parent="." instance=ExtResource("97_status")]
+
+[node name="InventoryMenu" parent="." instance=ExtResource("96_inventory")]
+
+[node name="LootWindow" parent="." instance=ExtResource("95_loot")]
+
+[node name="BlobShadow" type="MeshInstance3D" parent="."]
+script = ExtResource("98_blob_shadow")

@@ -24,6 +24,7 @@ var _stacks: Dictionary[IconSlot, ItemStack] = {}
 @onready var _weapons: HBoxContainer = $Root/Window/Layout/Weapons
 @onready var _bag: GridContainer = $Root/Window/Layout/Bag
 @onready var _close_icon: InputIcon = $Root/Hint/Icon
+@onready var _wallet: Label = $Root/Wallet
 
 
 func _ready() -> void:
@@ -31,6 +32,8 @@ func _ready() -> void:
 	_board = SlotBoard.new($Root/Bubble, $Root/Window/Layout/Description/Lines/Title,
 		$Root/Window/Layout/Description/Lines/Body, "BAG", DESCRIPTION_HINT)
 	_board.slot_right_clicked.connect(_on_right_clicked)
+	_close_icon.follow_device = true
+	ActiveDevice.connect_changed(_on_device_changed)
 
 
 func _exit_tree() -> void:
@@ -62,10 +65,17 @@ func open() -> void:
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_player.hud.visible = false
-	_close_icon.gamepad = _player.hud.using_gamepad
 	_build()
 	_root.visible = true
-	if _player.hud.using_gamepad and _bag.get_child_count() > 0:
+	_on_device_changed(ActiveDevice.using_gamepad)
+
+
+## Picking up the controller with nothing focused puts the cursor on the bag.
+func _on_device_changed(gamepad: bool) -> void:
+	if not is_open or not gamepad or _bag.get_child_count() == 0:
+		return
+	var focused := _root.get_viewport().gui_get_focus_owner()
+	if focused == null or not _root.is_ancestor_of(focused):
 		(_bag.get_child(0) as Control).grab_focus.call_deferred()
 
 
@@ -91,6 +101,7 @@ func _build() -> void:
 			child.queue_free()
 	_board.clear()
 	_stacks.clear()
+	_wallet.text = "CASH  $%d" % _player.money
 	_board.add_weapons(_weapons, _player)
 	for i in BAG_SLOTS:
 		if i < _player.inventory.size():

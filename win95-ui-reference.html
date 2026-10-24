@@ -1,0 +1,835 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>Gear Prompt Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Pixelify+Sans:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: a desktop of bevelled gray windows (the game's own Windows 95 UI look).
+   Inputs stack on the left, generated prompts and the size-to-scale diagram on the right. */
+:root{
+  --desk:#2f7f80; --desk-ink:#ffffff;
+  --panel:#d9d6cd; --panel-2:#c9c5ba;
+  --field:#ffffff; --ink:#1b1b19; --muted:#55524a;
+  --hi:#ffffff; --lo:#76726a; --edge:#1b1b19;
+  --accent:#16316f; --accent-2:#3b62b8; --accent-ink:#ffffff;
+  --mark:#c2410c;
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-px:'Pixelify Sans','IBM Plex Sans',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --desk:#12302f; --desk-ink:#e8f2f1;
+    --panel:#2a2c31; --panel-2:#232529;
+    --field:#17181b; --ink:#e8e6df; --muted:#a8a59b;
+    --hi:#44474f; --lo:#0d0e10; --edge:#0d0e10;
+    --accent:#26418a; --accent-2:#4a72cc; --accent-ink:#ffffff;
+    --mark:#fb923c;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#12302f; --desk-ink:#e8f2f1;
+  --panel:#2a2c31; --panel-2:#232529;
+  --field:#17181b; --ink:#e8e6df; --muted:#a8a59b;
+  --hi:#44474f; --lo:#0d0e10; --edge:#0d0e10;
+  --accent:#26418a; --accent-2:#4a72cc; --accent-ink:#ffffff;
+  --mark:#fb923c;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--desk);color:var(--ink);font-family:var(--font-ui);font-size:14px;line-height:1.45;padding-inline:16px;padding-block:20px 40px}
+.top{max-width:1180px;margin:0 auto 16px;color:var(--desk-ink)}
+.top h1{font:600 26px/1.1 var(--font-px);margin:0 0 6px;text-wrap:balance}
+.top p{margin:0;max-width:62ch;opacity:.92}
+.layout{max-width:1180px;margin:0 auto;display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:920px){.layout{grid-template-columns:minmax(0,400px) minmax(0,1fr);align-items:start}}
+.col{display:grid;gap:16px;min-width:0}
+.win{background:var(--panel);border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);box-shadow:2px 2px 0 var(--edge);min-width:0}
+.title{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:var(--accent-ink);font:500 15px/1 var(--font-px);padding:5px 6px 5px 8px;min-height:30px}
+.title .grow{flex:1;min-width:0}
+summary.title{cursor:pointer;list-style:none}
+summary.title::-webkit-details-marker{display:none}
+summary.title::before{content:"\25B8";display:inline-block;width:1em}
+details[open] > summary.title::before{content:"\25BE"}
+.tag{font:500 11px/1 var(--font-ui);padding:3px 6px;background:var(--panel);color:var(--ink);border:1px solid var(--edge)}
+.body{padding:12px;display:grid;gap:10px}
+label{display:grid;gap:3px;font-size:12px;font-weight:600;letter-spacing:.02em}
+.row{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+input,select,textarea{width:100%;font:inherit;font-weight:400;letter-spacing:0;background:var(--field);color:var(--ink);border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);padding:5px 7px;border-radius:0}
+textarea{resize:vertical;min-height:62px}
+:focus-visible{outline:2px solid var(--mark);outline-offset:1px}
+.hint{font-size:12px;color:var(--muted);margin:0}
+.btn{font:500 13px var(--font-ui);padding:5px 12px;background:var(--panel);color:var(--ink);border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);box-shadow:1px 1px 0 var(--edge);cursor:pointer;border-radius:0}
+.btn:active{border-color:var(--lo) var(--hi) var(--hi) var(--lo);box-shadow:none;transform:translate(1px,1px)}
+.btn.sm{font-size:12px;padding:3px 9px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font:400 12.5px/1.5 var(--font-mono);background:var(--field);color:var(--ink);border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);padding:10px;user-select:text}
+.saved{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.saved li{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--field);border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);padding:5px 7px}
+.saved .nm{flex:1;min-width:120px;overflow-wrap:anywhere}
+.saved .nm small{color:var(--muted)}
+.sizegrid{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:560px){.sizegrid{grid-template-columns:minmax(0,230px) minmax(0,1fr)}}
+.sizegrid svg{width:100%;max-width:260px;height:auto;display:block;background:var(--field);border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+.sizelines{margin:0;padding:0;list-style:none;display:grid;gap:6px;align-content:start}
+.sizelines li{padding-left:10px;border-left:3px solid var(--mark)}
+.sizelines .big{font-weight:600}
+.steps{margin:0;padding-left:22px;display:grid;gap:7px}
+.scroll{overflow-x:auto}
+.lineup svg{display:block;height:auto;background:var(--field);border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+[hidden]{display:none!important}
+</style>
+
+<header class="top">
+  <h1>Gear Prompt Builder</h1>
+  <p>Describe a weapon, prop or gear piece once. You get the Nano view sheet, an inventory icon prompt and a Godot scale prompt. One shared style lock keeps the look the same, and one size in meters keeps the scale the same.</p>
+</header>
+
+<main class="layout">
+  <section class="col">
+    <details class="win" id="styleWin" open>
+      <summary class="title"><span class="grow">World style lock</span><span class="tag">every item</span></summary>
+      <div class="body">
+        <p class="hint">These lines go into every prompt, word for word. Change them here once, never per item, so the whole game keeps one look.</p>
+        <label>Style line
+          <input id="p-style" class="live" type="text">
+        </label>
+        <label>Lighting and shading
+          <input id="p-shade" class="live" type="text">
+        </label>
+        <label>Detail level
+          <input id="p-detail" class="live" type="text">
+        </label>
+        <label>Palette
+          <input id="p-palette" class="live" type="text">
+        </label>
+        <div class="row">
+          <label>Background
+            <input id="p-bg" class="live" type="text">
+          </label>
+          <label>Style anchor image
+            <select id="p-anchor" class="live">
+              <option value="attached">I attach one (player render or last approved item)</option>
+              <option value="none">None, this is the first item</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">The anchor is the strongest consistency tool. Attach the same kind of image to every Nano run and the new item inherits its look.</p>
+      </div>
+    </details>
+
+    <details class="win" id="specWin">
+      <summary class="title"><span class="grow">Player spec (clothes only)</span></summary>
+      <div class="body">
+        <label>Base character prompt (what made your player)
+          <textarea id="p-base" class="live"></textarea>
+        </label>
+        <div class="row">
+          <label>Player height (Godot units, m)
+            <input id="p-height" class="live" type="number" min="0.3" max="10" step="0.05">
+          </label>
+          <label>Reference image
+            <select id="p-ref" class="live">
+              <option value="attached">I attach my player image</option>
+              <option value="text">Text only, no image</option>
+            </select>
+          </label>
+        </div>
+        <label>Pose to keep
+          <input id="p-pose" class="live" type="text">
+        </label>
+        <p class="hint">Weapons and props never use the player image. Height is a placeholder until you measure the real model in Godot, and it also scales the size lineup.</p>
+      </div>
+    </details>
+
+    <div class="win">
+      <div class="title"><span class="grow">Gear piece</span><span class="tag" id="exTag">example loaded</span></div>
+      <div class="body">
+        <div>
+          <p class="hint">Start from a preset</p>
+          <div class="btns" id="presetRow"></div>
+        </div>
+        <label>Name
+          <input id="i-name" class="live" type="text" placeholder="Suppressed Pistol">
+        </label>
+        <div class="row">
+          <label>Slot
+            <select id="i-slot"></select>
+          </label>
+          <label>Type
+            <select id="i-kind" class="live"></select>
+          </label>
+        </div>
+        <label>What it looks like
+          <textarea id="i-desc" class="live"></textarea>
+        </label>
+        <label>Parts that must show in every view
+          <input id="i-must" class="live" type="text" placeholder="e.g. the suppressor, the rope handles">
+        </label>
+        <label>Colors and materials
+          <input id="i-colors" class="live" type="text">
+        </label>
+        <div class="row">
+          <label>Tribe styling
+            <select id="i-tribe" class="live"></select>
+          </label>
+          <label>Rarity
+            <select id="i-rarity" class="live"></select>
+          </label>
+        </div>
+        <label id="sizeField" hidden>Longest side (meters)
+          <input id="i-size" class="live" type="number" min="0.05" max="10" step="0.05">
+        </label>
+        <label id="ratioField" hidden>Proportions (keeps the shape the same in every view)
+          <input id="i-ratio" class="live" type="text">
+        </label>
+        <p class="hint" id="sizeHint" hidden>Image and 3D generators cannot hold real size between runs. This number is applied in Godot, so the same item is the same size everywhere.</p>
+        <div class="row">
+          <label id="modeField">Tripo sheet shows
+            <select id="i-mode" class="live">
+              <option value="isolated">The item alone</option>
+              <option value="worn">Player wearing it</option>
+            </select>
+          </label>
+          <label>Views
+            <select id="i-views" class="live">
+              <option value="5">5 shots (front, 3/4, sides, back)</option>
+              <option value="4">4 sides (front, right, back, left)</option>
+            </select>
+          </label>
+        </div>
+        <div class="btns">
+          <button class="btn" id="saveBtn" type="button">Save piece</button>
+          <button class="btn" id="exBtn" type="button">Reset to example</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="win">
+      <div class="title"><span class="grow">Saved pieces</span></div>
+      <div class="body">
+        <ul class="saved" id="savedList"></ul>
+        <p class="hint" id="savedHint">Saved in this browser only.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="col">
+    <article class="win">
+      <div class="title"><span class="grow">Run order</span><span class="tag" id="stepTag">item alone</span></div>
+      <div class="body"><ol class="steps" id="steps"></ol></div>
+    </article>
+
+    <article class="win">
+      <div class="title"><span class="grow">Size against the player</span></div>
+      <div class="body">
+        <div class="sizegrid">
+          <div id="fig"></div>
+          <ul class="sizelines" id="sizeLines"></ul>
+        </div>
+        <p class="hint">Approximate human proportions. For clothes the prompts describe size against the body. For weapons and props the size is a number in meters that Claude Code applies in Godot.</p>
+      </div>
+    </article>
+
+    <article class="win">
+      <div class="title"><span class="grow">Size lineup</span><span class="tag">weapons and props</span></div>
+      <div class="body">
+        <div class="scroll lineup" id="lineup"></div>
+        <p class="hint">Every saved weapon and prop next to the player, smallest to largest, with the item you are editing in orange. Check it before you generate the next item so nothing ends up out of scale.</p>
+      </div>
+    </article>
+
+    <article class="win" id="wornCard">
+      <div class="title"><span class="grow">Worn on player</span><span class="tag">Nano</span><button class="btn sm" type="button" data-copy="out-worn">Copy</button></div>
+      <div class="body"><pre id="out-worn"></pre></div>
+    </article>
+
+    <article class="win">
+      <div class="title"><span class="grow">View sheet for Tripo</span><span class="tag">Nano</span><button class="btn sm" type="button" data-copy="out-sheet">Copy</button></div>
+      <div class="body"><pre id="out-sheet"></pre></div>
+    </article>
+
+    <article class="win">
+      <div class="title"><span class="grow">Inventory icon</span><span class="tag">Nano</span><button class="btn sm" type="button" data-copy="out-icon">Copy</button></div>
+      <div class="body"><pre id="out-icon"></pre></div>
+    </article>
+
+    <article class="win">
+      <div class="title"><span class="grow">Import and scale in Godot</span><span class="tag">Claude Code</span><button class="btn sm" type="button" data-copy="out-code">Copy</button></div>
+      <div class="body"><pre id="out-code"></pre></div>
+    </article>
+  </section>
+</main>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  var SLOTS = {
+    weapon: {label:'Weapon',               kinds:['Sword','Knife','Pistol','Suppressed pistol','Rifle','Summon focus']},
+    prop:   {label:'Prop (world object)',  kinds:['Crate','Barrel','Lamp','Furniture','Pickup','Door / gate','Other']},
+    head:   {label:'Head / hair',          kinds:['Hat','Helmet','Glasses / mask','Hairstyle']},
+    torso:  {label:'Torso',                kinds:['Shirt','Jacket','Vest','Armor']},
+    legs:   {label:'Legs',                 kinds:['Pants','Shorts','Skirt']},
+    feet:   {label:'Feet',                 kinds:['Shoes','Boots','Sandals']},
+    charm:  {label:'Charm (ring slot)',    kinds:['Ring']},
+    watch:  {label:'Watch (bracer slot)',  kinds:['Watch','Wristband','Bracer']}
+  };
+  function isStandalone(slot){ return slot === 'weapon' || slot === 'prop'; }
+
+  // Real-world target size, longest side, in meters. This is the single source of truth for scale.
+  var SIZE_M = {
+    'Sword':0.9, 'Knife':0.25, 'Pistol':0.22, 'Suppressed pistol':0.36, 'Rifle':1.0, 'Summon focus':0.55,
+    'Crate':0.6, 'Barrel':0.9, 'Lamp':1.6, 'Furniture':1.0, 'Pickup':0.25, 'Door / gate':2.1, 'Other':0.8
+  };
+  // Shape ratios. Generators keep proportions between views far better than they keep absolute size.
+  var RATIO = {
+    'Sword':'a long, thin blade about 4 times the length of the handle, flat and narrow',
+    'Knife':'a short blade about as long as the handle, slim',
+    'Pistol':'about 1.5 times as long as it is tall, slim when seen from the front',
+    'Suppressed pistol':'about 2.5 times as long as it is tall with the suppressor included, slim when seen from the front, suppressor about as long as the slide',
+    'Rifle':'about 5 times as long as it is tall, slim barrel and stock',
+    'Summon focus':'about 4 times as long as it is wide',
+    'Crate':'a boxy cube, nearly the same width, depth and height',
+    'Barrel':'about 1.5 times as tall as it is wide',
+    'Lamp':'tall and thin, about 6 times as tall as it is wide',
+    'Furniture':'',
+    'Pickup':'small and compact, about as wide as it is tall',
+    'Door / gate':'about 2.3 times as tall as it is wide, thin from the side',
+    'Other':''
+  };
+  var ORIENT_KEY = {'Pistol':'gun','Suppressed pistol':'gun','Rifle':'gun','Sword':'blade','Knife':'blade','Summon focus':'upright'};
+  var ORIENT_TXT = {
+    gun:    'lying level as if aimed, grip at the bottom, muzzle pointing to the left of the image in the side views',
+    blade:  'standing upright, handle at the bottom, tip pointing up',
+    upright:'standing upright with the top pointing up',
+    prop:   'standing in its natural upright position, the front of the object facing the camera in the front view'
+  };
+  var ORIENT_CODE = {
+    gun:    'muzzle along -Z (Godot forward), top of the gun toward +Y.',
+    blade:  'tip along -Z (Godot forward), top of the handle toward +Y.',
+    upright:'top of the item toward +Y.',
+    prop:   'upright along +Y, with the front of the object facing +Z.'
+  };
+  function orientKey(slot, kind){ return slot === 'prop' ? 'prop' : (ORIENT_KEY[kind] || 'upright'); }
+
+  var TRIBES = {
+    none:    {label:'No tribe styling', cue:''},
+    prep:    {label:'Prep aristocracy', cue:'preppy old-money style: polos, blazers, crests, navy and pastel colors'},
+    patriot: {label:'Ironic patriotic streetwear', cue:'ironic patriotic streetwear: stars-and-stripes graphics, oversized cuts, chunky sneakers'},
+    horror:  {label:'Roadside small-town horror', cue:'roadside small-town horror: faded diner and motel workwear, grime, flickering neon accents'},
+    y2k:     {label:'Y2K / dreamcore', cue:'Y2K dreamcore: translucent plastics, chrome, bubble shapes, pastel gradients'}
+  };
+  var RARITY = {
+    'Common':    'plain and slightly worn, simple design, no glow',
+    'Uncommon':  'clean and well made, one small decorative detail',
+    'Rare':      'distinctive details with one bold accent color',
+    'Epic':      'ornate, striking silhouette, subtle glow or shine',
+    'Legendary': 'one-of-a-kind, dramatic silhouette, strong glow or ornate trim'
+  };
+
+  var DEFAULT_SPEC = {
+    base:'basic player creation character for game, nothing but the character in a ps1 style with underwear and brown hair, empty background',
+    style:'ps1 style, low-poly look, low-resolution textures, simple flat colors',
+    shade:'flat even lighting, no hard cast shadows, no glossy reflections',
+    detail:'chunky low-poly shapes, small details painted on as texture instead of modeled, low-resolution hand-painted look',
+    palette:'slightly muted colors, a limited palette, no gradients',
+    anchor:'attached',
+    height:'1.8',
+    ref:'attached',
+    pose:'the same pose as the reference image',
+    bg:'a plain light-gray studio background'
+  };
+  var SPEC_FIELDS = {base:'p-base', style:'p-style', shade:'p-shade', detail:'p-detail', palette:'p-palette', anchor:'p-anchor',
+                     height:'p-height', ref:'p-ref', pose:'p-pose', bg:'p-bg'};
+
+  var PRESETS = [
+    {label:'Suppressed pistol', item:{
+      name:'Suppressed Pistol', slot:'weapon', kind:'Suppressed pistol',
+      desc:'a compact semi-automatic pistol with a long cylindrical suppressor screwed onto the barrel. The suppressor sticks out in front of the muzzle about as far as the slide is long, and is always attached. The suppressor is dark gray with faceted vertical bands and a ring of checkered grip texture at its base. The slide and frame are matte olive-gray with rear slide serrations, a small ejection port, a squared oversized trigger guard, an accessory rail slot under the barrel, and a grip covered in a dark checkered diamond pattern. Faceted low-poly shapes with flat shading. No logos, brand names or readable text anywhere',
+      colors:'matte olive-gray body, dark charcoal suppressor, dark checkered grip, one tiny red accent dot', tribe:'none', rarity:'Uncommon',
+      sizeM:SIZE_M['Suppressed pistol'], must:'the suppressor, the checkered grip, the trigger guard', ratio:RATIO['Suppressed pistol'], mode:'isolated', views:'5'}},
+    {label:'Wooden crate', item:{
+      name:'Wooden Crate', slot:'prop', kind:'Crate',
+      desc:'a plain wooden storage crate made of chunky planks, with darker metal corner brackets, a rope handle on each short side and one cracked plank. Faceted low-poly shapes. No logos or readable text',
+      colors:'weathered brown wood, dark gray brackets, tan rope', tribe:'none', rarity:'Common',
+      sizeM:SIZE_M['Crate'], must:'the metal corner brackets, the rope handles', ratio:RATIO['Crate'], mode:'isolated', views:'5'}},
+    {label:'Varsity jacket', item:{
+      name:'Varsity Jacket', slot:'torso', kind:'Jacket',
+      desc:'a navy varsity jacket with white leather sleeves, a small gold star patch on the chest, ribbed cuffs and collar',
+      colors:'navy, white, gold trim', tribe:'prep', rarity:'Uncommon', sizeM:'', ratio:'', mode:'isolated', views:'5'}}
+  ];
+  var EXAMPLE = PRESETS[0].item;
+
+  var KEY = 'gearPromptBuilder.v1';
+  var saved = [];
+  var usingExample = true;
+
+  function store(){
+    try { var r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch(e){ return null; }
+  }
+  function persist(){
+    try { localStorage.setItem(KEY, JSON.stringify({spec:getSpec(), saved:saved, draft:getItem()})); } catch(e){}
+  }
+
+  function getSpec(){
+    var s = {};
+    Object.keys(SPEC_FIELDS).forEach(function(k){ s[k] = $(SPEC_FIELDS[k]).value; });
+    return s;
+  }
+  function setSpec(s){
+    var m = Object.assign({}, DEFAULT_SPEC, s || {});
+    Object.keys(SPEC_FIELDS).forEach(function(k){ $(SPEC_FIELDS[k]).value = m[k]; });
+  }
+  function playerH(){ var H = parseFloat($('p-height').value); return H > 0 ? H : 1.8; }
+
+  // Older saved pieces stored weapon size as a percent of player height. Convert to meters.
+  function legacySize(it){
+    var p = parseFloat(it.size);
+    if(it.slot === 'weapon' && p > 0) return Math.round(p/100*playerH()*100)/100;
+    return '';
+  }
+  function metersOf(it){
+    var v = parseFloat(it.sizeM);
+    if(v > 0) return v;
+    v = parseFloat(legacySize(it));
+    if(v > 0) return v;
+    return SIZE_M[it.kind] || 0;
+  }
+
+  function getItem(){
+    return {name:$('i-name').value, slot:$('i-slot').value, kind:$('i-kind').value, desc:$('i-desc').value, colors:$('i-colors').value,
+            tribe:$('i-tribe').value, rarity:$('i-rarity').value, sizeM:$('i-size').value, ratio:$('i-ratio').value, must:$('i-must').value,
+            mode:$('i-mode').value, views:$('i-views').value};
+  }
+  function setItem(it){
+    $('i-slot').value = it.slot; fillKinds(); $('i-kind').value = it.kind;
+    if(!$('i-kind').value) $('i-kind').selectedIndex = 0;
+    $('i-name').value = it.name; $('i-desc').value = it.desc; $('i-colors').value = it.colors;
+    $('i-tribe').value = it.tribe; $('i-rarity').value = it.rarity;
+    $('i-size').value = (it.sizeM !== undefined && it.sizeM !== null && it.sizeM !== '') ? it.sizeM : legacySize(it);
+    $('i-ratio').value = it.ratio || ''; $('i-must').value = it.must || '';
+    $('i-mode').value = it.mode; $('i-views').value = it.views;
+    syncFields();
+  }
+
+  function fillKinds(){
+    var slot = $('i-slot').value, kinds = SLOTS[slot].kinds, k = $('i-kind');
+    k.innerHTML = '';
+    kinds.forEach(function(n){ var o = document.createElement('option'); o.value = n; o.textContent = n; k.appendChild(o); });
+  }
+  function syncFields(){
+    var st = isStandalone($('i-slot').value);
+    $('sizeField').hidden = !st; $('ratioField').hidden = !st; $('sizeHint').hidden = !st; $('modeField').hidden = st;
+    if(st){
+      var k = $('i-kind').value;
+      if(!$('i-size').value) $('i-size').value = SIZE_M[k] || 0.5;
+      if(!$('i-ratio').value) $('i-ratio').value = RATIO[k] || '';
+    }
+  }
+
+  function landmark(f){
+    if(f < 0.09) return "no bigger than the character's hand";
+    if(f < 0.19) return "about as long as the character's forearm";
+    if(f < 0.30) return "about as long as the character's thigh";
+    if(f < 0.33) return "reaching from the floor to just above the character's knee";
+    if(f < 0.45) return "reaching from the floor to about the character's mid-thigh";
+    if(f < 0.56) return "reaching from the floor to about the character's hip";
+    if(f < 0.66) return "reaching from the floor to about the character's waist";
+    if(f < 0.77) return "reaching from the floor to about the character's chest";
+    if(f < 0.90) return "reaching from the floor to about the character's shoulder";
+    return "about as tall as the character";
+  }
+
+  var REGIONS = {
+    head:  {lo:0.87, hi:1.00, x0:56, x1:84, note:'Head is about 13% of player height.'},
+    torso: {lo:0.52, hi:0.82, x0:50, x1:90, note:'Shoulder width is about 25% of player height.'},
+    legs:  {lo:0.04, hi:0.52, x0:54, x1:86, note:'Waist sits at the hips, hems follow the description.'},
+    feet:  {lo:0.00, hi:0.05, x0:52, x1:88, note:'Each foot is about 15% of player height long.'},
+    charm: {lo:0.38, hi:0.42, x0:38, x1:52, note:'A ring is about 1% of player height across.'},
+    watch: {lo:0.455, hi:0.50, x0:38, x1:50, note:'Strap width and watch face are about 2% of player height.'}
+  };
+
+  function sizeInfo(slot, kind){
+    var H = playerH();
+    var m = function(f){ return (f*H).toFixed(2) + ' m'; };
+    if(isStandalone(slot)){
+      var L = parseFloat($('i-size').value);
+      if(!(L > 0)) L = SIZE_M[kind] || 0.5;
+      var f = L/H, pct = Math.round(f*100);
+      var lm = landmark(Math.min(f, 1));
+      return {type:'bar', f:f, H:H, L:L,
+        lines:[{t:'Target size ' + L.toFixed(2) + ' m on its longest side', big:true},
+               {t:pct + '% of player height (' + H + ' m)'},
+               {t: f > 1 ? 'Taller than the player' : 'Reads as ' + lm},
+               {t:'The image and 3D generators cannot hold this number between runs. Godot applies it.'}],
+        prompt: lm + ' (about ' + pct + "% of the character's height)",
+        code:'scale the mesh uniformly so its longest axis is ' + L.toFixed(2) + ' m (about ' + pct + '% of the player, who is roughly ' + H + ' m tall; measure the player from my scene as a cross-check and tell me if the result looks wrong). Scale the mesh node, not any physics body.'};
+    }
+    var r = REGIONS[slot];
+    var ft = Math.round(r.lo*100), ht = Math.round(r.hi*100);
+    var big = (slot === 'feet') ? 'Foot length about ' + m(0.15) : (slot === 'charm') ? 'Ring about ' + m(0.011) + ' across' : (slot === 'watch') ? 'Watch face about ' + m(0.022) : 'Covers ' + m(r.hi - r.lo) + ' of the body';
+    return {type:'region', box:r, H:H,
+      lines:[{t:big, big:true}, {t:'Sits ' + m(r.lo) + ' to ' + m(r.hi) + ' above the floor (' + ft + '-' + ht + '% of height)'}, {t:r.note},
+             {t: slot === 'charm' || slot === 'watch' ? 'Small enough that the real fit comes from the bone attachment.' : 'Fits the body, so it follows the player instead of scaling on its own.'}],
+      prompt:'',
+      code: slot === 'charm' ? 'size it to roughly 1% of PLAYER_HEIGHT across; do not hand-tune beyond that.' :
+            slot === 'watch' ? 'size the watch face to roughly 2% of PLAYER_HEIGHT; the strap must wrap the wrist of the player mesh.' :
+            slot === 'feet'  ? 'fit each shoe to the length of the player foot mesh (about 15% of PLAYER_HEIGHT). Do not scale it as a free prop.' :
+            slot === 'head'  ? 'fit it to the player head mesh (about 13% of PLAYER_HEIGHT tall); it must sit on the head without clipping the hair or face.' :
+                               'no standalone scale. Fit it to the player body mesh (span ' + ft + '-' + ht + '% of PLAYER_HEIGHT) and keep it on the same skeleton.'};
+  }
+
+  function drawFigure(info){
+    var K = 190 / Math.max(1, info.f || 1);
+    var Y = function(f){ return (224 - K*f).toFixed(1); };
+    var rs = K/200;
+    var s = '<svg viewBox="0 0 220 240" role="img" aria-label="Item size against player height">';
+    s += '<rect x="0" y="0" width="220" height="240" fill="var(--field)"/>';
+    s += '<line x1="10" y1="224" x2="210" y2="224" stroke="var(--ink)" stroke-width="1.5"/>';
+    if(info.type === 'region'){
+      var b = info.box;
+      s += '<rect x="' + b.x0 + '" y="' + Y(b.hi) + '" width="' + (b.x1 - b.x0) + '" height="' + ((b.hi - b.lo)*K).toFixed(1) + '" fill="var(--mark)" fill-opacity="0.4" stroke="var(--mark)" stroke-width="1.5"/>';
+    }
+    s += '<circle cx="70" cy="' + Y(0.935) + '" r="' + (13*rs).toFixed(1) + '" fill="var(--panel-2)" stroke="var(--ink)" stroke-width="1.5"/>';
+    s += '<polygon points="50,' + Y(0.82) + ' 90,' + Y(0.82) + ' 84,' + Y(0.52) + ' 56,' + Y(0.52) + '" fill="var(--panel-2)" fill-opacity="0.7" stroke="var(--ink)" stroke-width="1.5"/>';
+    s += '<line x1="50" y1="' + Y(0.81) + '" x2="44" y2="' + Y(0.40) + '" stroke="var(--ink)" stroke-opacity="0.6" stroke-width="6" stroke-linecap="round"/>';
+    s += '<line x1="90" y1="' + Y(0.81) + '" x2="96" y2="' + Y(0.40) + '" stroke="var(--ink)" stroke-opacity="0.6" stroke-width="6" stroke-linecap="round"/>';
+    s += '<line x1="62" y1="' + Y(0.52) + '" x2="60" y2="' + Y(0.04) + '" stroke="var(--ink)" stroke-opacity="0.6" stroke-width="9" stroke-linecap="round"/>';
+    s += '<line x1="78" y1="' + Y(0.52) + '" x2="80" y2="' + Y(0.04) + '" stroke="var(--ink)" stroke-opacity="0.6" stroke-width="9" stroke-linecap="round"/>';
+    var marks = [['Knee',0.28],['Hip',0.52],['Waist',0.60],['Chest',0.72],['Shoulder',0.82]];
+    marks.forEach(function(mk){
+      s += '<line x1="112" y1="' + Y(mk[1]) + '" x2="120" y2="' + Y(mk[1]) + '" stroke="var(--muted)" stroke-width="1"/>';
+      s += '<text x="123" y="' + (parseFloat(Y(mk[1])) + 3.5) + '" font-size="9" fill="var(--muted)" font-family="IBM Plex Sans, sans-serif">' + mk[0] + '</text>';
+    });
+    if(info.type === 'bar'){
+      var top = parseFloat(Y(info.f));
+      s += '<line x1="112" y1="' + top + '" x2="176" y2="' + top + '" stroke="var(--mark)" stroke-width="1.2" stroke-dasharray="3 3"/>';
+      s += '<rect x="176" y="' + top + '" width="16" height="' + (224 - top).toFixed(1) + '" fill="var(--mark)" fill-opacity="0.5" stroke="var(--mark)" stroke-width="1.5"/>';
+      s += '<text x="184" y="' + Math.max(top - 5, 11) + '" text-anchor="middle" font-size="10" font-weight="600" fill="var(--ink)" font-family="IBM Plex Sans, sans-serif">' + info.L.toFixed(2) + ' m</text>';
+    }
+    s += '<text x="10" y="236" font-size="9" fill="var(--muted)" font-family="IBM Plex Sans, sans-serif">player ' + info.H + ' m</text>';
+    s += '</svg>';
+    return s;
+  }
+
+  // Every saved weapon and prop next to the player, smallest to largest.
+  function drawLineup(cur){
+    var H = playerH(), items = [];
+    saved.forEach(function(p){
+      if(!SLOTS[p.slot] || !isStandalone(p.slot)) return;
+      if(cur && isStandalone(cur.slot) && p.slot === cur.slot && p.name === cur.name) return;
+      var m = metersOf(p);
+      if(m > 0) items.push({name:p.name || '(unnamed)', m:m, cur:false});
+    });
+    if(cur && isStandalone(cur.slot)){
+      var cm = metersOf(cur);
+      if(cm > 0) items.push({name:cur.name || 'This item', m:cm, cur:true});
+    }
+    items.sort(function(a,b){ return a.m - b.m; });
+    var maxM = H; items.forEach(function(x){ if(x.m > maxM) maxM = x.m; });
+    var K = 165/maxM, base = 195, W = Math.max(280, 84 + items.length*68);
+    var s = '<svg viewBox="0 0 ' + W + ' 230" width="' + W + '" style="max-width:none" role="img" aria-label="Saved weapons and props next to the player, smallest to largest">';
+    s += '<line x1="8" y1="' + base + '" x2="' + (W - 8) + '" y2="' + base + '" stroke="var(--ink)" stroke-width="1.5"/>';
+    var yH = base - K*H;
+    s += '<line x1="52" y1="' + yH.toFixed(1) + '" x2="' + (W - 8) + '" y2="' + yH.toFixed(1) + '" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3"/>';
+    var hr = K*H*0.06;
+    s += '<circle cx="30" cy="' + (yH + hr + 1).toFixed(1) + '" r="' + hr.toFixed(1) + '" fill="var(--panel-2)" stroke="var(--ink)" stroke-width="1.5"/>';
+    s += '<line x1="30" y1="' + (base - K*H*0.87).toFixed(1) + '" x2="30" y2="' + (base - K*H*0.04).toFixed(1) + '" stroke="var(--ink)" stroke-opacity="0.6" stroke-width="12" stroke-linecap="round"/>';
+    s += '<text x="30" y="' + (base + 14) + '" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="IBM Plex Sans, sans-serif">Player</text>';
+    s += '<text x="30" y="' + (base + 25) + '" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="IBM Plex Sans, sans-serif">' + H + ' m</text>';
+    if(!items.length){
+      s += '<text x="70" y="110" font-size="11" fill="var(--muted)" font-family="IBM Plex Sans, sans-serif">Pick a weapon or prop, or save one, to fill the lineup.</text>';
+    }
+    items.forEach(function(x, i){
+      var bx = 66 + i*68, h = K*x.m, y = base - h;
+      var col = x.cur ? 'var(--mark)' : 'var(--accent-2)';
+      s += '<rect x="' + bx + '" y="' + y.toFixed(1) + '" width="34" height="' + h.toFixed(1) + '" fill="' + col + '" fill-opacity="' + (x.cur ? 0.55 : 0.45) + '" stroke="' + col + '" stroke-width="1.5"/>';
+      s += '<text x="' + (bx + 17) + '" y="' + (y - 4).toFixed(1) + '" text-anchor="middle" font-size="10" font-weight="600" fill="var(--ink)" font-family="IBM Plex Sans, sans-serif">' + x.m.toFixed(2) + ' m</text>';
+      var nm = x.name.length > 11 ? x.name.slice(0, 10) + '…' : x.name;
+      s += '<text x="' + (bx + 17) + '" y="' + (base + 14) + '" text-anchor="middle" font-size="9" fill="var(--ink)" font-family="IBM Plex Sans, sans-serif">' + esc(nm) + '</text>';
+    });
+    s += '</svg>';
+    return s;
+  }
+
+  function placement(slot, kind, info){
+    switch(slot){
+      case 'head':   return kind === 'Hairstyle' ? "replace the character's hairstyle with the item below, keeping the head shape the same." : "put it on the character's head, sized to fit the head exactly (no wider than the head unless the description says oversized).";
+      case 'torso':  return "put it on the torso over the underwear, fitted to the character's shoulder width and torso length.";
+      case 'legs':   return "put it on the legs with the waist at the character's hips, scaled to the character's leg length.";
+      case 'feet':   return "put it on both feet, each about as long as the character's foot (roughly 15% of body height).";
+      case 'charm':  return "show one small ring on the character's right hand, tiny and in proportion to the fingers (about one finger wide).";
+      case 'watch':  return "put it on the character's left wrist, strap width in proportion to the wrist and the watch face about as wide as the wrist.";
+      default:       return "place it in the character's right hand with a natural grip. Size: " + info.prompt + ".";
+    }
+  }
+  function isolation(slot, kind){
+    if(slot === 'head') return kind === 'Hairstyle' ? 'shown only as the hairstyle on a plain bald head and neck' : 'floating upright with no head or body';
+    if(slot === 'torso' || slot === 'legs') return 'shown as if worn by an invisible mannequin: a hollow garment with no body, head or hands visible';
+    if(slot === 'feet') return 'shown as a pair with no feet or legs visible';
+    if(slot === 'charm') return 'floating, ring shape, no hand';
+    if(slot === 'watch') return 'floating with the strap closed in a ring as if worn, no wrist or hand';
+    return 'floating upright, no hand holding it';
+  }
+  function attach(slot){
+    switch(slot){
+      case 'head':   return "BoneAttachment3D on the head bone (Mixamo name is usually mixamorig:Head; check my actual skeleton).";
+      case 'torso':
+      case 'legs':   return "skin it to the player's skeleton so it deforms with animation (weight-transfer in Blender if needed). As a stopgap only, parent it rigidly to the nearest spine or leg bone and tell me.";
+      case 'feet':   return "skin it to the player's skeleton; stopgap is a rigid parent on the left and right foot bones.";
+      case 'charm':  return "BoneAttachment3D on the right hand bone (usually mixamorig:RightHand; check my actual skeleton).";
+      case 'watch':  return "BoneAttachment3D on the left forearm or hand bone (usually mixamorig:LeftForeArm or mixamorig:LeftHand; check my actual skeleton).";
+      default:       return "BoneAttachment3D on the right hand bone (usually mixamorig:RightHand; check my actual skeleton), using a grip marker node.";
+    }
+  }
+
+  // One style block, identical in every prompt, so the whole game keeps one look.
+  function lockText(sp){
+    var parts = [sp.style.trim().replace(/[.,;\s]+$/, '')];
+    if(sp.shade.trim())   parts.push('lighting and shading: ' + sp.shade.trim());
+    if(sp.detail.trim())  parts.push('detail level: ' + sp.detail.trim());
+    if(sp.palette.trim()) parts.push('palette: ' + sp.palette.trim());
+    return parts.filter(Boolean).join('; ');
+  }
+  function anchorLine(sp){
+    return sp.anchor === 'attached'
+      ? 'Match the attached style anchor image for level of detail, texture resolution, color treatment, edge sharpness and lighting. Copy only its look, never its shape or subject.'
+      : '';
+  }
+
+  function build(){
+    var sp = getSpec(), it = getItem();
+    var st = isStandalone(it.slot);
+    var info = sizeInfo(it.slot, it.kind);
+    var kindL = (it.kind === 'Other') ? 'prop' : it.kind.toLowerCase();
+    var core = kindL + (it.desc.trim() ? ': ' + it.desc.trim() : ': (describe the item)');
+    var extras = [];
+    if(it.colors.trim()) extras.push('colors and materials: ' + it.colors.trim());
+    var tribe = TRIBES[it.tribe]; if(tribe && tribe.cue) extras.push(tribe.cue);
+    if(RARITY[it.rarity]) extras.push(it.rarity.toLowerCase() + ' rarity look: ' + RARITY[it.rarity]);
+    var extraLine = extras.length ? 'Style details: ' + extras.join('; ') + '.' : '';
+    var ref = sp.ref === 'attached';
+    var lock = lockText(sp), anc = anchorLine(sp);
+    var must = (it.must || '').trim();
+    var mustLine = must ? 'These parts must be clearly visible in every view where they would be visible: ' + must + '.' : '';
+    var nm = it.name.trim() || '(unnamed)';
+    var worn = '', sheet, icon, code, steps;
+
+    if(st){
+      // Weapons and props: the item alone, no character anywhere in the pipeline.
+      var ok = orientKey(it.slot, it.kind);
+      var ratio = it.ratio.trim();
+      var shape = (ratio ? 'Proportions: ' + ratio + '. ' : '') + 'Orientation in every view: ' + ORIENT_TXT[ok] + '.';
+      var viewsTxt;
+      if(ok === 'gun'){
+        viewsTxt = 'One row of 4 shots of the same item on ' + sp.bg + ', like a turntable going around it at the same camera height and distance. Every shot is straight-on, with no top-down view: (1) left-side profile, muzzle pointing left; (2) seen from the muzzle end, looking straight along the barrel, so the barrel and anything attached to it point at the camera and look short and round, with the grip hanging below; (3) right-side profile, muzzle pointing right; (4) seen from the rear, looking straight at the back of the slide and the grip.';
+      } else if(it.views === '4'){
+        viewsTxt = 'One row of 4 shots of the same item on ' + sp.bg + ': front view, right side profile, back view, left side profile.';
+      } else {
+        viewsTxt = 'Top row: 5 shots of the same item on ' + sp.bg + ': front view, 3/4 right, left and right side profile, 3/4 back, back view.';
+      }
+      sheet = [
+        'Make a multi-view model reference sheet of one game item for 3D generation. Style: ' + lock + '.',
+        'The item, ' + core + '.' + (extraLine ? ' ' + extraLine : ''),
+        shape,
+        anc,
+        viewsTxt + ' The item alone: no character, no hands, no other props, no text or labels. The same item at the same size in every view, centered, filling about 80% of its frame, evenly spaced, nothing cropped. ' + (mustLine ? mustLine + ' ' : '') + 'Every part named in the description appears in every view where it would be visible. Do not add, remove or change any part between views.'
+      ].filter(Boolean).join('\n\n');
+
+      icon = 'Make a square 1:1 inventory icon of one ' + core + '. ' + (extraLine ? extraLine + ' ' : '') +
+             'Single item, centered, slight 3/4 angle, no text, no hands or body, nothing cropped. ' + (must ? 'Clearly show: ' + must + '. ' : '') + 'Style: ' + lock + '. Background: ' + sp.bg + '.' + (anc ? ' ' + anc : '');
+
+      var pivot = (it.slot === 'prop')
+        ? 'put the pivot at the bottom center so the object stands on the floor at y = 0.'
+        : "put the pivot at the grip, where a right hand would hold it. Add a Marker3D on the business end (named Muzzle for guns, Tip for blades).";
+      var codeSteps = [
+        '1. Import the Tripo file and measure the imported mesh (AABB). Tell me its raw size. It was generated alone with no character, so its import size is arbitrary.',
+        '2. Scale: ' + info.code,
+        '3. Orientation: ' + ORIENT_CODE[ok] + ' Tripo meshes often import turned a different way, so check it against my sheet and fix the rotation on the root node of the item scene, not in the mesh data.',
+        '4. Pivot: ' + pivot,
+        '5. Save it as its own scene in whatever folder my project already uses for models or items (look first, then tell me where you put it). Do NOT attach it to the player or any enemy yet.',
+        '6. Data: register it in my existing item data (type, size in meters, scene path) instead of hardcoding it in a script. If there is no item data yet, say so and propose a minimal Resource rather than inventing one.',
+        '7. Tell me exactly what you changed and which numbers are placeholders.'
+      ];
+      code = [
+        "I'm adding a new " + (it.slot === 'prop' ? 'prop' : 'weapon') + " to my Godot 4 PS1-style action RPG (project ps1-rpg).",
+        'Item: ' + nm + ' | type: ' + it.kind + ' | target size: ' + info.L.toFixed(2) + ' m on its longest side\nMesh: Tripo3D export (I will give you the file path).',
+        'Do this:\n' + codeSteps.join('\n')
+      ];
+      if(it.slot === 'weapon') code.push('For later, not now: when I ask you to attach it, use ' + attach('weapon'));
+      code = code.join('\n\n');
+
+      steps = [
+        (sp.anchor === 'attached'
+          ? 'Nano: attach your style anchor image (your player render for the first item, then the last item you approved), then paste the view sheet prompt. Use the same image size and aspect ratio every time.'
+          : 'Nano: no anchor, so this item sets the look. Keep it simple, paste the view sheet prompt, then use the approved image as the anchor for every item after it.'),
+        'Check the sheet before Tripo: the same item in every view, every named part' + (must ? ' (' + must + ')' : ' (like a suppressor)') + ' present in all of them, nothing cropped, no text, no top-down views. If a view is wrong, regenerate the sheet rather than fixing it in Tripo.',
+        'Tripo: upload the sheet as a multi-view image. Use the same Tripo settings for every item (model version, polygon and texture options) and write them down the first time.',
+        'Godot: import the file and paste the Godot prompt into Claude Code. Do not judge size by eye, Tripo meshes import at an arbitrary size. The prompt sets this one to ' + info.L.toFixed(2) + ' m.',
+        'Happy with it? Press Save piece, then use its sheet image as the style anchor for the next item.'
+      ];
+    } else {
+      var open = ref
+        ? 'Use the attached reference image of my game character as the exact base. Keep the same character, face, hair, body proportions, camera angle, framing, image size and ' + sp.style + '. Pose: ' + sp.pose + '.'
+        : sp.base.trim() + '. Keep ' + sp.style + '. Pose: ' + sp.pose + '.';
+      worn = [
+        open,
+        'Change only one thing: ' + placement(it.slot, it.kind, info),
+        'The item, ' + core + '.' + (extraLine ? ' ' + extraLine : ''),
+        'Keep the underwear and everything else the item does not cover exactly as in the reference. No other clothing, props, text or logos. Background: ' + sp.bg + '.'
+      ].join('\n\n');
+
+      var intro = ref
+        ? 'Using the attached reference image of my game character for exact body proportions and ' + sp.style + ', make a multi-view model reference sheet for 3D generation.'
+        : 'In ' + sp.style + ', make a multi-view model reference sheet for 3D generation, for a human character about ' + info.H + ' m tall.';
+      var subject, show;
+      if(it.mode === 'worn'){
+        subject = 'person';
+        show = 'Show the character wearing the ' + core + ', full body, same proportions as the reference. Same scale and camera distance in every view.';
+      } else {
+        subject = 'item';
+        show = 'Show ONLY the ' + core + ', ' + isolation(it.slot, it.kind) + ", sized to fit the character's body exactly. Same scale and camera distance in every view.";
+      }
+      var views;
+      if(it.views === '4'){
+        views = 'One row of 4 shots of the same ' + subject + ' on ' + sp.bg + ': front view, right side profile, back view, left side profile.';
+      } else if(it.mode === 'worn'){
+        views = 'Top row: 5 full-body shots of the same person on ' + sp.bg + ': front view, 3/4 right, left and right side profile, 3/4 back, back view.';
+      } else {
+        views = 'Top row: 5 shots of the same item on ' + sp.bg + ': front view, 3/4 right, left and right side profile, 3/4 back, back view.';
+      }
+      sheet = [intro, 'Style: ' + lock + '.', show + (extraLine ? ' ' + extraLine : ''), views + ' Evenly spaced, nothing cropped, no text or labels, flat even lighting.' + (mustLine ? ' ' + mustLine : '')].join('\n\n');
+
+      icon = 'Make a square 1:1 inventory icon of one ' + core + '. ' + (extraLine ? extraLine + ' ' : '') + 'Single item, centered, slight 3/4 angle, no text, no hands or body, nothing cropped. ' + (must ? 'Clearly show: ' + must + '. ' : '') + 'Style: ' + lock + '. Background: ' + sp.bg + '.';
+
+      code = [
+        "I'm adding a new gear piece to my Godot 4 PS1-style action RPG (project ps1-rpg).",
+        'Gear piece: ' + nm + ' | slot: ' + SLOTS[it.slot].label + ' | type: ' + it.kind + '\nMesh: Tripo3D export (I will give you the file path).',
+        'Do this:\n' +
+        "1. Find my player model scene and measure the standing player's visible mesh height (AABB). Use that as PLAYER_HEIGHT. Do not assume " + info.H + ' m, that is only my placeholder.\n' +
+        '2. Scale: ' + info.code + '\n' +
+        '3. Attach: ' + attach(it.slot) + '\n' +
+        '4. Pivot: put the pivot at the natural attachment point and zero out any stray rotation from the import.\n' +
+        "5. Data: register it in my existing item data (slot, stats, mesh path) instead of hardcoding it in a script. If there is no item data yet, say so and propose a minimal Resource rather than inventing one.\n" +
+        '6. Tell me exactly what you changed and which numbers are placeholders.'
+      ].join('\n\n');
+
+      steps = [
+        'Nano: attach your player image and paste the "Worn on player" prompt to check the fit.',
+        'Nano: paste the view sheet prompt and check every view matches the player.',
+        'Tripo: upload the sheet as a multi-view image, with the same settings you used for your other items.',
+        'Godot: import the file and paste the Godot prompt into Claude Code.'
+      ];
+    }
+
+    return {info:info, st:st, worn:worn, sheet:sheet, icon:icon, code:code, steps:steps};
+  }
+
+  function render(){
+    var o = build();
+    $('wornCard').hidden = o.st;
+    $('out-worn').textContent = o.worn;
+    $('out-sheet').textContent = o.sheet;
+    $('out-icon').textContent = o.icon;
+    $('out-code').textContent = o.code;
+    $('fig').innerHTML = drawFigure(o.info);
+    $('lineup').innerHTML = drawLineup(getItem());
+    var ul = $('sizeLines'); ul.innerHTML = '';
+    o.info.lines.forEach(function(l){ var li = document.createElement('li'); li.textContent = l.t; if(l.big) li.className = 'big'; ul.appendChild(li); });
+    var ol = $('steps'); ol.innerHTML = '';
+    o.steps.forEach(function(t){ var li = document.createElement('li'); li.textContent = t; ol.appendChild(li); });
+    $('stepTag').textContent = o.st ? 'item alone' : 'worn on player';
+    $('exTag').hidden = !usingExample;
+  }
+
+  function renderSaved(){
+    var ul = $('savedList'); ul.innerHTML = '';
+    if(!saved.length){
+      var li = document.createElement('li'); li.textContent = 'No saved pieces yet. Fill in the form and press Save piece.'; ul.appendChild(li); return;
+    }
+    saved.forEach(function(p){
+      var li = document.createElement('li');
+      var nm = document.createElement('span'); nm.className = 'nm';
+      nm.textContent = (p.name || '(unnamed)') + ' ';
+      var sm = document.createElement('small'); sm.textContent = SLOTS[p.slot].label + ' / ' + p.kind; nm.appendChild(sm);
+      var ld = document.createElement('button'); ld.className = 'btn sm'; ld.type = 'button'; ld.textContent = 'Load';
+      ld.addEventListener('click', function(){ setItem(p); usingExample = false; render(); persist(); });
+      var dl = document.createElement('button'); dl.className = 'btn sm'; dl.type = 'button'; dl.textContent = 'Delete';
+      var armed = false, t;
+      dl.addEventListener('click', function(){
+        if(!armed){ armed = true; dl.textContent = 'Sure?'; t = setTimeout(function(){ armed = false; dl.textContent = 'Delete'; }, 3000); return; }
+        clearTimeout(t); saved = saved.filter(function(x){ return x.id !== p.id; }); renderSaved(); render(); persist();
+      });
+      li.appendChild(nm); li.appendChild(ld); li.appendChild(dl); ul.appendChild(li);
+    });
+  }
+
+  function flash(btn, txt){
+    var old = btn.dataset.label || btn.textContent; btn.dataset.label = old; btn.textContent = txt;
+    setTimeout(function(){ btn.textContent = old; }, 1400);
+  }
+  function selectText(el){
+    var r = document.createRange(); r.selectNodeContents(el);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  document.querySelectorAll('[data-copy]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var el = $(btn.getAttribute('data-copy'));
+      var txt = el.textContent;
+      var done = function(){ flash(btn, 'Copied'); };
+      var fail = function(){ selectText(el); flash(btn, 'Press Ctrl+C'); };
+      try {
+        if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, fail); }
+        else fail();
+      } catch(e){ fail(); }
+    });
+  });
+
+  // Populate selects
+  Object.keys(SLOTS).forEach(function(k){ var o = document.createElement('option'); o.value = k; o.textContent = SLOTS[k].label; $('i-slot').appendChild(o); });
+  Object.keys(TRIBES).forEach(function(k){ var o = document.createElement('option'); o.value = k; o.textContent = TRIBES[k].label; $('i-tribe').appendChild(o); });
+  Object.keys(RARITY).forEach(function(k){ var o = document.createElement('option'); o.value = k; o.textContent = k; $('i-rarity').appendChild(o); });
+
+  PRESETS.forEach(function(p){
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'btn sm'; b.textContent = p.label;
+    b.addEventListener('click', function(){ setItem(p.item); usingExample = true; render(); persist(); });
+    $('presetRow').appendChild(b);
+  });
+
+  // Events
+  document.querySelectorAll('.live').forEach(function(el){
+    el.addEventListener('input', function(){ usingExample = false; render(); persist(); });
+    el.addEventListener('change', function(){ usingExample = false; render(); persist(); });
+  });
+  $('i-slot').addEventListener('change', function(){
+    fillKinds(); $('i-size').value = ''; $('i-ratio').value = ''; syncFields(); usingExample = false; render(); persist();
+  });
+  $('i-kind').addEventListener('change', function(){
+    if(isStandalone($('i-slot').value)){
+      var k = $('i-kind').value;
+      $('i-size').value = SIZE_M[k] || 0.5;
+      $('i-ratio').value = RATIO[k] || '';
+    }
+    usingExample = false; render(); persist();
+  });
+  $('saveBtn').addEventListener('click', function(){
+    var it = getItem(); it.id = String(Date.now());
+    var i = saved.findIndex(function(x){ return x.name && x.name === it.name && x.slot === it.slot; });
+    if(i >= 0){ it.id = saved[i].id; saved[i] = it; } else saved.unshift(it);
+    usingExample = false; renderSaved(); render(); persist(); flash($('saveBtn'), 'Saved');
+  });
+  $('exBtn').addEventListener('click', function(){
+    setItem(EXAMPLE); usingExample = true; render(); persist();
+  });
+
+  // Boot
+  var st = store();
+  setSpec(st && st.spec);
+  saved = (st && Array.isArray(st.saved)) ? st.saved.filter(function(p){ return p && SLOTS[p.slot]; }) : [];
+  if(st && st.draft && SLOTS[st.draft.slot]){ setItem(st.draft); usingExample = false; } else { setItem(EXAMPLE); usingExample = true; }
+  renderSaved(); render();
+})();
+</script>
+</body></html>

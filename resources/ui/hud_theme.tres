@@ -1,14 +1,14 @@
-[gd_resource type="Theme" load_steps=2 format=3]
+[gd_resource type="Theme" format=3 uid="uid://cnru4uu22qtpm"]
 
-[ext_resource type="FontVariation" path="res://resources/ui/hud_font_bold.tres" id="1_bold"]
+[ext_resource type="FontVariation" uid="uid://vgok6wo54orh" path="res://resources/ui/hud_font_bold.tres" id="1_bold"]
 
 [resource]
 default_font = ExtResource("1_bold")
-default_font_size = 30
+default_font_size = 32
+HudStatLabel/base_type = &"Label"
+HudStatLabel/colors/font_color = Color(0.93, 0.94, 0.96, 1)
+HudStatLabel/font_sizes/font_size = 32
+HudStatLabel/fonts/font = ExtResource("1_bold")
 Label/colors/font_color = Color(1, 1, 1, 1)
 Label/colors/font_outline_color = Color(0, 0, 0, 1)
 Label/constants/outline_size = 10
-HudStatLabel/base_type = &"Label"
-HudStatLabel/colors/font_color = Color(0.93, 0.94, 0.96, 1)
-HudStatLabel/font_sizes/font_size = 30
-HudStatLabel/fonts/font = ExtResource("1_bold")

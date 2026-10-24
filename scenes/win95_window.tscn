@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_window.gd" id="1_window"]
+
+[node name="Win95Window" type="Container"]
+offset_right = 320.0
+offset_bottom = 200.0
+script = ExtResource("1_window")

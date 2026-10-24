@@ -1,0 +1,108 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy/floating_monk/floating_monk.gd" id="1_monk"]
+[ext_resource type="PackedScene" path="res://scenes/characters/FloatingFigure.tscn" id="2_model"]
+[ext_resource type="Resource" path="res://resources/enemies/floating_monk_stats.tres" id="3_stats"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
+[ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
+[ext_resource type="Script" path="res://scripts/combat/health.gd" id="6_health"]
+[ext_resource type="Script" path="res://scripts/state_machine/state_machine.gd" id="7_machine"]
+[ext_resource type="Script" path="res://scripts/enemy/floating_monk/states/hover.gd" id="8_hover"]
+[ext_resource type="Script" path="res://scripts/enemy/floating_monk/states/engage.gd" id="9_engage"]
+[ext_resource type="Script" path="res://scripts/enemy/floating_monk/states/volley.gd" id="10_volley"]
+[ext_resource type="Script" path="res://scripts/enemy/floating_monk/states/rush.gd" id="11_rush"]
+[ext_resource type="Script" path="res://scripts/enemy/floating_monk/states/attack.gd" id="12_attack"]
+[ext_resource type="Script" path="res://scripts/enemy/floating_monk/states/recover.gd" id="13_recover"]
+[ext_resource type="Script" path="res://scripts/enemy/floating_monk/states/stagger.gd" id="14_stagger"]
+[ext_resource type="Script" path="res://scripts/enemy/states/dead.gd" id="15_dead"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_health_bar.tscn" id="99_health_bar"]
+[ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.45
+height = 2.4
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hitbox"]
+size = Vector3(2.2, 1.9, 1.6)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.6
+height = 2.1
+
+[node name="FloatingMonk" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 7
+floor_max_angle = 1.0471976
+floor_snap_length = 0.25
+script = ExtResource("1_monk")
+stats = ExtResource("3_stats")
+patrol_area = Vector2(4, 4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Facing" type="Node3D" parent="."]
+
+[node name="Model" parent="Facing" instance=ExtResource("2_model")]
+transform = Transform3D(-2, 0, 0, 0, 2, 0, 0, 0, -2, 0, 0.45, 0)
+
+[node name="Hitbox" type="Area3D" parent="Facing"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -1.1)
+collision_layer = 0
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("4_hitbox")
+show_debug_mesh = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/Hitbox"]
+shape = SubResource("BoxShape3D_hitbox")
+
+[node name="Hurtbox" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hurtbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("6_health")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("7_machine")
+initial_state = NodePath("Hover")
+
+[node name="Hover" type="Node" parent="StateMachine"]
+script = ExtResource("8_hover")
+
+[node name="Engage" type="Node" parent="StateMachine"]
+script = ExtResource("9_engage")
+
+[node name="Volley" type="Node" parent="StateMachine"]
+script = ExtResource("10_volley")
+
+[node name="Rush" type="Node" parent="StateMachine"]
+script = ExtResource("11_rush")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("12_attack")
+
+[node name="Recover" type="Node" parent="StateMachine"]
+script = ExtResource("13_recover")
+
+[node name="Stagger" type="Node" parent="StateMachine"]
+script = ExtResource("14_stagger")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("15_dead")
+
+[node name="HealthBar" parent="." instance=ExtResource("99_health_bar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.95, 0)
+
+[node name="BlobShadow" type="MeshInstance3D" parent="."]
+script = ExtResource("98_blob_shadow")
+radius = 0.7

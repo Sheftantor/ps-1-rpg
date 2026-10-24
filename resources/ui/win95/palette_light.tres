@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="Win95Palette" format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_palette.gd" id="1_palette"]
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_body.tres" id="1_s4mtb"]
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_mono.tres" id="2_v161i"]
+[ext_resource type="FontVariation" path="res://resources/ui/win95/font_title.tres" id="4_ydnji"]
+
+[resource]
+script = ExtResource("1_palette")
+desktop = Color(0.18431373, 0.49803922, 0.5019608, 1)
+face = Color(0.8509804, 0.8392157, 0.8039216, 1)
+field = Color(1, 1, 1, 1)
+text = Color(0.105882354, 0.105882354, 0.09803922, 1)
+muted = Color(0.4627451, 0.44705883, 0.41568628, 1)
+highlight = Color(1, 1, 1, 1)
+shadow = Color(0.4627451, 0.44705883, 0.41568628, 1)
+title_left = Color(0.08627451, 0.19215687, 0.43529412, 1)
+title_right = Color(0.23137255, 0.38431373, 0.72156864, 1)
+scale = 2
+title_font = ExtResource("4_ydnji")
+body_font = ExtResource("1_s4mtb")
+mono_font = ExtResource("2_v161i")

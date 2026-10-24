@@ -5,6 +5,8 @@ extends Resource
 
 @export var skills: Array[SkillData] = []
 @export var inventory: Array[ItemStack] = []
+## Cash in the wallet at the start of a new game (spent at shops, earned from kills).
+@export var starting_money: int = 40
 
 @export_group("Equipment")
 ## Primary weapon, always equipped.

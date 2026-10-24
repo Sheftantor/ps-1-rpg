@@ -6,10 +6,11 @@ extends CharacterBody3D
 
 signal died
 
-const HIT_FLASH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.85)
-const HIT_FLASH_TIME: float = 0.12
 ## Below this ground speed (m/s) the model stands instead of walking.
 const WALK_ANIM_MIN_SPEED: float = 0.15
+const TUNING: CombatTuning = preload("res://resources/combat_tuning.tres")
+const KNOCKDOWN_POSE := preload("res://scripts/combat/knockdown_pose.gd")
+const FLAIL_LIMBS := preload("res://scripts/enemy/flail_limbs.gd")
 
 @export var stats: EnemyStats
 ## Size (world X/Z, m) of the box around the spawn point the enemy wanders in
@@ -31,22 +32,37 @@ var telegraph_flash: Color = Color(0.0, 0.0, 0.0, 0.0)
 var pulse_scale: float = 1.0
 ## Where the enemy spawned; the centre of its patrol area.
 var home_position: Vector3 = Vector3.ZERO
-## Attacks finished in a row without the player landing a hit (see the
-## Escalation group in EnemyStats). The next attack is number slash_chain + 1.
-var slash_chain: int = 0
+## The combo swing in progress (1-5), 0 outside a combo (see the Attack state).
+var combo_swing: int = 0
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+## Whether max health has been scaled to the player's level yet.
+var _scaled_to_player: bool = false
+## Hit / kill flash (Feel): colour and seconds left.
+var _hit_flash_color: Color = Color.WHITE
 var _hit_flash_timer: float = 0.0
-var _chain_timer: float = 0.0
-## False once the current swing is hit, so it doesn't count toward the chain.
-var _swing_clean: bool = false
+## Feel's hit push: extra velocity and seconds left.
+var _push_velocity: Vector3 = Vector3.ZERO
+var _push_timer: float = 0.0
+## Seconds left floating at the top of a launch (see launch()).
+var _hang_timer: float = 0.0
+## Flying back from a finisher or launch (null when standing); see knock_down().
+var _knockdown: KNOCKDOWN_POSE = null
+## Where Facing sits at rest; the knockdown turns it about the hips.
+var _facing_rest_position: Vector3 = Vector3.ZERO
+## Flailing limbs while flying back; made on the first knockdown.
+var _flail: FLAIL_LIMBS = null
+## Seconds left of the post-combo vulnerability window.
+var _vulnerable_timer: float = 0.0
+## Seconds until the next combo may start.
+var _combo_cooldown: float = 0.0
 
 @onready var facing: Node3D = $Facing
 @onready var hitbox: Hitbox = $Facing/Hitbox
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var health: Health = $Health
 @onready var state_machine: StateMachine = $StateMachine
-@onready var model: MincerModel = $Facing/Model
+@onready var model: EnemyModel = $Facing/Model
 
 
 func _ready() -> void:
@@ -54,19 +70,44 @@ func _ready() -> void:
 	home_position = global_position
 	health.setup(stats.max_health)
 	model.set_tint(body_tint)
+	_facing_rest_position = facing.position
 	health.died.connect(_award_xp)
 	hurtbox.hit_received.connect(_on_hit_received)
 	state_machine.start(self)
 
 
 func _physics_process(delta: float) -> void:
+	# Hit stop (Feel): this enemy alone holds still for a moment.
+	if Feel.is_frozen(self):
+		return
 	if not has_target():
 		target = get_tree().get_first_node_in_group(&"player") as Node3D
+	if not _scaled_to_player:
+		_scale_to_player()
 	if not is_on_floor():
-		velocity.y -= _gravity * delta
+		# Juggled: full gravity on the way up, then a slow drift from the top of
+		# the arc for the hang time.
+		var floating := _hang_timer > 0.0 and velocity.y <= 0.0
+		velocity.y -= _gravity * (TUNING.juggle_hang_gravity_scale if floating else 1.0) * delta
+		if floating:
+			_hang_timer = maxf(_hang_timer - delta, 0.0)
+	elif velocity.y <= 0.0:
+		# Landed (a launch this frame is still on the floor, moving up).
+		_hang_timer = 0.0
 	state_machine.physics_update(delta)
-	move_and_slide()
-	_update_escalation(delta)
+	if _push_timer > 0.0:
+		# Feel's push rides on top of the state's own movement for one step.
+		_push_timer -= delta
+		var own_velocity := velocity
+		velocity += _push_velocity
+		move_and_slide()
+		velocity.x = own_velocity.x
+		velocity.z = own_velocity.z
+	else:
+		move_and_slide()
+	_update_knockdown(delta)
+	_vulnerable_timer = maxf(_vulnerable_timer - delta, 0.0)
+	_combo_cooldown = maxf(_combo_cooldown - delta, 0.0)
 	_update_visuals(delta)
 	_update_animation()
 
@@ -108,12 +149,62 @@ func direction_to_target() -> Vector3:
 
 func _award_xp() -> void:
 	var player := get_tree().get_first_node_in_group(&"player") as Player
-	if player != null:
-		player.award_kill(level())
+	var xp := player.award_kill(level()) if player != null else 0
+	Feel.on_kill(self, xp)
 
 
 func level() -> int:
 	return level_override if level_override > 0 else stats.level
+
+
+# --- Level scaling --------------------------------------------------------------
+# Max health and hit damage follow the level gap to the player (LevelScaling,
+# res://resources/combat_tuning.tres), from the bases in stats' Level Scaling group.
+
+## Enemy level minus the player's level (0 without a player).
+func level_gap() -> int:
+	var player := _player()
+	return level() - player.level if player != null else 0
+
+
+func scaled_max_health() -> int:
+	var player := _player()
+	var base := float(stats.max_health)
+	if stats.health_in_melee_hits > 0.0 and player != null:
+		base = stats.health_in_melee_hits * LevelScaling.melee_damage(player.stats)
+	return maxi(1, roundi(base * LevelScaling.health_multiplier(level_gap())))
+
+
+## One hit's damage: stats.damage_percent of a same-level player's max health
+## (or raw_damage when that's 0), scaled by the level gap.
+func scaled_damage(raw_damage: int) -> int:
+	var player := _player()
+	var base := float(raw_damage)
+	if stats.damage_percent > 0.0 and player != null:
+		base = stats.damage_percent * LevelScaling.player_max_health_at(level(), player.stats)
+	return maxi(1, roundi(base * LevelScaling.damage_multiplier(level_gap())))
+
+
+func _player() -> Player:
+	return get_tree().get_first_node_in_group(&"player") as Player
+
+
+func _scale_to_player() -> void:
+	var player := _player()
+	if player == null:
+		return
+	_scaled_to_player = true
+	health.setup(scaled_max_health())
+	player.level_changed.connect(_on_player_level_changed)
+
+
+## Keeps the same share of health when the gap changes mid-fight.
+func _on_player_level_changed(_level: int) -> void:
+	if health.is_dead:
+		return
+	var fraction := float(health.current) / health.max_health
+	health.max_health = scaled_max_health()
+	health.set_current(maxi(1, roundi(fraction * health.max_health)))
 
 
 func forward() -> Vector3:
@@ -170,68 +261,120 @@ func release_attack_token(cooldown: float) -> void:
 	EnemyAttackCoordinator.release(self, cooldown)
 
 
-# --- Escalation -----------------------------------------------------------------
-# Each attack finished without the player landing a hit adds to slash_chain:
-# the next one plays faster, the arms start to shake from jitter_start_attack on,
-# the top attacks hit harder, and finishing the last one costs the enemy its
-# balance. Any hit the player lands drops the chain back to the base attack.
+# --- Combo ----------------------------------------------------------------------
+# One attack: the Combo group in EnemyStats (telegraph, five swings, recovery).
 
-## Playback-speed multiplier for the next attack (also scales its timings).
-func attack_speed() -> float:
-	return 1.0 + stats.escalation_speed_step * slash_chain
-
-
-## Arm jitter (degrees) for the next attack's swing; 0 before jitter_start_attack.
-func attack_jitter() -> float:
-	var past_start := slash_chain + 1 - stats.jitter_start_attack
-	return stats.jitter_degrees_per_attack * (past_start + 1) if past_start >= 0 else 0.0
+## A combo swing: current_attack's knockback, stun and lunge with
+## stats.attack_damage (level-scaled). Every swing deals the same damage.
+func combo_attack() -> AttackData:
+	var swing := current_attack.duplicate() as AttackData
+	swing.damage = scaled_damage(stats.attack_damage)
+	return swing
 
 
-## Whether the next attack is one of the harder-hitting top attacks.
-func is_top_attack() -> bool:
-	return slash_chain >= stats.escalation_chain_length - stats.top_attack_count
+func is_vulnerable() -> bool:
+	return _vulnerable_timer > 0.0
 
 
-## current_attack, boosted for the top of the chain.
-func escalated_attack() -> AttackData:
-	if not is_top_attack():
-		return current_attack
-	var boosted := current_attack.duplicate() as AttackData
-	boosted.knockback *= stats.top_attack_knockback_multiplier
-	boosted.hit_stun_multiplier *= stats.top_attack_hit_stun_multiplier
-	return boosted
+## Opens the post-combo vulnerability window for seconds.
+func set_vulnerable(seconds: float) -> void:
+	_vulnerable_timer = seconds
 
 
-func begin_attack() -> void:
-	_swing_clean = true
+func combo_ready() -> bool:
+	return _combo_cooldown <= 0.0
 
 
-## Called when an attack's swing ends. Counts it toward the chain unless it was
-## hit; returns true when it was the last attack in the chain and the enemy
-## should lose its balance.
-func finish_attack() -> bool:
-	if not _swing_clean:
-		return false
-	if slash_chain + 1 >= stats.escalation_chain_length:
-		break_chain()
-		return true
-	slash_chain += 1
-	_chain_timer = stats.escalation_chain_timeout
-	return false
+## No combo for at least seconds (never shortens a longer wait).
+func start_combo_cooldown(seconds: float) -> void:
+	_combo_cooldown = maxf(_combo_cooldown, seconds)
 
 
-func break_chain() -> void:
-	slash_chain = 0
-	_chain_timer = 0.0
-	_swing_clean = false
+## Flashes the model color for seconds (hit and kill feedback), shown at once.
+func flash(color: Color, seconds: float) -> void:
+	_hit_flash_color = color
+	_hit_flash_timer = seconds
+	model.set_flash(color)
 
 
-func _update_escalation(delta: float) -> void:
-	if slash_chain == 0:
+## Knocks the enemy up (positive) or down (negative) at speed m/s, then floats
+## it near the top of the arc for hang_time seconds so it can be juggled.
+func launch(speed: float, hang_time: float) -> void:
+	if not stats.launchable:
 		return
-	_chain_timer -= delta
-	if _chain_timer <= 0.0:
-		break_chain()
+	velocity.y = speed
+	_hang_timer = hang_time
+
+
+func is_airborne() -> bool:
+	return not is_on_floor()
+
+
+## Sends it flying back from source: it turns to face the hit, then sails back
+## through the air leaning back, spinning round and flailing its arms and legs,
+## lands on its back, lies there, then gets up (the stagger lasts until it's
+## standing). Hit again mid-air, it keeps flying.
+func knock_down(source: Node3D) -> void:
+	if not stats.launchable:
+		return
+	if _knockdown != null:
+		_knockdown.refresh()
+		return
+	_knockdown = KNOCKDOWN_POSE.new(false, TUNING.enemy_flyback_lean_speed, TUNING.enemy_down_time,
+			TUNING.enemy_get_up_time, TUNING.enemy_flyback_lean_degrees)
+	_start_flail()
+	if source != null and is_instance_valid(source):
+		var toward := source.global_position - global_position
+		toward.y = 0.0
+		if toward.length_squared() > 0.0001:
+			var body_yaw := atan2(global_basis.z.x, global_basis.z.z)
+			facing.rotation.y = atan2(-toward.x, -toward.z) - body_yaw
+
+
+## Down or flying back from a knock_down() and not up yet.
+func is_knocked_down() -> bool:
+	return _knockdown != null
+
+
+func _start_flail() -> void:
+	if _flail == null:
+		var skeletons := model.find_children("*", "Skeleton3D", true, false)
+		if skeletons.is_empty():
+			return
+		_flail = FLAIL_LIMBS.new()
+		# Last child, so it runs after the clip and the model's own modifiers.
+		skeletons[0].add_child(_flail)
+	_flail.degrees = TUNING.enemy_flail_degrees
+	_flail.speed = TUNING.enemy_flail_speed
+
+
+func _update_knockdown(delta: float) -> void:
+	if _knockdown == null:
+		return
+	var flying := _knockdown.is_flying() and is_airborne()
+	if _flail != null:
+		_flail.amount = 1.0 if flying else 0.0
+	if flying:
+		facing.rotation.y += deg_to_rad(TUNING.enemy_flyback_spin_degrees) * delta
+	var pitch := _knockdown.update(delta, is_airborne())
+	var lying := _knockdown.lying_amount()
+	if _knockdown.done():
+		_knockdown = null
+		pitch = 0.0
+		lying = 0.0
+	facing.rotation.x = pitch
+	var height := TUNING.enemy_tumble_pivot_height
+	var pivot := Vector3.UP * height
+	# Lying on its back, it rests on the ground rather than at hip height.
+	var drop := Vector3.DOWN * (height - KNOCKDOWN_POSE.LYING_HIP_HEIGHT) * lying
+	facing.position = _facing_rest_position + pivot - facing.quaternion * pivot + drop
+
+
+## Adds a push (m/s) for seconds through the body's normal movement, so walls
+## still stop it (hit feedback, on top of the hit's own knockback).
+func push(push_velocity: Vector3, seconds: float) -> void:
+	_push_velocity = push_velocity
+	_push_timer = seconds
 
 
 func reset_telegraph_visuals() -> void:
@@ -241,8 +384,7 @@ func reset_telegraph_visuals() -> void:
 
 func _update_visuals(delta: float) -> void:
 	_hit_flash_timer = maxf(_hit_flash_timer - delta, 0.0)
-	var flash := HIT_FLASH_COLOR if _hit_flash_timer > 0.0 else telegraph_flash
-	model.set_flash(flash)
+	model.set_flash(_hit_flash_color if _hit_flash_timer > 0.0 else telegraph_flash)
 	model.set_pulse(pulse_scale)
 
 
@@ -258,10 +400,10 @@ func _update_animation() -> void:
 
 
 func _on_hit_received(attack: AttackData, source: Node3D) -> void:
-	health.take_damage(attack.damage)
-	_hit_flash_timer = HIT_FLASH_TIME
-	# Interrupted: the escalation starts over from the base attack.
-	break_chain()
+	var damage := attack.damage
+	if is_vulnerable():
+		damage = roundi(damage * stats.vulnerable_damage_multiplier)
+	health.take_damage(damage)
 	var push := global_position - source.global_position
 	push.y = 0.0
 	var msg := {"knockback": push.normalized() * attack.knockback}
@@ -270,3 +412,9 @@ func _on_hit_received(attack: AttackData, source: Node3D) -> void:
 		died.emit()
 	elif (state_machine.current as EnemyState).can_be_staggered():
 		state_machine.transition_to(EnemyState.STAGGER, msg)
+	else:
+		return
+	if attack.launch_speed != 0.0:
+		launch(attack.launch_speed, attack.hang_time)
+	if attack.heavy_hit or attack.launch_speed > 0.0 or _knockdown != null:
+		knock_down(source)

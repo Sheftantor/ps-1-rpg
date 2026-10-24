@@ -1,9 +1,9 @@
 [gd_scene format=3]
 
-[ext_resource type="PackedScene" uid="uid://b0pa4v61t0pen" path="res://Import/Character/Idle.fbx" id="1_rig"]
+[ext_resource type="PackedScene" uid="uid://cqtqmanwawrc6" path="res://Import/Character/Real_MainC.fbx" id="1_rig"]
 [ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="2_ps1"]
-[ext_resource type="Texture2D" uid="uid://cxgifsnuog08r" path="res://Import/Character/MC-Rig/tripo_convert_016b917f-db36-43be-9f7a-85e054f88dc0_0.png" id="3_skin"]
-[ext_resource type="AnimationLibrary" path="res://resources/player/player_animations.tres" id="4_anims"]
+[ext_resource type="Texture2D" uid="uid://cn3kfxawetlfe" path="res://Import/Character/Real_MainC_0.png" id="3_skin"]
+[ext_resource type="AnimationLibrary" path="res://resources/player/player_animations_real.tres" id="4_anims"]
 [ext_resource type="PackedScene" path="res://scenes/bat.tscn" id="5_melee"]
 [ext_resource type="AnimationNodeBlendTree" path="res://resources/player/player_animation_tree.tres" id="6_tree"]
 [ext_resource type="Script" path="res://scripts/combat/weapon_trail.gd" id="7_trail"]
@@ -15,22 +15,22 @@ shader_parameter/albedo_texture = ExtResource("3_skin")
 
 [node name="PlayerModel" instance=ExtResource("1_rig")]
 
-[node name="tripo_node_016b917f_001" parent="Skeleton3D" index="0"]
+[node name="tripo_node_bb4cb8d8" parent="Skeleton3D" index="0"]
 surface_material_override/0 = SubResource("ShaderMaterial_skin")
 
 [node name="RightHandAttachment" type="BoneAttachment3D" parent="Skeleton3D" index="1"]
 bone_name = "mixamorig_RightHand"
-bone_idx = 34
+bone_idx = 7
 
 [node name="MeleeWeapon" type="Node3D" parent="Skeleton3D/RightHandAttachment"]
-transform = Transform3D(-0.4063486, 0.9089339, 0.093382664, 0.91132915, 0.41054958, -0.03046821, -0.066031806, 0.07272168, -0.99516404, 0.0026307218, 0.04235795, 0.017037489)
+transform = Transform3D(-0.16869408, 0.3628467, 0.9164522, 0.9219364, 0.38699043, 0.016484167, -0.34867713, 0.8476915, -0.3998046, -0.015010854, 0.041403785, 0.012320469)
 
 [node name="Model" parent="Skeleton3D/RightHandAttachment/MeleeWeapon" instance=ExtResource("5_melee")]
 
 [node name="WeaponTrail" type="MeshInstance3D" parent="Skeleton3D/RightHandAttachment/MeleeWeapon"]
 script = ExtResource("7_trail")
 
-[node name="AnimationPlayer" parent="." index="1"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": ExtResource("4_anims")
 }

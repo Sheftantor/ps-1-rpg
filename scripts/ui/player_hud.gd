@@ -1,12 +1,15 @@
 class_name PlayerHud
 extends CanvasLayer
-## Player HUD: top-left health, energy and XP bars with values, the bottom-left
+## Player HUD: top-left health and energy bars with values, the full-width XP
+## bar along the bottom (SegmentedXpBar), the bottom-left
 ## loadout window (LoadoutPanel: both weapons, then the carried items with the
 ## selected one under the cursor), pickup prompt and short messages, plus the gun-mode targeting
 ## overlay (connector web, reticle with target and range-state labels, mode
 ## label, queued-shot portrait slots centered under it, action prompts). Structure and logic only: layout,
 ## colors and fonts live in res://scenes/player_hud.tscn and
 ## res://resources/ui/hud_theme.tres for styling in the editor.
+
+const SEGMENTED_XP_BAR := preload("res://scripts/ui/segmented_xp_bar.gd")
 
 ## Seconds a flash_message() stays up before the prompt comes back.
 @export var message_time: float = 1.2
@@ -16,14 +19,28 @@ extends CanvasLayer
 @export var target_text: String = "TARGET"
 ## Queue slot and reticle label for queued targets, numbered in queue order.
 @export var queued_format: String = "ENEMY %s"
+## Gun mode's TARGET / range boxes sit at the left edge, 4% in and centered
+## vertically (anchors on Root/Targeting/TargetPanel); this nudges them (pixels).
+@export var target_panel_offset: Vector2 = Vector2.ZERO:
+	set(value):
+		target_panel_offset = value
+		if is_node_ready():
+			_place_target_panel()
 
 # Typed by path so the HUD loads before the editor has registered the class_name.
 const LoadoutPanelScript := preload("res://scripts/ui/loadout_panel.gd")
+const IconSlotScript := preload("res://scripts/ui/icon_slot.gd")
+## Queue slot side (pixels): the ItemSlot frame's 8 px margins leave a 64 px
+## picture, the portrait icons' own size, so they draw 1:1 with no rescaling.
+const PORTRAIT_SLOT_SIZE := 80.0
 ## Queue slot portrait for an enemy whose stats have none.
 const PORTRAIT_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
 
-## Whether key labels show gamepad buttons; follows the last device used.
-var using_gamepad: bool = false
+## Whether key labels show gamepad buttons; follows the last device used
+## (ActiveDevice, the InputDevice autoload).
+var using_gamepad: bool:
+	get:
+		return ActiveDevice.using_gamepad
 
 var _message_timer: float = 0.0
 var _gun_drawn: bool = false
@@ -40,9 +57,8 @@ var _level_up_tween: Tween = null
 @onready var _health_bar: Range = $Root/Stats/HealthBar
 @onready var _stamina_value: Label = $Root/Stats/StaminaRow/Value
 @onready var _stamina_bar: Range = $Root/Stats/StaminaBar
-@onready var _xp_level: Label = $Root/Stats/XpRow/Name
-@onready var _xp_value: Label = $Root/Stats/XpRow/Value
-@onready var _xp_bar: Range = $Root/Stats/XpBar
+@onready var _xp_bar: SEGMENTED_XP_BAR = $Root/XpBar
+@onready var _xp_bar_alpha: float = _xp_bar.modulate.a
 @onready var _level_up: Label = $Root/LevelUp
 @onready var _loadout: LoadoutPanelScript = $Root/LoadoutPanel
 @onready var _prompt: Label = $Root/Prompt
@@ -53,46 +69,26 @@ var _level_up_tween: Tween = null
 @onready var _targeting: Control = $Root/Targeting
 @onready var _links: TargetLinks = $Root/Targeting/Links
 @onready var _reticle: TargetReticle = $Root/Targeting/Reticle
-@onready var _target_label: Label = $Root/Targeting/Reticle/TargetLabel
-@onready var _range_label: Label = $Root/Targeting/Reticle/RangeLabel
+@onready var _target_panel: Control = $Root/Targeting/TargetPanel
+@onready var _target_label: Label = $Root/Targeting/TargetPanel/TargetLabel
+@onready var _range_label: Label = $Root/Targeting/TargetPanel/RangeLabel
 @onready var _mode_label: Label = $Root/Targeting/ModeLabel
 @onready var _queue_row: HBoxContainer = $Root/Targeting/QueueRow
-@onready var _slot_template: Control = $Root/Targeting/QueueRow/SlotTemplate
 @onready var _gun_prompts: HBoxContainer = $Root/Targeting/Prompts
 
 
 func _ready() -> void:
+	_place_target_panel()
 	_targeting.visible = false
-	_slot_template.visible = false
 	_prompt.text = ""
 	_interact.visible = false
-	_refresh_keybinds()
-
-
-## Switches the key labels between keyboard/mouse and gamepad as either is used.
-func _input(event: InputEvent) -> void:
-	var gamepad := using_gamepad
-	if event is InputEventJoypadButton:
-		gamepad = true
-	elif event is InputEventJoypadMotion:
-		if absf((event as InputEventJoypadMotion).axis_value) > 0.5:
-			gamepad = true
-	elif event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
-		gamepad = false
-	if gamepad != using_gamepad:
-		using_gamepad = gamepad
-		_refresh_keybinds()
+	# Key icons switch between keyboard/mouse and gamepad as either is used.
+	_interact_icon.follow_device = true
 
 
 ## Short name of the key/button bound to `action` on the current device.
 func key_label(action: StringName) -> String:
 	return InputBindings.label(action, using_gamepad)
-
-
-func _refresh_keybinds() -> void:
-	_interact_icon.gamepad = using_gamepad
-	if _targeting.visible:
-		_build_gun_prompts()
 
 
 func _process(delta: float) -> void:
@@ -112,11 +108,17 @@ func set_stamina(current: float, maximum: float) -> void:
 
 
 ## Level and the XP bar toward the next one (needed 0 = max level).
+## Brightens the XP bar for a moment (kill feedback).
+func pulse_xp_bar(seconds: float) -> void:
+	# Keeps the bar's own see-through alpha (set in the scene).
+	var alpha := _xp_bar_alpha
+	var tween := _xp_bar.create_tween()
+	tween.tween_property(_xp_bar, ^"modulate", Color(2.2, 2.2, 2.2, alpha), seconds * 0.3)
+	tween.tween_property(_xp_bar, ^"modulate", Color(1, 1, 1, alpha), seconds * 0.7)
+
+
 func set_xp(level: int, xp: int, needed: int) -> void:
-	_xp_level.text = "LV %d" % level
-	_xp_bar.max_value = maxi(needed, 1)
-	_xp_bar.value = xp if needed > 0 else _xp_bar.max_value
-	_xp_value.text = "%d/%d" % [xp, needed] if needed > 0 else "MAX"
+	_xp_bar.set_progress(level, xp, needed)
 
 
 ## Big gold "LEVEL UP!" banner that rises a little and fades.
@@ -204,7 +206,7 @@ func _build_gun_prompts() -> void:
 		var pair := HBoxContainer.new()
 		pair.add_theme_constant_override(&"separation", 8)
 		var icon := InputIcon.new()
-		icon.gamepad = using_gamepad
+		icon.follow_device = true
 		icon.press_phase = -0.15 * i
 		icon.action = GUN_PROMPTS[i][0]
 		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -220,26 +222,40 @@ func set_mode_text(text: String) -> void:
 	_mode_label.text = text
 
 
-## One slot per queued shot, in queue order, copied from the hidden
-## SlotTemplate: the target's portrait (placeholder if null) over "ENEMY 1", "ENEMY 2", ...
-func set_queue(portraits: Array[Texture2D]) -> void:
-	var count := portraits.size()
+## One slot per queued shot, in queue order: the target's portrait in an item
+## icon slot (same frame and filtering as every other icon, at
+## PORTRAIT_SLOT_SIZE; placeholder if it has none). No name label: the name
+## is only the slot's tooltip. null = a target that's gone (placeholder).
+func set_queue(targets: Array[EnemyStats]) -> void:
+	var count := targets.size()
 	while _slots.size() < count:
-		var slot := _slot_template.duplicate() as Control
-		slot.visible = true
+		var slot := IconSlotScript.new()
+		slot.placeholder = PORTRAIT_PLACEHOLDER
+		slot.set_slot_size(PORTRAIT_SLOT_SIZE)
+		slot.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_queue_row.add_child(slot)
 		_slots.append(slot)
 	while _slots.size() > count:
 		_slots.pop_back().queue_free()
 	for i in _slots.size():
-		(_slots[i].get_node("VBox/Label") as Label).text = queued_format % (i + 1)
-		(_slots[i].get_node("VBox/Icon") as TextureRect).texture = 				portraits[i] if portraits[i] != null else PORTRAIT_PLACEHOLDER
+		var stats := targets[i]
+		_slots[i].show_icon(stats.portrait if stats != null else null,
+				stats.display_name if stats != null else "")
 
 
 ## Projects the player and target points onto the screen: connector lines to
 ## every target, queued ones highlighted, and the reticle on `cursor` (index
 ## into targets, -1 for none) with its queue number, range state and distance.
 ## `queued` lists indices into targets in queue order (-1 for off-list ones).
+## Applies target_panel_offset to the panel's left-edge anchor point.
+func _place_target_panel() -> void:
+	_target_panel.offset_left = target_panel_offset.x
+	_target_panel.offset_right = target_panel_offset.x
+	_target_panel.offset_top = target_panel_offset.y
+	_target_panel.offset_bottom = target_panel_offset.y
+
+
 func update_targeting(camera: Camera3D, origin: Vector3, targets: Array[Vector3], cursor: int,
 		queued: PackedInt32Array, in_range: bool, distance: float) -> void:
 	var points := PackedVector2Array()
@@ -258,6 +274,8 @@ func update_targeting(camera: Camera3D, origin: Vector3, targets: Array[Vector3]
 	_links.set_links(camera.unproject_position(origin), points, cursor_2d, queued_2d)
 
 	_reticle.visible = cursor_2d >= 0
+	# The TARGET / range boxes show while there's a reticle, as when they rode on it.
+	_target_panel.visible = _reticle.visible
 	if cursor_2d < 0:
 		return
 	_reticle.position = points[cursor_2d] - _reticle.size * 0.5

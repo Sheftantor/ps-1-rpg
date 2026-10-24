@@ -1,6 +1,7 @@
 class_name MeleeWeaponData
 extends Resource
-## The primary (melee) weapon: a bat, sword, pipe... Its model is held in the
+## A melee weapon (the primary slot): bats, swords, pipes... all melee weapons
+## share this class, its swing combo and its guard (Block). Its model is held in the
 ## right hand, built in the grip convention of res://scenes/bat.tscn (grip at the
 ## origin, the weapon extending ~0.47 along +Y) so swings, trails and hitboxes fit.
 

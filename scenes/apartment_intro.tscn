@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/apartment_intro.gd" id="1_intro"]
+[ext_resource type="PackedScene" path="res://scenes/player_model.tscn" id="2_model"]
+[ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="3_shadow"]
+
+[node name="ApartmentIntro" type="Node3D"]
+script = ExtResource("1_intro")
+
+[node name="Camera" type="Camera3D" parent="."]
+fov = 60.0
+
+[node name="Actor" type="Node3D" parent="."]
+
+[node name="Model" parent="Actor" instance=ExtResource("2_model")]
+transform = Transform3D(-1.8, 0, 0, 0, 1.8, 0, 0, 0, -1.8, 0, 0, 0)
+
+[node name="BlobShadow" type="MeshInstance3D" parent="Actor"]
+script = ExtResource("3_shadow")
+
+[node name="Fade" type="CanvasLayer" parent="."]
+layer = 90
+
+[node name="Cover" type="ColorRect" parent="Fade"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

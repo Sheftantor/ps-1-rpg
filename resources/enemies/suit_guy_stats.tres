@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyStats" format=3 uid="uid://cibmuv3c5amb1"]
+
+[ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="1_s1l2q"]
+[ext_resource type="Script" uid="uid://e4ea8tpb76l5" path="res://scripts/enemy/enemy_stats.gd" id="1_stats"]
+[ext_resource type="Texture2D" uid="uid://tsrsa7vjsx3g" path="res://textures/ui/icons/suit_guy_portrait.png" id="2_cmkbt"]
+
+[resource]
+script = ExtResource("1_stats")
+max_health = 60
+level = 3
+display_name = "Suit Guy"
+portrait = ExtResource("2_cmkbt")
+damage_percent = 0.125
+health_in_melee_hits = 7.0
+acceleration = 12.0
+turn_speed = 6.0
+patrol_pause_min = 0.8
+patrol_pause_max = 2.5
+stagger_time = 0.35

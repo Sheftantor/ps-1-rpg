@@ -1,0 +1,25 @@
+[gd_resource type="Theme" load_steps=3 format=3]
+
+[ext_resource type="FontVariation" path="res://resources/ui/hud_font_bold.tres" id="1_font"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_none"]
+
+[resource]
+default_font = ExtResource("1_font")
+default_font_size = 32
+Button/colors/font_color = Color(0.6, 0.6, 0.64, 1)
+Button/colors/font_disabled_color = Color(0.3, 0.3, 0.33, 1)
+Button/colors/font_focus_color = Color(1, 1, 1, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/colors/font_hover_pressed_color = Color(1, 0.86, 0.55, 1)
+Button/colors/font_outline_color = Color(0, 0, 0, 1)
+Button/colors/font_pressed_color = Color(1, 0.86, 0.55, 1)
+Button/constants/outline_size = 10
+Button/styles/disabled = SubResource("StyleBoxEmpty_none")
+Button/styles/focus = SubResource("StyleBoxEmpty_none")
+Button/styles/hover = SubResource("StyleBoxEmpty_none")
+Button/styles/hover_pressed = SubResource("StyleBoxEmpty_none")
+Button/styles/normal = SubResource("StyleBoxEmpty_none")
+Button/styles/pressed = SubResource("StyleBoxEmpty_none")
+Label/colors/font_outline_color = Color(0, 0, 0, 1)
+Label/constants/outline_size = 10

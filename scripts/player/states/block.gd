@@ -1,7 +1,11 @@
 extends PlayerState
-## Guarding while the block input is held: slow movement, facing locked. Hits
-## cost stamina instead of health (see Player._on_hit_received); not having
-## enough stamina breaks the guard. Can roll out of it.
+## Guarding while the block input is held, with any melee weapon: the upper
+## body raises the weapon into the Guard pose (Player._update_guard_layer) and
+## the player walks slowly (stats.block_move_speed) with facing locked (on the
+## lock target if there is one), so the legs play the forward, backpedal,
+## strafe and diagonal walk blends underneath the guard. Hits cost stamina
+## instead of health (see Player._on_hit_received) and knock the guard back;
+## not having enough stamina breaks the guard. Can roll out of it.
 
 const GUARD_COLOR: Color = Color(0.5, 0.7, 1.0, 0.25)
 

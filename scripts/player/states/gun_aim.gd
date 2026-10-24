@@ -1,6 +1,6 @@
 extends PlayerState
 ## Gun mode (gun_mode input, with a gun in the secondary slot and some stamina):
-## sheathes the sword, draws the gun and brings time to a stop so shots can be
+## sheathes the melee weapon, draws the gun and brings time to a stop so shots can be
 ## lined up. Time eases from normal to stats.gun_slow_time_scale over
 ## stats.gun_slowdown_time real seconds, then (stats.gun_pause_after_slowdown)
 ## the scene tree pauses with only the player, camera and HUD still running.
@@ -15,12 +15,14 @@ extends PlayerState
 ##   gun_undo takes one shot at the cursor target (or else the last one queued)
 ##     off the queue and refunds its cost,
 ##   attack_heavy executes the queue,
-##   gun_mode cancels: back to the sword with nothing fired.
+##   gun_mode cancels: back to the melee weapon with nothing fired.
 ## After stats.gun_drain_delay real seconds, bullet time drains stamina
 ## (stats.gun_energy_drain per second); it doesn't regenerate meanwhile. When it
-## runs out the queue executes by itself and can't be cancelled. Executing
-## restores normal time and fires the queued shots in order,
-## stats.gun_shot_interval apart; targets that died meanwhile are skipped.
+## runs out the queue executes by itself and can't be cancelled. Executing fires
+## the queued shots in order, stats.gun_shot_interval apart, with the world still
+## stopped (enemies, their shots and projectiles stay frozen; hits land and play
+## out once time resumes); targets that died meanwhile are skipped. Time
+## resumes after the last shot.
 
 enum Phase { SLOWING, STOPPED, EXECUTING, RECOVERING }
 
@@ -58,7 +60,7 @@ func enter(_msg: Dictionary) -> void:
 func exit() -> void:
 	_resume_time()
 	queue.clear()
-	# Presses made while aiming shouldn't leak into sword mode.
+	# Presses made while aiming shouldn't leak into melee mode.
 	player.consume_buffer()
 	player.process_mode = Node.PROCESS_MODE_INHERIT
 	player.set_gun_drawn(false)
@@ -72,7 +74,7 @@ func drives_animation() -> bool:
 	return true
 
 
-## Gun mode spends stamina; it doesn't refill until back in sword mode.
+## Gun mode spends stamina; it doesn't refill until back in melee mode.
 func stamina_regen_scale() -> float:
 	return 0.0
 
@@ -199,7 +201,9 @@ func _undo() -> void:
 
 
 func _execute() -> void:
-	_resume_time()
+	# The world stays frozen while the queue fires (from bullet time too).
+	Engine.time_scale = 1.0
+	get_tree().paused = true
 	_phase = Phase.EXECUTING
 	_phase_time = 0.0
 	_shot_timer = 0.0
@@ -220,6 +224,7 @@ func _fire_next(real_delta: float) -> void:
 		player.fire_gun(target)
 		_shot_timer = player.stats.gun_shot_interval
 		return
+	_resume_time()
 	_phase = Phase.RECOVERING
 	_phase_time = 0.0
 
@@ -263,10 +268,10 @@ func _update_hud() -> void:
 			hud.set_mode_text("EXECUTE")
 		Phase.RECOVERING:
 			hud.set_mode_text("")
-	var portraits: Array[Texture2D] = []
+	var queued_stats: Array[EnemyStats] = []
 	for enemy in queue:
-		portraits.append(enemy.stats.portrait if is_instance_valid(enemy) else null)
-	hud.set_queue(portraits)
+		queued_stats.append(enemy.stats if is_instance_valid(enemy) else null)
+	hud.set_queue(queued_stats)
 	var points: Array[Vector3] = []
 	for enemy in _targets:
 		points.append(player.aim_point(enemy))

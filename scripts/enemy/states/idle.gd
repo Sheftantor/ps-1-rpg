@@ -16,7 +16,6 @@ var _leg_timer: float = 0.0
 
 
 func enter(_msg: Dictionary) -> void:
-	enemy.break_chain()
 	_pick_point()
 	_pause_timer = randf_range(0.0, enemy.stats.patrol_pause_max)
 

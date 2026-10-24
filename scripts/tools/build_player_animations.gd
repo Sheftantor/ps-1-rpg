@@ -4,8 +4,8 @@
 #
 # Idle, Walking and Running come from the Mixamo FBX clips: renamed, looped,
 # made in place (Mixamo's walk/run carry forward root motion) and given a
-# closed right hand for the sword; WalkBack/RunBack are those played in
-# reverse. The strafes and the sword moves are posed here instead: each key
+# closed right hand for the melee weapon; WalkBack/RunBack are those played in
+# reverse. The strafes and the melee moves are posed here instead: each key
 # gives hand/foot targets in character space (+Z forward, -X is the
 # character's right, 1 unit ~ rig height) and two-bone IK solves the limbs.
 # Also writes the AnimationTree (locomotion blend space + action slots) that
@@ -116,7 +116,7 @@ func _initialize() -> void:
 		push_error("Saving %s failed: %s" % [OUTPUT_PATH, error_string(err)])
 	else:
 		print("Saved %s: %s" % [OUTPUT_PATH, library.get_animation_list()])
-	err = ResourceSaver.save(_build_tree(), TREE_PATH)
+	err = load("res://scripts/tools/build_guard_clips.gd").save_keeping_uid(build_tree(), TREE_PATH)
 	if err != OK:
 		push_error("Saving %s failed: %s" % [TREE_PATH, error_string(err)])
 	else:
@@ -189,7 +189,7 @@ func _convert_mixamo(clip_name: StringName, path: String) -> Animation:
 			var value: Vector3 = anim.track_get_key_value(hips, key)
 			anim.track_set_key_value(hips, key, value - first * Vector3(1, 0, 1) - travel * weight)
 
-	# Close the right hand around the sword grip.
+	# Close the right hand around the melee weapon grip.
 	for bone: int in _grip_fingers:
 		var track_path := NodePath(SKELETON + ":" + _skel.get_bone_name(bone))
 		var track := anim.find_track(track_path, Animation.TYPE_ROTATION_3D)
@@ -471,7 +471,7 @@ func _with(base: Dictionary, changes: Dictionary) -> Dictionary:
 # Rest landmarks: hips (0, 0.53, 0), shoulders (+-0.11, 0.77, -0.03), arm reach
 # ~0.26, ankles (+-0.08, 0.05, -0.03), top of head ~0.99.
 
-## Sword-ready stance that the ground attacks start and end on.
+## Melee-ready stance that the ground attacks start and end on.
 func _ready_pose() -> Dictionary:
 	return {
 		"hips": Vector3(0, -0.025, 0),
@@ -481,7 +481,7 @@ func _ready_pose() -> Dictionary:
 	}
 
 
-## Airborne base: legs loosely tucked, sword ready.
+## Airborne base: legs loosely tucked, melee weapon ready.
 func _air_pose() -> Dictionary:
 	return {
 		"hips_rot": Vector3(5, 0, 0), "spine": Vector3(5, 0, 0),
@@ -641,8 +641,10 @@ func _strafe_keys(side_sign: float, gait: Dictionary) -> Array:
 ## The player's AnimationTree: a BlendSpace2D of the locomotion clips (x =
 ## strafe right, y = forward, 1 = walk, 2 = run) crossfading to the jump when
 ## airborne, under two alternating one-shot slots that Player fills with the
-## action clip (attacks, roll). Parameter names are mirrored in player.gd.
-func _build_tree() -> AnimationNodeBlendTree:
+## action clip (attacks, roll). The melee guard (build_guard_clips.gd) sits
+## between gun mode's aim and the action slots. Parameter names are mirrored
+## in player.gd. Static so build_guard_clips.gd can rebuild the tree too.
+static func build_tree() -> AnimationNodeBlendTree:
 	var tree := AnimationNodeBlendTree.new()
 
 	var locomotion := AnimationNodeBlendSpace2D.new()
@@ -692,7 +694,8 @@ func _build_tree() -> AnimationNodeBlendTree:
 	tree.connect_node(&"AimBlend", 0, &"Air")
 	tree.connect_node(&"AimBlend", 1, &"AimPose")
 
-	var previous := &"AimBlend"
+	# Blocking: upper body raised into the melee guard (Player drives the amount).
+	var previous: StringName = load("res://scripts/tools/build_guard_clips.gd").add_guard_nodes(tree, &"AimBlend")
 	for index in 2:
 		var slot := "AB"[index]
 		tree.add_node(StringName("Action" + slot), _anim_node(&"Idle"), Vector2(600, 300 + 120 * index))
@@ -709,7 +712,7 @@ func _build_tree() -> AnimationNodeBlendTree:
 	return tree
 
 
-func _anim_node(clip_name: StringName) -> AnimationNodeAnimation:
+static func _anim_node(clip_name: StringName) -> AnimationNodeAnimation:
 	var node := AnimationNodeAnimation.new()
 	node.animation = clip_name
 	return node

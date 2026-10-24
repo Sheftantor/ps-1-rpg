@@ -1,13 +1,13 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://2tahbih66gja"]
 
 [ext_resource type="Environment" path="res://resources/rendering/city_day_environment.tres" id="1_x157p"]
 [ext_resource type="Material" path="res://resources/materials/city/road_asphalt.tres" id="2_ns402"]
 [ext_resource type="Material" path="res://resources/materials/city/road_one_way.tres" id="3_lk1rj"]
 [ext_resource type="Material" path="res://resources/materials/city/sidewalk_concrete.tres" id="4_0dhpf"]
 [ext_resource type="Material" path="res://resources/materials/city/paint_white.tres" id="5_ndod5"]
-[ext_resource type="Script" path="res://scripts/city/city_building.gd" id="6_oiqgb"]
+[ext_resource type="Script" uid="uid://dlp3q3htww3dl" path="res://scripts/city/city_building.gd" id="6_oiqgb"]
 [ext_resource type="Material" path="res://resources/materials/city/metal_gray.tres" id="7_y03ab"]
-[ext_resource type="Shader" path="res://shaders/ps1.gdshader" id="8_ynaur"]
+[ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="8_ynaur"]
 [ext_resource type="PackedScene" path="res://scenes/city_kit/street_light.tscn" id="9_8ffq7"]
 [ext_resource type="PackedScene" path="res://scenes/city_kit/props/fire_hydrant.tscn" id="10_wel17"]
 [ext_resource type="PackedScene" path="res://scenes/city_kit/props/trash_can.tscn" id="11_hxrce"]
@@ -30,36 +30,38 @@
 [ext_resource type="Material" path="res://resources/materials/city/metal_fire_escape.tres" id="28_jum3c"]
 [ext_resource type="PackedScene" path="res://scenes/city_kit/props/scaffold_shed.tscn" id="29_uh6kh"]
 [ext_resource type="Material" path="res://resources/materials/city/stone_trim.tres" id="30_6b4e6"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="31_25cc4"]
+[ext_resource type="PackedScene" uid="uid://1gh1uj6b4gct" path="res://scenes/player.tscn" id="31_25cc4"]
 [ext_resource type="PackedScene" path="res://scenes/pickup.tscn" id="35_j2ihi"]
-[ext_resource type="Resource" path="res://resources/weapons/pistol.tres" id="37_wuovx"]
+[ext_resource type="Resource" uid="uid://b722as2rwrfg5" path="res://resources/weapons/pistol.tres" id="37_wuovx"]
 [ext_resource type="Resource" path="res://resources/items/potion.tres" id="38_xq67f"]
-[ext_resource type="Script" path="res://scripts/commands/item_stack.gd" id="39_wx52c"]
+[ext_resource type="Script" uid="uid://dgmf2wf00pke0" path="res://scripts/commands/item_stack.gd" id="39_wx52c"]
 [ext_resource type="Resource" path="res://resources/items/tonic.tres" id="40_ifbtb"]
 [ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="41_takfg"]
 [ext_resource type="Resource" path="res://resources/enemies/passive_target_stats.tres" id="44_kt0b8"]
-[ext_resource type="Script" path="res://scripts/world/area_exit.gd" id="45_b85x0"]
+[ext_resource type="Script" uid="uid://01xpsk6yobtt" path="res://scripts/world/area_exit.gd" id="45_b85x0"]
+[ext_resource type="Script" uid="uid://4er8su8ggi7o" path="res://scripts/enemy/enemy_spawn_point.gd" id="46_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/floating_monk.tscn" id="47_monk"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_uruus"]
 render_priority = 0
 shader = ExtResource("8_ynaur")
 shader_parameter/albedo_color = Color(1, 0.45, 0.7, 1)
-shader_parameter/uv_scale = null
-shader_parameter/uv_offset = null
-shader_parameter/box_projection = null
-shader_parameter/vertex_snap = null
-shader_parameter/wet_sheen = null
-shader_parameter/sheen_color = null
-shader_parameter/checker_size = null
-shader_parameter/checker_color = null
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
 shader_parameter/emission_color = Color(0.85, 0.3825, 0.595, 0.85)
 shader_parameter/emission_energy = 1.2
-shader_parameter/window_lit_ratio = null
-shader_parameter/window_grid = null
-shader_parameter/window_warm_color = null
-shader_parameter/window_cool_color = null
-shader_parameter/window_cool_ratio = null
-shader_parameter/window_energy = null
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_0ejc4"]
 size = Vector2(7, 12)
@@ -70,22 +72,22 @@ subdivide_depth = 4
 render_priority = 0
 shader = ExtResource("8_ynaur")
 shader_parameter/albedo_color = Color(0.55, 0.85, 1, 1)
-shader_parameter/uv_scale = null
-shader_parameter/uv_offset = null
-shader_parameter/box_projection = null
-shader_parameter/vertex_snap = null
-shader_parameter/wet_sheen = null
-shader_parameter/sheen_color = null
-shader_parameter/checker_size = null
-shader_parameter/checker_color = null
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
 shader_parameter/emission_color = Color(0.46750003, 0.7225, 0.85, 0.85)
 shader_parameter/emission_energy = 1.2
-shader_parameter/window_lit_ratio = null
-shader_parameter/window_grid = null
-shader_parameter/window_warm_color = null
-shader_parameter/window_cool_color = null
-shader_parameter/window_cool_ratio = null
-shader_parameter/window_energy = null
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_5uf6k"]
 size = Vector2(10, 6)
@@ -96,22 +98,22 @@ subdivide_depth = 4
 render_priority = 0
 shader = ExtResource("8_ynaur")
 shader_parameter/albedo_color = Color(1, 0.85, 0.45, 1)
-shader_parameter/uv_scale = null
-shader_parameter/uv_offset = null
-shader_parameter/box_projection = null
-shader_parameter/vertex_snap = null
-shader_parameter/wet_sheen = null
-shader_parameter/sheen_color = null
-shader_parameter/checker_size = null
-shader_parameter/checker_color = null
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
 shader_parameter/emission_color = Color(0.85, 0.7225, 0.3825, 0.85)
 shader_parameter/emission_energy = 1.2
-shader_parameter/window_lit_ratio = null
-shader_parameter/window_grid = null
-shader_parameter/window_warm_color = null
-shader_parameter/window_cool_color = null
-shader_parameter/window_cool_ratio = null
-shader_parameter/window_energy = null
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_rfaif"]
 size = Vector2(9, 7)
@@ -122,22 +124,22 @@ subdivide_depth = 4
 render_priority = 0
 shader = ExtResource("8_ynaur")
 shader_parameter/albedo_color = Color(0.5, 1, 0.75, 1)
-shader_parameter/uv_scale = null
-shader_parameter/uv_offset = null
-shader_parameter/box_projection = null
-shader_parameter/vertex_snap = null
-shader_parameter/wet_sheen = null
-shader_parameter/sheen_color = null
-shader_parameter/checker_size = null
-shader_parameter/checker_color = null
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
 shader_parameter/emission_color = Color(0.425, 0.85, 0.63750005, 0.85)
 shader_parameter/emission_energy = 1.2
-shader_parameter/window_lit_ratio = null
-shader_parameter/window_grid = null
-shader_parameter/window_warm_color = null
-shader_parameter/window_cool_color = null
-shader_parameter/window_cool_ratio = null
-shader_parameter/window_energy = null
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_4uv60"]
 size = Vector2(7, 12)
@@ -148,22 +150,22 @@ subdivide_depth = 4
 render_priority = 0
 shader = ExtResource("8_ynaur")
 shader_parameter/albedo_color = Color(1, 0.6, 0.3, 1)
-shader_parameter/uv_scale = null
-shader_parameter/uv_offset = null
-shader_parameter/box_projection = null
-shader_parameter/vertex_snap = null
-shader_parameter/wet_sheen = null
-shader_parameter/sheen_color = null
-shader_parameter/checker_size = null
-shader_parameter/checker_color = null
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
 shader_parameter/emission_color = Color(0.85, 0.51000005, 0.25500003, 0.85)
 shader_parameter/emission_energy = 1.2
-shader_parameter/window_lit_ratio = null
-shader_parameter/window_grid = null
-shader_parameter/window_warm_color = null
-shader_parameter/window_cool_color = null
-shader_parameter/window_cool_ratio = null
-shader_parameter/window_energy = null
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_kqyni"]
 size = Vector2(10, 6)
@@ -174,22 +176,22 @@ subdivide_depth = 4
 render_priority = 0
 shader = ExtResource("8_ynaur")
 shader_parameter/albedo_color = Color(0.85, 0.5, 1, 1)
-shader_parameter/uv_scale = null
-shader_parameter/uv_offset = null
-shader_parameter/box_projection = null
-shader_parameter/vertex_snap = null
-shader_parameter/wet_sheen = null
-shader_parameter/sheen_color = null
-shader_parameter/checker_size = null
-shader_parameter/checker_color = null
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
 shader_parameter/emission_color = Color(0.7225, 0.425, 0.85, 0.85)
 shader_parameter/emission_energy = 1.2
-shader_parameter/window_lit_ratio = null
-shader_parameter/window_grid = null
-shader_parameter/window_warm_color = null
-shader_parameter/window_cool_color = null
-shader_parameter/window_cool_ratio = null
-shader_parameter/window_energy = null
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_jroa2"]
 size = Vector2(9, 7)
@@ -200,22 +202,22 @@ subdivide_depth = 4
 render_priority = 0
 shader = ExtResource("8_ynaur")
 shader_parameter/albedo_color = Color(1, 0.3, 0.25, 1)
-shader_parameter/uv_scale = null
-shader_parameter/uv_offset = null
-shader_parameter/box_projection = null
-shader_parameter/vertex_snap = null
-shader_parameter/wet_sheen = null
-shader_parameter/sheen_color = null
-shader_parameter/checker_size = null
-shader_parameter/checker_color = null
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
 shader_parameter/emission_color = Color(0.85, 0.25500003, 0.2125, 0.85)
 shader_parameter/emission_energy = 1.2
-shader_parameter/window_lit_ratio = null
-shader_parameter/window_grid = null
-shader_parameter/window_warm_color = null
-shader_parameter/window_cool_color = null
-shader_parameter/window_cool_ratio = null
-shader_parameter/window_energy = null
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_4u64s"]
 size = Vector2(13, 9)
@@ -226,22 +228,22 @@ subdivide_depth = 4
 render_priority = 0
 shader = ExtResource("8_ynaur")
 shader_parameter/albedo_color = Color(0.45, 0.7, 1, 1)
-shader_parameter/uv_scale = null
-shader_parameter/uv_offset = null
-shader_parameter/box_projection = null
-shader_parameter/vertex_snap = null
-shader_parameter/wet_sheen = null
-shader_parameter/sheen_color = null
-shader_parameter/checker_size = null
-shader_parameter/checker_color = null
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = false
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
 shader_parameter/emission_color = Color(0.3825, 0.595, 0.85, 0.85)
 shader_parameter/emission_energy = 1.2
-shader_parameter/window_lit_ratio = null
-shader_parameter/window_grid = null
-shader_parameter/window_warm_color = null
-shader_parameter/window_cool_color = null
-shader_parameter/window_cool_ratio = null
-shader_parameter/window_energy = null
+shader_parameter/window_lit_ratio = 0.0
+shader_parameter/window_grid = Vector2(1, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
+shader_parameter/window_cool_ratio = 0.3
+shader_parameter/window_energy = 1.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_6041p"]
 size = Vector2(11, 7)
@@ -1097,219 +1099,165 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0.15, -42.6)
 
 [node name="FireHydrant0" parent="Props" unique_id=586949899 instance=ExtResource("10_wel17")]
 transform = Transform3D(0.25766268, 0, 0.9662349, 0, 1, 0, -0.9662349, 0, 0.25766268, -21.93634, 0.15, 26.3843)
-use_collision = true
 
 [node name="TrashCan1" parent="Props" unique_id=922052345 instance=ExtResource("11_hxrce")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.284828, 0.15, 16.44113)
-use_collision = true
 
 [node name="NewspaperBoxes2" parent="Props" unique_id=1706229036 instance=ExtResource("12_gaxtb")]
 transform = Transform3D(0.25766268, 0, 0.9662349, 0, 1, 0, -0.9662349, 0, 0.25766268, -18.867832, 0.15, 13.324982)
-use_collision = true
 
 [node name="Mailbox3" parent="Props" unique_id=1215093270 instance=ExtResource("13_3n8i7")]
 transform = Transform3D(0.25766268, 0, 0.9662349, 0, 1, 0, -0.9662349, 0, 0.25766268, -16.360744, 0.15, 4.311501)
-use_collision = true
 
 [node name="FireHydrant4" parent="Props" unique_id=978429979 instance=ExtResource("10_wel17")]
 transform = Transform3D(-0.22903925, 0, 0.97341716, 0, 1, 0, -0.97341716, 0, -0.22903925, -15.821945, 0.15, -4.1951246)
-use_collision = true
 
 [node name="TrashCan5" parent="Props" unique_id=774692994 instance=ExtResource("11_hxrce")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.451786, 0.15, -15.371953)
-use_collision = true
 
 [node name="NewspaperBoxes6" parent="Props" unique_id=593496703 instance=ExtResource("12_gaxtb")]
 transform = Transform3D(-0.22903925, 0, 0.97341716, 0, 1, 0, -0.97341716, 0, -0.22903925, -19.638075, 0.15, -18.667255)
-use_collision = true
 
 [node name="PhoneKiosk7" parent="Props" unique_id=1499167157 instance=ExtResource("14_j6yyy")]
 transform = Transform3D(-0.22903925, 0, 0.97341716, 0, 1, 0, -0.97341716, 0, -0.22903925, -21.931498, 0.15, -28.850914)
-use_collision = true
 
 [node name="FireHydrant8" parent="Props" unique_id=915644529 instance=ExtResource("10_wel17")]
 transform = Transform3D(0.25766268, 0, -0.9662349, 0, 1, 0, 0.9662349, 0, 0.25766268, 21.93634, 0.15, 26.3843)
-use_collision = true
 
 [node name="TrashCan9" parent="Props" unique_id=1415261416 instance=ExtResource("11_hxrce")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.284828, 0.15, 16.44113)
-use_collision = true
 
 [node name="NewspaperBoxes10" parent="Props" unique_id=2035182413 instance=ExtResource("12_gaxtb")]
 transform = Transform3D(0.25766268, 0, -0.9662349, 0, 1, 0, 0.9662349, 0, 0.25766268, 18.867832, 0.15, 13.324982)
-use_collision = true
 
 [node name="Mailbox11" parent="Props" unique_id=1119978 instance=ExtResource("13_3n8i7")]
 transform = Transform3D(0.25766268, 0, -0.9662349, 0, 1, 0, 0.9662349, 0, 0.25766268, 16.360744, 0.15, 4.311501)
-use_collision = true
 
 [node name="FireHydrant12" parent="Props" unique_id=174992381 instance=ExtResource("10_wel17")]
 transform = Transform3D(-0.22903925, 0, -0.97341716, 0, 1, 0, 0.97341716, 0, -0.22903925, 15.821945, 0.15, -4.1951246)
-use_collision = true
 
 [node name="TrashCan13" parent="Props" unique_id=2055968543 instance=ExtResource("11_hxrce")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.451786, 0.15, -15.371953)
-use_collision = true
 
 [node name="NewspaperBoxes14" parent="Props" unique_id=969268779 instance=ExtResource("12_gaxtb")]
 transform = Transform3D(-0.22903925, 0, -0.97341716, 0, 1, 0, 0.97341716, 0, -0.22903925, 19.638075, 0.15, -18.667255)
-use_collision = true
 
 [node name="PhoneKiosk15" parent="Props" unique_id=1410816669 instance=ExtResource("14_j6yyy")]
 transform = Transform3D(-0.22903925, 0, -0.97341716, 0, 1, 0, 0.97341716, 0, -0.22903925, 21.931498, 0.15, -28.850914)
-use_collision = true
 
 [node name="SubwayEntrance16" parent="Props" unique_id=722300485 instance=ExtResource("15_qfbr2")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24, 0.15, 40)
-use_collision = true
 
 [node name="SubwayEntrance17" parent="Props" unique_id=621211811 instance=ExtResource("15_qfbr2")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 26, 0.15, -44)
-use_collision = true
 
 [node name="FireHydrant18" parent="Props" unique_id=674027169 instance=ExtResource("10_wel17")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.15, 38.7)
-use_collision = true
 
 [node name="TrashCan19" parent="Props" unique_id=127577767 instance=ExtResource("11_hxrce")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.15, 38.8)
-use_collision = true
 
 [node name="NewspaperBoxes20" parent="Props" unique_id=1159346223 instance=ExtResource("12_gaxtb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.15, -42.8)
-use_collision = true
 
 [node name="TrafficLight21" parent="Props" unique_id=2039819863 instance=ExtResource("16_mqomg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -13.4, 0.15, 29.4)
-use_collision = true
 
 [node name="TrafficLight22" parent="Props" unique_id=1962467580 instance=ExtResource("16_mqomg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -13.4, 0.15, -33.4)
-use_collision = true
 
 [node name="TrafficLight23" parent="Props" unique_id=1668090559 instance=ExtResource("16_mqomg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.4, 0.15, 29.4)
-use_collision = true
 
 [node name="TrafficLight24" parent="Props" unique_id=1641184655 instance=ExtResource("16_mqomg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.4, 0.15, -33.4)
-use_collision = true
 
 [node name="Planter25" parent="Props" unique_id=621606982 instance=ExtResource("17_myxbn")]
 transform = Transform3D(0.2570805, 0, 0.96639, 0, 1, 0, -0.96639, 0, 0.2570805, -11, 0.15, 24)
-use_collision = true
 
 [node name="Planter26" parent="Props" unique_id=1745261783 instance=ExtResource("17_myxbn")]
 transform = Transform3D(-0.25708058, 0, 0.96638995, 0, 1, 0, -0.96638995, 0, -0.25708058, 11, 0.15, 24)
-use_collision = true
 
 [node name="Planter27" parent="Props" unique_id=48925890 instance=ExtResource("17_myxbn")]
 transform = Transform3D(0.2570805, 0, 0.96639, 0, 1, 0, -0.96639, 0, 0.2570805, -7.8, 0.15, 12)
-use_collision = true
 
 [node name="Planter28" parent="Props" unique_id=284027184 instance=ExtResource("17_myxbn")]
 transform = Transform3D(-0.25708058, 0, 0.96638995, 0, 1, 0, -0.96638995, 0, -0.25708058, 7.8, 0.15, 12)
-use_collision = true
 
 [node name="Planter29" parent="Props" unique_id=1089610355 instance=ExtResource("17_myxbn")]
 transform = Transform3D(-0.25708058, 0, 0.96638995, 0, 1, 0, -0.96638995, 0, -0.25708058, -7.894118, 0.15, -14)
-use_collision = true
 
 [node name="Planter30" parent="Props" unique_id=602706476 instance=ExtResource("17_myxbn")]
 transform = Transform3D(0.2570805, 0, 0.96639, 0, 1, 0, -0.96639, 0, 0.2570805, 7.894118, 0.15, -14)
-use_collision = true
 
 [node name="Planter31" parent="Props" unique_id=2076256611 instance=ExtResource("17_myxbn")]
 transform = Transform3D(-0.25708058, 0, 0.96638995, 0, 1, 0, -0.96638995, 0, -0.25708058, -10.717647, 0.15, -26)
-use_collision = true
 
 [node name="Planter32" parent="Props" unique_id=925119011 instance=ExtResource("17_myxbn")]
 transform = Transform3D(0.2570805, 0, 0.96639, 0, 1, 0, -0.96639, 0, 0.2570805, 10.717647, 0.15, -26)
-use_collision = true
 
 [node name="Bollard33" parent="Props" unique_id=725213327 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.15, 29.5)
-use_collision = true
 
 [node name="Bollard34" parent="Props" unique_id=294407777 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.15, -33.5)
-use_collision = true
 
 [node name="Bollard35" parent="Props" unique_id=1457303531 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.15, 29.5)
-use_collision = true
 
 [node name="Bollard36" parent="Props" unique_id=665303082 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.15, -33.5)
-use_collision = true
 
 [node name="Bollard37" parent="Props" unique_id=525082006 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 29.5)
-use_collision = true
 
 [node name="Bollard38" parent="Props" unique_id=1367527850 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -33.5)
-use_collision = true
 
 [node name="Bollard39" parent="Props" unique_id=2012454059 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.15, 29.5)
-use_collision = true
 
 [node name="Bollard40" parent="Props" unique_id=1582959866 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.15, -33.5)
-use_collision = true
 
 [node name="Bollard41" parent="Props" unique_id=1082928859 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.15, 29.5)
-use_collision = true
 
 [node name="Bollard42" parent="Props" unique_id=1771694838 instance=ExtResource("18_7k036")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.15, -33.5)
-use_collision = true
 
 [node name="CafeSet43" parent="Props" unique_id=99190860 instance=ExtResource("19_hvcp6")]
 transform = Transform3D(0.5685086, 0, 0.8226773, 0, 1, 0, -0.8226773, 0, 0.5685086, -5, 0.15, 18)
-use_collision = true
 
 [node name="CafeSet44" parent="Props" unique_id=812462007 instance=ExtResource("19_hvcp6")]
 transform = Transform3D(0.6106358, 0, -0.79191154, 0, 1, 0, 0.79191154, 0, 0.6106358, -1.5, 0.15, 15)
-use_collision = true
 
 [node name="CafeSet45" parent="Props" unique_id=47578174 instance=ExtResource("19_hvcp6")]
 transform = Transform3D(-0.3784863, 0, 0.9256069, 0, 1, 0, -0.9256069, 0, -0.3784863, 4.5, 0.15, 17)
-use_collision = true
 
 [node name="CafeSet46" parent="Props" unique_id=1170549924 instance=ExtResource("19_hvcp6")]
 transform = Transform3D(-0.475278, 0, 0.87983567, 0, 1, 0, -0.87983567, 0, -0.475278, -6, 0.15, 10.5)
-use_collision = true
 
 [node name="CafeSet47" parent="Props" unique_id=338380623 instance=ExtResource("19_hvcp6")]
 transform = Transform3D(0.72822595, 0, 0.6853371, 0, 1, 0, -0.6853371, 0, 0.72822595, 6, 0.15, -20)
-use_collision = true
 
 [node name="HotDogCart48" parent="Props" unique_id=812043312 instance=ExtResource("20_hc72h")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.5, 0.15, 7)
-use_collision = true
 
 [node name="Bench49" parent="Props" unique_id=182801523 instance=ExtResource("21_t18od")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3.5, 0.15, -30)
-use_collision = true
 
 [node name="Bench50" parent="Props" unique_id=661687418 instance=ExtResource("21_t18od")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.5, 0.15, -30)
-use_collision = true
 
 [node name="TrashCan51" parent="Props" unique_id=1297995178 instance=ExtResource("11_hxrce")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.15, 27.5)
-use_collision = true
 
 [node name="TrashCan52" parent="Props" unique_id=592896334 instance=ExtResource("11_hxrce")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.15, -31)
-use_collision = true
 
 [node name="SteamStack53" parent="Props" unique_id=854369924 instance=ExtResource("22_x1rgt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 33)
-use_collision = true
 
 [node name="Traffic" type="Node3D" parent="." unique_id=2146396455]
 
@@ -1542,7 +1490,6 @@ material = ExtResource("28_jum3c")
 
 [node name="PlazaShed" parent="TestGeometry" unique_id=625274877 instance=ExtResource("29_uh6kh")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.5, 0.15, -16)
-use_collision = true
 
 [node name="Plinth" type="CSGCombiner3D" parent="TestGeometry" unique_id=1757817635]
 use_collision = true
@@ -1580,40 +1527,63 @@ item = SubResource("Resource_7qfv2")
 
 [node name="GruntSouth" parent="Enemies" unique_id=1354924605 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -4, 0.15, 13)
-level_override = 1
+level_override = 4
 
 [node name="GruntCafe" parent="Enemies" unique_id=53594126 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5, 0.15, 9)
-level_override = 1
+level_override = 4
 
 [node name="GruntPinch" parent="Enemies" unique_id=39933669 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1, 0.15, -1)
-level_override = 1
+level_override = 4
 
 [node name="GruntBleachers" parent="Enemies" unique_id=2134395766 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3, 0.15, -4)
-level_override = 1
+level_override = 4
 
 [node name="GruntBleachersTop" parent="Enemies" unique_id=489557998 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 2.9, -9.8)
-level_override = 1
+level_override = 4
 
 [node name="GruntShed" parent="Enemies" unique_id=512283705 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3, 0.15, -19)
-level_override = 1
+level_override = 4
 
 [node name="GruntNorth" parent="Enemies" unique_id=1541588900 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 0.15, -28)
-level_override = 1
+level_override = 4
 
 [node name="GruntEastWalk" parent="Enemies" unique_id=1977731189 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 20, 0.15, -12)
-level_override = 1
+level_override = 4
 
 [node name="FarTargetPlinth" parent="Enemies" unique_id=1248445225 instance=ExtResource("41_takfg")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 5.7, -24)
 stats = ExtResource("44_kt0b8")
 level_override = 1
+
+[node name="SuitGuyNearSpawn" type="Marker3D" parent="Enemies" unique_id=300952379]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6.5, 0.15, 12.5)
+script = ExtResource("46_spawn")
+levels_above_player = 1
+patrol_area = Vector2(4, 4)
+
+[node name="SuitGuyWestSpawn" type="Marker3D" parent="Enemies" unique_id=2070507587]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -12, 0.15, 1)
+script = ExtResource("46_spawn")
+levels_above_player = 3
+
+[node name="SuitGuyNorthSpawn" type="Marker3D" parent="Enemies" unique_id=1144410888]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14, 0.15, -21)
+script = ExtResource("46_spawn")
+levels_above_player = 4
+
+[node name="FloatingMonkSpawn" type="Marker3D" parent="Enemies"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -6, 0.15, 14)
+script = ExtResource("46_spawn")
+enemy_scene = ExtResource("47_monk")
+levels_above_player = 3
+patrol_area = Vector2(4, 4)
 
 [node name="Gates" type="Node3D" parent="." unique_id=832298068]
 

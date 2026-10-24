@@ -1,9 +1,13 @@
 // Shared body of the PS1 surface shaders (ps1.gdshader, ps1_double_sided.gdshader).
-// Snap resolution is a global uniform (Project Settings > Shader Globals).
-// Texture mapping is perspective-correct (no PS1 affine warping).
+// Snap resolution, snap strength and affine warp are global uniforms (Project
+// Settings > Shader Globals), driven by res://settings/ps1_settings.tres.
 
 // Virtual vertical resolution that vertices snap to. Lower = more jitter.
 global uniform float ps1_snap_resolution;
+// 0 = smooth vertices, 1 = fully locked to the virtual pixel grid.
+global uniform float ps1_snap_strength;
+// 0 = perspective-correct textures, 1 = PS1 affine texture mapping.
+global uniform float ps1_affine_warp;
 
 // Per-instance flash (hit flash, attack telegraphs) set from script with
 // set_instance_shader_parameter(&"flash_color", color). Alpha is strength.
@@ -48,6 +52,9 @@ uniform float window_cool_ratio : hint_range(0.0, 1.0) = 0.3;
 uniform float window_energy : hint_range(0.0, 8.0) = 1.0;
 
 varying flat vec3 object_origin;
+// UV * w and w, both perspective-interpolated: their ratio interpolates linearly
+// in screen space, which is affine texture mapping.
+varying vec3 affine_uv;
 
 // The post effect keeps one screen pixel per virtual pixel, so sample textures
 // as if rendering at the virtual resolution; otherwise detail finer than a
@@ -77,13 +84,15 @@ void vertex() {
 	vec4 clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
 	if (vertex_snap && clip.w > 0.0) {
 		vec2 grid = vec2(ps1_snap_resolution * VIEWPORT_SIZE.x / VIEWPORT_SIZE.y, ps1_snap_resolution) * 0.5;
-		clip.xy = round(clip.xy / clip.w * grid) / grid * clip.w;
+		vec2 snapped = round(clip.xy / clip.w * grid) / grid * clip.w;
+		clip.xy = mix(clip.xy, snapped, ps1_snap_strength);
 	}
 	POSITION = clip;
+	affine_uv = vec3(UV * clip.w, clip.w);
 }
 
 void fragment() {
-	vec2 uv = UV;
+	vec2 uv = ps1_affine_warp > 0.0 ? mix(UV, affine_uv.xy / affine_uv.z, ps1_affine_warp) : UV;
 
 	vec4 albedo_tex = texture(albedo_texture, uv, ps1_texture_bias(VIEWPORT_SIZE));
 	vec3 color = albedo_color.rgb * albedo_tex.rgb * tint.rgb;

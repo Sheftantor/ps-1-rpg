@@ -1,24 +1,40 @@
 class_name LootWindow
 extends CanvasLayer
-## Loot window, opened by interacting with a loot sack (Pickup). Lists what's in
-## the sack, one row per entry (icon square, name, and what it is or how many).
-## Take a row with loot_take (right-click it, or A on the focused row), or drag it
-## with the mouse onto the HUD's loadout window. Weapons go to the gun slot,
-## items into the inventory. Interact takes everything; ui_cancel (Esc / B) or
-## pause backs out, leaving the rest in the sack. The prompt row under the list
-## shows each of these as the bound button's icon for the device in use, and its
-## TAKE ALL / CANCEL prompts can be clicked. The window closes when the sack is
-## empty. Pauses the game and frees the mouse while open.
+## Loot window, opened by interacting with a loot sack (Pickup). Shows what's in
+## the sack as a grid of icon slots (the inventory's IconSlot at loot_slot_scale,
+## with the same stack count), each with the shared ItemTooltip on hover.
+## Take a slot with loot_take (right-click it, or A on the focused slot), or drag
+## it with the mouse onto the HUD's loadout window. Weapons go to the gun slot,
+## items into the inventory. Interact (E) takes everything; ui_cancel or pause
+## (Esc) closes it, leaving the rest in the sack (that Esc doesn't also open the
+## pause menu). The window closes when the sack is empty.
+##
+## The game keeps running while it's open: enemies, projectiles and the player
+## (movement, keyboard / controller combat, right-stick camera) carry on. The
+## cursor is shown for the window, so mouse-look waits; clicking anywhere
+## outside the window closes it and gives the mouse back to the camera. It also
+## closes when the player walks loot_close_distance away from the sack, the sack
+## goes, the player dies (or is hit, with close_on_damage), or a full-screen
+## menu opens. Opening another sack replaces this one.
 ## Layout and styling live in res://scenes/loot_window.tscn.
 
-## True while the window is up; the player ignores input and physics meanwhile.
+## True while the window is up. Not a GameMenus menu: the player keeps playing.
 static var is_open: bool = false
 
-const LABEL_SETTINGS: LabelSettings = preload("res://resources/ui/stat_label.tres")
-const ROW_STYLE: StyleBox = preload("res://resources/ui/window_inset.tres")
-const HOVER_COLOR := Color(1.0, 0.85, 0.35, 1.0)
-const DETAIL_COLOR := Color(0.72, 0.74, 0.8)
-## [action, word, clickable] for each prompt under the list.
+## Closes the window when the player gets this far from the sack (m, flat).
+@export var loot_close_distance: float = 4.0
+## Also close when the player takes damage.
+@export var close_on_damage: bool = false
+## Loot slot size as a fraction of the inventory's (IconSlot.SIZE).
+@export_range(0.3, 1.5, 0.05) var loot_slot_scale: float = 0.65
+## Slots per row; more rows grow downward.
+@export_range(1, 12) var columns: int = 4:
+	set(value):
+		columns = value
+		if is_node_ready():
+			_grid.columns = columns
+
+## [action, word, clickable] for each prompt under the grid.
 const PROMPTS: Array = [
 	[&"loot_take", "TAKE", false],
 	[&"interact", "TAKE ALL", true],
@@ -26,26 +42,27 @@ const PROMPTS: Array = [
 ]
 ## Drag data key marking a loot entry (see LoadoutPanel.drop_handler).
 const DRAG_KEY := "loot_entry"
+## Prompt key art size (InputIcon.pixel_scale): smaller than the HUD's.
+const PROMPT_PIXEL_SCALE := 2
 
-var _was_paused: bool = false
 var _player: Player = null
 var _pickup: Pickup = null
-var _hover_style: StyleBoxFlat
-var _gamepad: bool = false
-## Row -> the sack entry it shows.
+## Whether the mouse was driving the camera when the window opened.
+var _mouse_was_captured: bool = false
+## Slot -> the sack entry it shows.
 var _entries: Dictionary[Control, Resource] = {}
-var _prompt_icons: Array[InputIcon] = []
 
 @onready var _root: Control = $Root
-@onready var _rows: VBoxContainer = $Root/Window/Layout/Rows
+@onready var _window: Control = $Root/Window
+@onready var _grid: GridContainer = $Root/Window/Layout/Grid
 @onready var _prompts: HBoxContainer = $Root/Window/Layout/Prompts
 
 
 func _ready() -> void:
 	_root.visible = false
-	_hover_style = ROW_STYLE.duplicate() as StyleBoxFlat
-	_hover_style.border_color = HOVER_COLOR
+	_grid.columns = columns
 	_build_prompts()
+	ActiveDevice.connect_changed(_on_device_changed)
 
 
 func _exit_tree() -> void:
@@ -55,45 +72,75 @@ func _exit_tree() -> void:
 func _input(event: InputEvent) -> void:
 	if not is_open:
 		return
-	_track_device(event)
 	if event.is_action_pressed(&"interact"):
-		_take_all()
+		# Interact at a different sack opens that one instead; here, takes all.
+		var nearest := _player.nearest_interactable()
+		if nearest is Pickup and nearest != _pickup:
+			open(nearest as Pickup)
+		else:
+			_take_all()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"pause"):
 		close()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventJoypadButton and event.is_action_pressed(&"loot_take"):
-		# Handled here rather than through focus so A always takes the row under
+		# Handled here rather than through focus so A always takes the slot under
 		# the cursor (the first one if nothing has focus yet).
-		var row := _focused_row()
-		if row == null and _rows.get_child_count() > 0:
-			row = _rows.get_child(0) as Control
-		if row != null:
-			_take.call_deferred(_entries[row], row.get_index())
+		var slot := _focused_slot()
+		if slot == null and _grid.get_child_count() > 0:
+			slot = _grid.get_child(0) as Control
+		if slot != null:
+			_take.call_deferred(_entries[slot], slot.get_index())
 		get_viewport().set_input_as_handled()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_open and event.is_action_pressed(&"ui_cancel"):
+	if not is_open:
+		return
+	if event.is_action_pressed(&"ui_cancel"):
 		close()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.is_pressed():
+		# A click outside the window: back to the fight. Only gives the mouse
+		# back to the camera; it doesn't also attack.
+		close()
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		get_viewport().set_input_as_handled()
 
 
-func open(pickup: Pickup) -> void:
-	if is_open or GameMenus.any_open() or pickup == null:
+func _process(_delta: float) -> void:
+	if not is_open:
 		return
+	if GameMenus.any_open() or not is_instance_valid(_pickup) or _pickup.is_queued_for_deletion() \
+			or not is_instance_valid(_player) or _player.health.current <= 0:
+		close()
+		return
+	var offset := _player.global_position - _pickup.global_position
+	offset.y = 0.0
+	if offset.length() > loot_close_distance:
+		close()
+
+
+## Opens pickup's loot. Another sack's window already open is replaced.
+func open(pickup: Pickup) -> void:
+	if GameMenus.any_open() or pickup == null:
+		return
+	if is_open:
+		if pickup == _pickup:
+			return
+		close()
 	_player = get_tree().get_first_node_in_group(&"player") as Player
 	if _player == null:
 		return
 	_pickup = pickup
 	is_open = true
-	_was_paused = get_tree().paused
-	get_tree().paused = true
+	_mouse_was_captured = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_player.hud.set_loot_drop_handler(_on_dropped)
+	_player.health.damaged.connect(_on_player_damaged)
 	_build()
 	_root.visible = true
-	_set_gamepad(_player.hud.using_gamepad)
+	_on_device_changed(ActiveDevice.using_gamepad)
 
 
 func close() -> void:
@@ -101,61 +148,69 @@ func close() -> void:
 		return
 	is_open = false
 	var focused := _root.get_viewport().gui_get_focus_owner()
-	if focused != null:
+	if focused != null and _root.is_ancestor_of(focused):
 		focused.release_focus()
-	get_tree().paused = _was_paused
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_root.visible = false
-	if _player != null:
+	ItemTooltip.service().hide_now()
+	# Give the mouse back to the camera, unless a menu that wants it is opening.
+	if _mouse_was_captured and not GameMenus.any_open():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if is_instance_valid(_player):
 		_player.hud.set_loot_drop_handler(Callable())
+		if _player.health.damaged.is_connected(_on_player_damaged):
+			_player.health.damaged.disconnect(_on_player_damaged)
 	_pickup = null
+
+
+func _on_player_damaged(_amount: int) -> void:
+	if close_on_damage:
+		close()
 
 
 # --- Device / prompts -------------------------------------------------------------
 
-## Follows the last device used (the HUD can't while the game is paused).
-func _track_device(event: InputEvent) -> void:
-	var gamepad := _gamepad
-	if event is InputEventJoypadButton:
-		gamepad = true
-	elif event is InputEventJoypadMotion:
-		if absf((event as InputEventJoypadMotion).axis_value) > 0.5:
-			gamepad = true
-	elif event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
-		gamepad = false
-	if gamepad != _gamepad:
-		_set_gamepad(gamepad)
-
-
-func _set_gamepad(gamepad: bool) -> void:
-	_gamepad = gamepad
-	_player.hud.using_gamepad = gamepad
-	for icon: InputIcon in _prompt_icons:
-		icon.gamepad = gamepad
-	if gamepad and _focused_row() == null and _rows.get_child_count() > 0:
-		(_rows.get_child(0) as Control).grab_focus.call_deferred()
+## Follows the last device used (prompt icons follow it themselves): on the
+## controller a slot always has the cursor and its tooltip; on the mouse the
+## focus tooltip goes, leaving hover to show them.
+func _on_device_changed(gamepad: bool) -> void:
+	if not is_open:
+		return
+	var slot := _focused_slot()
+	if not gamepad:
+		if slot != null:
+			ItemTooltip.service().leave(slot)
+	elif slot == null:
+		if _grid.get_child_count() > 0:
+			(_grid.get_child(0) as Control).grab_focus.call_deferred()
+	else:
+		ItemTooltip.service().focus(slot, _entries[slot])
 
 
 ## Icon + word per PROMPTS entry; the clickable ones act on a left click.
 func _build_prompts() -> void:
 	for i in PROMPTS.size():
 		var pair := HBoxContainer.new()
-		pair.add_theme_constant_override(&"separation", 8)
+		pair.add_theme_constant_override(&"separation", 6)
 		pair.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var icon := InputIcon.new()
 		icon.action = PROMPTS[i][0]
+		icon.pixel_scale = PROMPT_PIXEL_SCALE
+		icon.follow_device = true
 		icon.press_phase = -0.15 * i
 		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		pair.add_child(icon)
-		_prompt_icons.append(icon)
-		var word := _label(PROMPTS[i][1])
+		var word := Label.new()
+		word.text = PROMPTS[i][1]
+		word.theme_type_variation = &"HintLabel"
+		word.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		word.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		pair.add_child(word)
 		if PROMPTS[i][2]:
 			pair.mouse_filter = Control.MOUSE_FILTER_STOP
 			pair.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-			pair.mouse_entered.connect(func() -> void: word.modulate = HOVER_COLOR)
-			pair.mouse_exited.connect(func() -> void: word.modulate = Color.WHITE)
+			pair.mouse_entered.connect(func() -> void:
+				word.add_theme_color_override(&"font_color", word.get_theme_color(&"accent", &"Win95")))
+			pair.mouse_exited.connect(word.remove_theme_color_override.bind(&"font_color"))
 			pair.gui_input.connect(_on_prompt_input.bind(PROMPTS[i][0]))
 		_prompts.add_child(pair)
 
@@ -171,93 +226,78 @@ func _on_prompt_input(event: InputEvent, action: StringName) -> void:
 		close.call_deferred()
 
 
-# --- Rows -----------------------------------------------------------------------
+# --- Grid -----------------------------------------------------------------------
 
 func _build() -> void:
-	for child in _rows.get_children():
-		_rows.remove_child(child)
+	for child in _grid.get_children():
+		_grid.remove_child(child)
 		child.queue_free()
 	_entries.clear()
 	if not is_instance_valid(_pickup):
 		return
 	for entry: Resource in _pickup.contents():
-		var row := _row(entry)
-		_entries[row] = entry
-		_rows.add_child(row)
+		var slot := _slot(entry)
+		_entries[slot] = entry
+		_grid.add_child(slot)
+	# Shrink the window to the new grid.
+	_window.reset_size.call_deferred()
 
 
-func _row(entry: Resource) -> PanelContainer:
-	var row := PanelContainer.new()
-	row.focus_mode = Control.FOCUS_ALL
-	row.add_theme_stylebox_override(&"panel", ROW_STYLE)
-	var line := HBoxContainer.new()
-	line.add_theme_constant_override(&"separation", 12)
-	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(line)
-
+func _slot(entry: Resource) -> IconSlot:
 	var slot := IconSlot.new()
-	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.set_slot_scale(loot_slot_scale)
+	slot.focus_mode = Control.FOCUS_ALL
 	slot.show_icon(Pickup.entry_icon(entry), "", _count(entry))
-	line.add_child(slot)
-
-	var text := VBoxContainer.new()
-	text.alignment = BoxContainer.ALIGNMENT_CENTER
-	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	line.add_child(text)
-	var name_label := _label(Pickup.entry_name(entry).to_upper())
-	text.add_child(name_label)
-	var detail := _label("GUN" if entry is WeaponData else "ITEM  X%d" % _count(entry))
-	detail.modulate = DETAIL_COLOR
-	text.add_child(detail)
-
-	row.mouse_entered.connect(row.grab_focus)
-	row.focus_entered.connect(row.add_theme_stylebox_override.bind(&"panel", _hover_style))
-	row.focus_exited.connect(row.add_theme_stylebox_override.bind(&"panel", ROW_STYLE))
-	row.gui_input.connect(_on_row_input.bind(row))
-	# Left-drag the row onto the HUD's loadout window to take it.
-	row.set_drag_forwarding(_drag_data.bind(row), Callable(), Callable())
-	return row
-
-
-func _label(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.label_settings = LABEL_SETTINGS
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return label
+	var tooltip := ItemTooltip.service()
+	slot.mouse_entered.connect(func() -> void:
+		slot.grab_focus()
+		tooltip.hover(slot, entry))
+	slot.mouse_exited.connect(tooltip.leave.bind(slot))
+	slot.focus_entered.connect(func() -> void:
+		slot.set_selected(true)
+		if ActiveDevice.using_gamepad:
+			tooltip.focus(slot, entry))
+	slot.focus_exited.connect(func() -> void:
+		slot.set_selected(false)
+		if ActiveDevice.using_gamepad:
+			tooltip.leave(slot))
+	slot.gui_input.connect(_on_slot_input.bind(slot))
+	# Left-drag the slot onto the HUD's loadout window to take it.
+	slot.set_drag_forwarding(_drag_data.bind(slot), Callable(), Callable())
+	return slot
 
 
 static func _count(entry: Resource) -> int:
 	return (entry as ItemStack).count if entry is ItemStack else 0
 
 
-func _focused_row() -> Control:
+func _focused_slot() -> Control:
 	var focused := _root.get_viewport().gui_get_focus_owner()
 	return focused if focused != null and _entries.has(focused) else null
 
 
-func _on_row_input(event: InputEvent, row: Control) -> void:
-	# Right-click (loot_take on the mouse) or ui_accept (Enter) takes the row.
+func _on_slot_input(event: InputEvent, slot: Control) -> void:
+	# Right-click (loot_take on the mouse) or ui_accept (Enter) takes the slot.
 	if (event is InputEventMouseButton and event.is_action_pressed(&"loot_take")) \
 			or event.is_action_pressed(&"ui_accept"):
-		row.accept_event()
-		# Take after this input event: the row is about to be freed.
-		_take.call_deferred(_entries[row], row.get_index())
+		slot.accept_event()
+		# Take after this input event: the slot is about to be freed.
+		_take.call_deferred(_entries[slot], slot.get_index())
 
 
-## Drag source: the row's entry, previewed as its icon square under the cursor.
-func _drag_data(_at_position: Vector2, row: Control) -> Variant:
-	var entry: Resource = _entries.get(row)
+## Drag source: the slot's entry, previewed as a full-size icon square under the cursor.
+func _drag_data(_at_position: Vector2, slot: Control) -> Variant:
+	var entry: Resource = _entries.get(slot)
 	if entry == null:
 		return null
-	var slot := IconSlot.new()
-	slot.show_icon(Pickup.entry_icon(entry), "", _count(entry), true)
-	slot.position = -Vector2.ONE * IconSlot.SIZE * 0.5
+	ItemTooltip.service().hide_now()
+	var preview_slot := IconSlot.new()
+	preview_slot.show_icon(Pickup.entry_icon(entry), "", _count(entry), true)
+	preview_slot.position = -Vector2.ONE * IconSlot.SIZE * 0.5
 	var preview := Control.new()
 	preview.modulate.a = 0.85
-	preview.add_child(slot)
-	row.set_drag_preview(preview)
+	preview.add_child(preview_slot)
+	slot.set_drag_preview(preview)
 	return {DRAG_KEY: entry}
 
 
@@ -272,13 +312,14 @@ func _on_dropped(data: Variant) -> void:
 func _take(entry: Resource, index: int) -> void:
 	if not is_open or not is_instance_valid(_pickup) or not _pickup.contents().has(entry):
 		return
+	ItemTooltip.service().hide_now()
 	_player.take_loot(_pickup, entry)
 	if _pickup.contents().is_empty():
 		close()
 		return
 	_build()
-	if index >= 0 and _rows.get_child_count() > 0:
-		(_rows.get_child(mini(index, _rows.get_child_count() - 1)) as Control).grab_focus()
+	if ActiveDevice.using_gamepad and index >= 0 and _grid.get_child_count() > 0:
+		(_grid.get_child(mini(index, _grid.get_child_count() - 1)) as Control).grab_focus()
 
 
 func _take_all() -> void:

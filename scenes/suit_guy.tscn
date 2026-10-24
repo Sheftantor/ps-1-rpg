@@ -1,0 +1,97 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemy/suit_guy/suit_guy.gd" id="1_suit"]
+[ext_resource type="PackedScene" path="res://scenes/suit_guy_model.tscn" id="2_model"]
+[ext_resource type="Resource" path="res://resources/enemies/suit_guy_stats.tres" id="3_stats"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
+[ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]
+[ext_resource type="Script" path="res://scripts/combat/health.gd" id="6_health"]
+[ext_resource type="Script" path="res://scripts/state_machine/state_machine.gd" id="7_machine"]
+[ext_resource type="Script" path="res://scripts/enemy/suit_guy/states/wander.gd" id="8_wander"]
+[ext_resource type="Script" path="res://scripts/enemy/suit_guy/states/engage.gd" id="9_engage"]
+[ext_resource type="Script" path="res://scripts/enemy/suit_guy/states/attack.gd" id="10_attack"]
+[ext_resource type="Script" path="res://scripts/enemy/suit_guy/states/stagger.gd" id="11_stagger"]
+[ext_resource type="Script" path="res://scripts/enemy/states/dead.gd" id="12_dead"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_health_bar.tscn" id="99_health_bar"]
+[ext_resource type="Script" path="res://scripts/world/blob_shadow.gd" id="98_blob_shadow"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.45
+height = 2.35
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_unused"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.5
+height = 2.35
+
+[node name="SuitGuy" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 7
+floor_max_angle = 1.0471976
+floor_snap_length = 0.25
+script = ExtResource("1_suit")
+stats = ExtResource("3_stats")
+patrol_area = Vector2(5, 5)
+level_override = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.175, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="Facing" type="Node3D" parent="."]
+
+[node name="Model" parent="Facing" instance=ExtResource("2_model")]
+transform = Transform3D(-2.05, 0, 0, 0, 2.05, 0, 0, 0, -2.05, 0, 0, 0)
+
+[node name="Hitbox" type="Area3D" parent="Facing"]
+collision_layer = 0
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("4_hitbox")
+show_debug_mesh = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facing/Hitbox"]
+shape = SubResource("BoxShape3D_unused")
+
+[node name="Hurtbox" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_hurtbox")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.175, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("6_health")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("7_machine")
+initial_state = NodePath("Wander")
+
+[node name="Wander" type="Node" parent="StateMachine"]
+script = ExtResource("8_wander")
+
+[node name="Engage" type="Node" parent="StateMachine"]
+script = ExtResource("9_engage")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("10_attack")
+
+[node name="Stagger" type="Node" parent="StateMachine"]
+script = ExtResource("11_stagger")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("12_dead")
+
+[node name="HealthBar" parent="." instance=ExtResource("99_health_bar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.45, 0)
+side_drop = 0.25
+
+[node name="BlobShadow" type="MeshInstance3D" parent="."]
+script = ExtResource("98_blob_shadow")
+radius = 0.75

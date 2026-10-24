@@ -38,6 +38,8 @@ extends Resource
 @export var health_per_level: int = 10
 @export var energy_per_level: float = 5.0
 @export var stat_points_per_level: int = 1
+## Cash dropped by a kill: this x the enemy's level (0 turns kill cash off).
+@export var kill_cash_per_level: int = 3
 
 @export_group("Stamina")
 ## Per second, once regeneration resumes.
@@ -90,11 +92,13 @@ extends Resource
 @export_range(1, 8) var gun_max_queued_shots: int = 4
 ## Seconds between queued shots as they fire.
 @export var gun_shot_interval: float = 0.3
-## Real seconds holding the gun after the last shot before drawing the sword again.
+## Real seconds holding the gun after the last shot before drawing the melee weapon again.
 @export var gun_fire_recovery: float = 0.35
 
 @export_group("Block")
-@export var block_move_speed: float = 2.5
+## Guarded walking speed (m/s), kept under the walk clip's pace (1.7) so the
+## legs step slowly in every direction while the guard is up.
+@export var block_move_speed: float = 1.3
 ## Fraction of a blocked hit's damage that still gets through.
 @export_range(0.0, 1.0) var block_damage_multiplier: float = 0.1
 ## Stamina spent per point of damage blocked. Too little stamina breaks the guard.
@@ -121,7 +125,11 @@ extends Resource
 ## The lock breaks once the target is farther than this.
 @export var lock_on_break_range: float = 20.0
 @export var lock_on_camera_speed: float = 8.0
-@export var lock_on_pitch_degrees: float = -20.0
+## Kingdom Hearts framing: a low camera looking along the ground at the target.
+@export var lock_on_pitch_degrees: float = -10.0
+## While locked on the camera pulls in to this distance (m), easing back out to
+## the free camera's distance when the lock ends.
+@export var lock_on_camera_distance: float = 3.6
 ## When the target is above the player, the lock-on camera tilts up (past
 ## lock_on_pitch_degrees) until the target is at least this far inside the top
 ## of the screen. It isn't centered, just kept in view.

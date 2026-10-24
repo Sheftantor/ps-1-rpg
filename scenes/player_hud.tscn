@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="1_hud"]
 [ext_resource type="Theme" path="res://resources/ui/hud_theme.tres" id="2_theme"]
@@ -6,32 +6,17 @@
 [ext_resource type="Script" path="res://scripts/ui/target_reticle.gd" id="4_reticle"]
 [ext_resource type="Texture2D" path="res://resources/ui/player_health_under.tres" id="5_background"]
 [ext_resource type="Texture2D" path="res://resources/ui/player_health_fill.tres" id="6_gradient"]
-[ext_resource type="Texture2D" path="res://textures/ui/enemy_silhouette.png" id="7_silhouette"]
 [ext_resource type="Script" path="res://scripts/ui/input_icon.gd" id="8_input_icon"]
-[ext_resource type="LabelSettings" path="res://resources/ui/prompt_label.tres" id="9_prompt"]
 [ext_resource type="Script" path="res://scripts/ui/loadout_panel.gd" id="10_loadout_panel"]
-[ext_resource type="LabelSettings" path="res://resources/ui/level_up.tres" id="11_level_up"]
+[ext_resource type="Theme" path="res://resources/ui/win95/win95_dark_hud.tres" id="12_hud"]
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_message_label.gd" id="13_message"]
+[ext_resource type="Script" path="res://scripts/ui/segmented_xp_bar.gd" id="14_xp_bar"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stat_background"]
 bg_color = Color(0, 0, 0, 0.55)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_fill"]
 bg_color = Color(0.9, 0.7, 0.2, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xp_fill"]
-bg_color = Color(0.62, 0.32, 0.95, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 4.0
-bg_color = Color(0, 0, 0, 0.55)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.9, 0.9, 0.9, 0.8)
 
 [node name="PlayerHud" type="CanvasLayer"]
 layer = 5
@@ -45,7 +30,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme = ExtResource("2_theme")
 
 [node name="Stats" type="VBoxContainer" parent="Root"]
 layout_mode = 1
@@ -55,6 +39,7 @@ offset_right = 380.0
 offset_bottom = 210.0
 mouse_filter = 2
 theme_override_constants/separation = 4
+theme = ExtResource("2_theme")
 
 [node name="HealthRow" type="HBoxContainer" parent="Root/Stats"]
 layout_mode = 2
@@ -106,30 +91,37 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_stamina_fill")
 value = 100.0
 show_percentage = false
 
-[node name="XpRow" type="HBoxContainer" parent="Root/Stats"]
-layout_mode = 2
-
-[node name="Name" type="Label" parent="Root/Stats/XpRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"HudStatLabel"
-text = "LV 1"
-
-[node name="Value" type="Label" parent="Root/Stats/XpRow"]
-layout_mode = 2
-theme_type_variation = &"HudStatLabel"
-text = "0/400"
-horizontal_alignment = 2
-
-[node name="XpBar" type="ProgressBar" parent="Root/Stats"]
-custom_minimum_size = Vector2(180, 8)
-layout_mode = 2
-size_flags_horizontal = 0
+[node name="XpBar" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -28.0
+offset_right = -16.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+modulate = Color(1, 1, 1, 0.6)
 mouse_filter = 2
-theme_override_styles/background = SubResource("StyleBoxFlat_stat_background")
-theme_override_styles/fill = SubResource("StyleBoxFlat_xp_fill")
-max_value = 400.0
-show_percentage = false
+script = ExtResource("14_xp_bar")
+
+[node name="Text" type="Label" parent="Root/XpBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 20
+text = "LV 1   XP 0/400   0%"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="LevelUp" type="Label" parent="Root"]
 visible = false
@@ -137,13 +129,13 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -400.0
+offset_left = -20.0
 offset_top = 150.0
-offset_right = 400.0
-offset_bottom = 250.0
+offset_right = 20.0
+offset_bottom = 190.0
 grow_horizontal = 2
+theme_type_variation = &"BannerLabel"
 text = "LEVEL UP!"
-label_settings = ExtResource("11_level_up")
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -167,14 +159,14 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -400.0
-offset_top = -140.0
-offset_right = 400.0
-offset_bottom = -80.0
+offset_left = -20.0
+offset_top = -150.0
+offset_right = 20.0
+offset_bottom = -104.0
 grow_horizontal = 2
 grow_vertical = 0
 text = "GOT PISTOL"
-label_settings = ExtResource("9_prompt")
+script = ExtResource("13_message")
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -186,14 +178,15 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -240.0
-offset_top = -220.0
+offset_top = -240.0
 offset_right = 240.0
-offset_bottom = -150.0
+offset_bottom = -176.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 theme_override_constants/separation = 14
 alignment = 1
+theme = ExtResource("12_hud")
 
 [node name="Icon" type="Control" parent="Root/Interact"]
 layout_mode = 2
@@ -205,7 +198,6 @@ pixel_scale = 4
 [node name="Verb" type="Label" parent="Root/Interact"]
 layout_mode = 2
 text = "PICKUP"
-label_settings = ExtResource("9_prompt")
 vertical_alignment = 1
 
 [node name="Targeting" type="Control" parent="Root"]
@@ -216,6 +208,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme = ExtResource("12_hud")
 
 [node name="Links" type="Control" parent="Root/Targeting"]
 layout_mode = 1
@@ -236,32 +229,36 @@ offset_bottom = 392.0
 mouse_filter = 2
 script = ExtResource("4_reticle")
 
-[node name="TargetLabel" type="Label" parent="Root/Targeting/Reticle"]
-layout_mode = 0
-offset_left = -68.0
-offset_top = -38.0
-offset_right = 132.0
-offset_bottom = -4.0
-text = "TARGET"
-horizontal_alignment = 1
+[node name="TargetPanel" type="VBoxContainer" parent="Root/Targeting"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.04
+anchor_top = 0.5
+anchor_right = 0.04
+anchor_bottom = 0.5
+offset_bottom = 0.0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
 
-[node name="RangeLabel" type="Label" parent="Root/Targeting/Reticle"]
-layout_mode = 0
-offset_left = -98.0
-offset_top = 68.0
-offset_right = 162.0
-offset_bottom = 102.0
+[node name="TargetLabel" type="Label" parent="Root/Targeting/TargetPanel"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "TARGET"
+
+[node name="RangeLabel" type="Label" parent="Root/Targeting/TargetPanel"]
+layout_mode = 2
+size_flags_horizontal = 0
 text = "IN RANGE  0.0M"
-horizontal_alignment = 1
 
 [node name="ModeLabel" type="Label" parent="Root/Targeting"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -200.0
+offset_left = -20.0
 offset_top = 20.0
-offset_right = 200.0
+offset_right = 20.0
 offset_bottom = 56.0
 grow_horizontal = 2
 text = "TIME STOP"
@@ -273,44 +270,13 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -480.0
-offset_top = 64.0
+offset_top = 90.0
 offset_right = 480.0
-offset_bottom = 136.0
+offset_bottom = 170.0
 grow_horizontal = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 alignment = 1
-
-[node name="SlotTemplate" type="PanelContainer" parent="Root/Targeting/QueueRow"]
-visible = false
-custom_minimum_size = Vector2(72, 72)
-layout_mode = 2
-size_flags_vertical = 0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
-
-[node name="VBox" type="VBoxContainer" parent="Root/Targeting/QueueRow/SlotTemplate"]
-layout_mode = 2
-mouse_filter = 2
-alignment = 1
-
-[node name="Icon" type="TextureRect" parent="Root/Targeting/QueueRow/SlotTemplate/VBox"]
-texture_filter = 1
-custom_minimum_size = Vector2(38, 38)
-layout_mode = 2
-size_flags_horizontal = 4
-mouse_filter = 2
-texture = ExtResource("7_silhouette")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Label" type="Label" parent="Root/Targeting/QueueRow/SlotTemplate/VBox"]
-layout_mode = 2
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 18
-text = "ENEMY 1"
-horizontal_alignment = 1
-clip_text = true
 
 [node name="Prompts" type="HBoxContainer" parent="Root/Targeting"]
 layout_mode = 1

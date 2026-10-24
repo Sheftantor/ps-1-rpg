@@ -8,5 +8,7 @@ extends Resource
 @export_multiline var description: String = ""
 ## Square picture for the HUD loadout row and status screen. Defaults to a placeholder.
 @export var icon: Texture2D = preload("res://textures/ui/icons/placeholder_item.png")
+## What a shop charges for one (shops buy it back at their sell rate). 0 = can't be sold.
+@export var price: int = 0
 @export var heal_amount: int = 0
 @export var stamina_restore: float = 0.0

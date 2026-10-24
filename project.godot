@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="PS1-RPG"
-run/main_scene="res://scenes/test_plaza.tscn"
+run/main_scene="res://scenes/start_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -19,6 +19,13 @@ config/icon="res://icon.svg"
 
 BeckettRuntime="*uid://do68dqybesb7r"
 PS1Renderer="*res://scripts/rendering/ps1_renderer.gd"
+SceneManager="*res://scenes/scene_manager.tscn"
+SaveManager="*res://scripts/save/save_manager.gd"
+Win95Cursor="*res://scripts/ui/win95/win95_cursor.gd"
+Feel="*res://scripts/feel/feel.gd"
+ComboInput="*res://scripts/input/combo_input.gd"
+InputDevice="*res://scripts/input/input_device.gd"
+FocusPulse="*res://scripts/ui/focus_pulse.gd"
 
 [beckett]
 
@@ -32,6 +39,7 @@ window/size/viewport_height=1080
 window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/stretch/scale_mode="integer"
 
 [editor_plugins]
 
@@ -50,7 +58,7 @@ folder_colors={
 
 [gui]
 
-theme/custom="res://resources/ui/hud_theme.tres"
+theme/custom="res://resources/ui/win95/win95_dark.tres"
 
 [physics]
 
@@ -58,11 +66,20 @@ theme/custom="res://resources/ui/hud_theme.tres"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 
 [shader_globals]
 
 ps1_snap_resolution={
 "type": "float",
-"value": 240.0
+"value": 360.0
+}
+ps1_snap_strength={
+"type": "float",
+"value": 1.0
+}
+ps1_affine_warp={
+"type": "float",
+"value": 0.0
 }

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" uid="uid://b134nsxh5ksou" path="res://scripts/commands/item_data.gd" id="1_item"]
+[ext_resource type="Texture2D" path="res://textures/ui/icons/item_coffee.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item")
+display_name = "Canned Coffee"
+description = "Cold, sweet and far too strong. Refills your energy and steadies you."
+icon = ExtResource("2_icon")
+price = 10
+heal_amount = 10
+stamina_restore = 100.0

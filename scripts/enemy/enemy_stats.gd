@@ -6,8 +6,21 @@ extends Resource
 ## Shown on the level badge over the health number, coloured against the
 ## player's level. An Enemy's level_override replaces it per instance.
 @export_range(1, 99) var level: int = 1
-## Face shown in gun mode's target queue slots. Defaults to a generic placeholder.
+## The enemy's name, e.g. for its gun-mode queue slot's tooltip.
+@export var display_name: String = ""
+## Face shown in gun mode's target queue slots: a 64x64 icon in
+## res://textures/ui/icons/ made by scripts/tools/build_portrait_icons.gd
+## (rules: docs/enemy_portraits.md). Defaults to a generic placeholder.
 @export var portrait: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
+
+@export_group("Level Scaling")
+## One hit's damage at the same level as the player, as a share of a same-level,
+## ungeared player's max health; then scaled by the level gap (CombatTuning).
+## 0 = use each attack's own damage, still scaled by the gap.
+@export_range(0.0, 1.0, 0.01) var damage_percent: float = 0.0
+## Max health at the same level as the player, in basic melee-swing hits; then
+## scaled by the level gap. 0 = use max_health, still scaled by the gap.
+@export var health_in_melee_hits: float = 0.0
 
 @export_group("Movement")
 @export var move_speed: float = 3.5
@@ -37,6 +50,10 @@ extends Resource
 @export var preferred_distance: float = 4.5
 ## Distance error that produces full-speed correction toward/away from the player.
 @export var distance_tolerance: float = 1.5
+## Chance, each time he starts circling, that he backs away when the player comes
+## closer than preferred_distance. Otherwise he holds his ground and only
+## circles (he still closes in when too far). 1 = always back off.
+@export_range(0.0, 1.0, 0.01) var back_off_chance: float = 0.15
 @export var reposition_time_min: float = 1.2
 @export var reposition_time_max: float = 2.8
 @export var strafe_flip_time_min: float = 1.5
@@ -54,26 +71,31 @@ extends Resource
 @export var attack_token_cooldown: float = 0.9
 @export var stagger_time: float = 0.4
 @export var stagger_friction: float = 18.0
+## Launchers (AttackData.launch_speed) knock it into the air for air combos.
+@export var launchable: bool = true
 
-@export_group("Escalation")
-## Attacks finished in a row without the player landing a hit. The last one
-## costs the enemy its balance (BalanceLoss state).
-@export_range(1, 10) var escalation_chain_length: int = 4
-## Extra playback speed per attack already in the chain (0.25 = +25% each).
-## Also shortens the telegraph, recovery and wait between attacks.
-@export var escalation_speed_step: float = 0.25
-## First attack in the chain (1-based) whose swing gets random arm jitter.
-@export_range(1, 10) var jitter_start_attack: int = 2
-## Arm jitter on that attack (degrees); grows by this much per attack after it.
-@export var jitter_degrees_per_attack: float = 7.0
-## The chain is dropped if the enemy goes this long without finishing an attack.
-@export var escalation_chain_timeout: float = 6.0
-## How many attacks at the top of the chain hit harder.
-@export_range(0, 10) var top_attack_count: int = 1
-## Knockback and player hit-stun multipliers for those top attacks (applied on
-## top of the attack's own knockback / hit_stun_multiplier).
-@export var top_attack_knockback_multiplier: float = 1.8
-@export var top_attack_hit_stun_multiplier: float = 2.0
-## Stumble after the last attack in the chain: can't attack or move, and is open
-## to punishment like a stagger (hits don't cut it short).
-@export var balance_loss_time: float = 1.5
+@export_group("Combo")
+## The Mincer's one attack: a telegraph, then five alternating claw sweeps (two
+## slow, three rapid), then an overextended recovery that's open to punishment.
+## Damage of every swing, all five the same (before level scaling; while
+## damage_percent above is set, that decides the base instead).
+@export var attack_damage: int = 25
+## Length of each slow swing (1 and 2), split like the player's first melee
+## swings: 17% windup, 21% strike (hitbox live), 62% recovery.
+@export var slow_swing_time: float = 0.9
+## Length of each rapid swing (3 to 5): 25% windup, 55% strike, 20% recovery.
+@export var rapid_swing_time: float = 0.3
+## The tell before the combo: rears up, claws spread, trembling (s).
+@export var telegraph_time: float = 0.7
+## After swing 5: the stumble, step back and straightening up, during which he
+## can't attack and takes vulnerable_damage_multiplier damage (s).
+@export var vulnerable_time: float = 1.2
+@export var vulnerable_damage_multiplier: float = 1.0
+## Wait after the recovery before the next combo can start (s).
+@export var combo_cooldown: float = 1.5
+## Chance, each time he's about to start a combo, that he steps back ~1.5 m to
+## reset the spacing instead. 0 = never.
+@export_range(0.0, 1.0, 0.01) var random_step_back_chance: float = 0.05
+## Hits don't cancel the rapid swings (3 to 5), only the telegraph, slow swings
+## and recovery.
+@export var combo_stagger_immune: bool = false
