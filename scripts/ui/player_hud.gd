@@ -1,12 +1,15 @@
 class_name PlayerHud
 extends CanvasLayer
-## Player HUD: top-left health, energy and XP bars with values, the bottom-left
+## Player HUD: top-left health and energy bars with values, the full-width XP
+## bar along the bottom (SegmentedXpBar), the bottom-left
 ## loadout window (LoadoutPanel: both weapons, then the carried items with the
 ## selected one under the cursor), pickup prompt and short messages, plus the gun-mode targeting
 ## overlay (connector web, reticle with target and range-state labels, mode
 ## label, queued-shot portrait slots centered under it, action prompts). Structure and logic only: layout,
 ## colors and fonts live in res://scenes/player_hud.tscn and
 ## res://resources/ui/hud_theme.tres for styling in the editor.
+
+const SEGMENTED_XP_BAR := preload("res://scripts/ui/segmented_xp_bar.gd")
 
 ## Seconds a flash_message() stays up before the prompt comes back.
 @export var message_time: float = 1.2
@@ -54,9 +57,8 @@ var _level_up_tween: Tween = null
 @onready var _health_bar: Range = $Root/Stats/HealthBar
 @onready var _stamina_value: Label = $Root/Stats/StaminaRow/Value
 @onready var _stamina_bar: Range = $Root/Stats/StaminaBar
-@onready var _xp_level: Label = $Root/Stats/XpRow/Name
-@onready var _xp_value: Label = $Root/Stats/XpRow/Value
-@onready var _xp_bar: Range = $Root/Stats/XpBar
+@onready var _xp_bar: SEGMENTED_XP_BAR = $Root/XpBar
+@onready var _xp_bar_alpha: float = _xp_bar.modulate.a
 @onready var _level_up: Label = $Root/LevelUp
 @onready var _loadout: LoadoutPanelScript = $Root/LoadoutPanel
 @onready var _prompt: Label = $Root/Prompt
@@ -108,16 +110,15 @@ func set_stamina(current: float, maximum: float) -> void:
 ## Level and the XP bar toward the next one (needed 0 = max level).
 ## Brightens the XP bar for a moment (kill feedback).
 func pulse_xp_bar(seconds: float) -> void:
+	# Keeps the bar's own see-through alpha (set in the scene).
+	var alpha := _xp_bar_alpha
 	var tween := _xp_bar.create_tween()
-	tween.tween_property(_xp_bar, ^"modulate", Color(2.2, 2.2, 2.2), seconds * 0.3)
-	tween.tween_property(_xp_bar, ^"modulate", Color.WHITE, seconds * 0.7)
+	tween.tween_property(_xp_bar, ^"modulate", Color(2.2, 2.2, 2.2, alpha), seconds * 0.3)
+	tween.tween_property(_xp_bar, ^"modulate", Color(1, 1, 1, alpha), seconds * 0.7)
 
 
 func set_xp(level: int, xp: int, needed: int) -> void:
-	_xp_level.text = "LV %d" % level
-	_xp_bar.max_value = maxi(needed, 1)
-	_xp_bar.value = xp if needed > 0 else _xp_bar.max_value
-	_xp_value.text = "%d/%d" % [xp, needed] if needed > 0 else "MAX"
+	_xp_bar.set_progress(level, xp, needed)
 
 
 ## Big gold "LEVEL UP!" banner that rises a little and fades.

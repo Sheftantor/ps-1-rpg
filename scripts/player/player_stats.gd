@@ -125,7 +125,11 @@ extends Resource
 ## The lock breaks once the target is farther than this.
 @export var lock_on_break_range: float = 20.0
 @export var lock_on_camera_speed: float = 8.0
-@export var lock_on_pitch_degrees: float = -20.0
+## Kingdom Hearts framing: a low camera looking along the ground at the target.
+@export var lock_on_pitch_degrees: float = -10.0
+## While locked on the camera pulls in to this distance (m), easing back out to
+## the free camera's distance when the lock ends.
+@export var lock_on_camera_distance: float = 3.6
 ## When the target is above the player, the lock-on camera tilts up (past
 ## lock_on_pitch_degrees) until the target is at least this far inside the top
 ## of the screen. It isn't centered, just kept in view.

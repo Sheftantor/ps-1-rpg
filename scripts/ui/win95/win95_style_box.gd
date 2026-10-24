@@ -86,6 +86,18 @@ enum Bevel { NONE, RAISED, SUNKEN }
 	set(value):
 		dotted_inset = value
 		emit_changed()
+## Pulse (the highlighted item, Smash Bros. Brawl style): with any alpha, the
+## outline and accent bar swing smoothly to this colour and back every
+## pulse_period seconds. Only frames that get drawn move, so something must
+## redraw the control every frame: FocusPulse does it for the focused one.
+@export var pulse_color: Color = Color(0, 0, 0, 0):
+	set(value):
+		pulse_color = value
+		emit_changed()
+@export var pulse_period: float = 0.45:
+	set(value):
+		pulse_period = value
+		emit_changed()
 ## Extends the drawn rect upwards (px), past the content: Godot draws an
 ## embedded Window's title there.
 @export var expand_margin_top: int = 0:
@@ -116,10 +128,16 @@ func _draw(canvas_item: RID, rect: Rect2) -> void:
 			var ring := r.grow(-(i + outline_width))
 			_frame(canvas_item, ring, 1.0, top_left.lerp(base, t), bottom_right.lerp(base, t))
 
+	var outline := outline_color
+	var accent := accent_color
+	if pulse_color.a > 0.0 and pulse_period > 0.0:
+		var t := 0.5 - 0.5 * cos(TAU * Time.get_ticks_msec() / 1000.0 / pulse_period)
+		outline = outline.lerp(pulse_color, t)
+		accent = accent.lerp(pulse_color, t)
 	if outline_width > 0:
-		_frame(canvas_item, r, outline_width, outline_color, outline_color)
+		_frame(canvas_item, r, outline_width, outline, outline)
 	if accent_width > 0:
-		RenderingServer.canvas_item_add_rect(canvas_item, Rect2(r.position, Vector2(accent_width, r.size.y)), accent_color)
+		RenderingServer.canvas_item_add_rect(canvas_item, Rect2(r.position, Vector2(accent_width, r.size.y)), accent)
 	if dotted_width > 0:
 		_dotted(canvas_item, r.grow(-dotted_inset), dotted_width, dotted_color)
 

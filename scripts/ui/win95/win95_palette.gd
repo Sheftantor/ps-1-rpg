@@ -26,6 +26,10 @@ extends Resource
 @export var title_text: Color = Color("ffffff")
 ## Focus outline, selection bar.
 @export var accent: Color = Color("fb923c")
+## The focus outline pulses from accent to this and back (Smash Bros. Brawl's
+## blinking cursor), once every focus_pulse_period seconds. Transparent = steady.
+@export var focus_pulse: Color = Color("9c4612")
+@export var focus_pulse_period: float = 0.45
 ## Mouse cursor (the classic arrow): fill and outline.
 @export var cursor_fill: Color = Color("ffffff")
 @export var cursor_outline: Color = Color("000000")
@@ -71,6 +75,11 @@ extends Resource
 @export var focus_dots_inset: int = 4
 
 @export_group("Fonts")
+## Title-font text (headings, buttons, tabs, banners) is drawn this much bigger
+## than its size above, since the title face is small for its point size ...
+@export var title_font_scale: float = 1.33
+## ... and snapped to a multiple of this (the face's pixel grid; 10 for Jersey 10).
+@export var title_font_grid: int = 10
 @export var title_font: Font
 @export var body_font: Font
 @export var mono_font: Font

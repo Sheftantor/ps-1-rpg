@@ -33,6 +33,11 @@ func stamina_regen_scale() -> float:
 	return 1.0
 
 
+## Multiplies gravity while airborne (the air combo hangs the player).
+func gravity_scale() -> float:
+	return 1.0
+
+
 ## Whether this state plays its own animation. Otherwise Player picks
 ## locomotion (idle/walk/run/jump) from the body's movement.
 func drives_animation() -> bool:

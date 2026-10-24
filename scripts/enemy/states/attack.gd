@@ -136,7 +136,11 @@ func _set_striking(striking: bool) -> void:
 		return
 	_striking = striking
 	if striking:
-		enemy.hitbox.activate(enemy.combo_attack(), enemy)
+		var attack := enemy.combo_attack()
+		# The last swing throws the player back off their feet.
+		attack.knockdown = _swing == SWINGS
+		attack.heavy_hit = attack.knockdown
+		enemy.hitbox.activate(attack, enemy)
 	else:
 		enemy.hitbox.deactivate()
 

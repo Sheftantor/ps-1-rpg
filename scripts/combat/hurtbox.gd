@@ -29,5 +29,5 @@ func receive_hit(attack: AttackData, source: Node3D) -> bool:
 	hit_received.emit(attack, source)
 	if health != null:
 		health.damaged.disconnect(count)
-	Feel.on_hit(source, get_parent(), taken[0])
+	Feel.on_hit(source, get_parent(), taken[0], attack.heavy_hit)
 	return true

@@ -71,6 +71,8 @@ extends Resource
 @export var attack_token_cooldown: float = 0.9
 @export var stagger_time: float = 0.4
 @export var stagger_friction: float = 18.0
+## Launchers (AttackData.launch_speed) knock it into the air for air combos.
+@export var launchable: bool = true
 
 @export_group("Combo")
 ## The Mincer's one attack: a telegraph, then five alternating claw sweeps (two

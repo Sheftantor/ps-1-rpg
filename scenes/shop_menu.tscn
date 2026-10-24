@@ -85,7 +85,7 @@ theme_override_constants/v_separation = 8
 columns = 8
 
 [node name="Description" type="ScrollContainer" parent="Root/Window/Layout"]
-custom_minimum_size = Vector2(0, 120)
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 theme_type_variation = &"FieldScroll"
 horizontal_scroll_mode = 0

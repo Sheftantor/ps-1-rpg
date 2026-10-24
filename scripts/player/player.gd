@@ -184,6 +184,8 @@ var _hip_attachment: BoneAttachment3D = null
 @onready var _camera_rig: Node3D = $CameraRig
 @onready var _spring_arm: SpringArm3D = $CameraRig/SpringArm3D
 @onready var _lock_on_marker: Node3D = $LockOnMarker
+## The free camera's distance; lock-on pulls in to stats.lock_on_camera_distance.
+@onready var _free_camera_distance: float = _spring_arm.spring_length
 
 
 func _ready() -> void:
@@ -297,7 +299,7 @@ func _physics_process(delta: float) -> void:
 	# While gun mode has the world paused, the player keeps processing but must not
 	# fall (or build up fall speed to release all at once on resume).
 	if not is_on_floor() and not get_tree().paused:
-		velocity.y -= _gravity * delta
+		velocity.y -= _gravity * current_state().gravity_scale() * delta
 	state_machine.physics_update(delta)
 	# Gun mode pauses the tree (and physics) while the player keeps processing.
 	if not get_tree().paused:
@@ -448,7 +450,8 @@ func _on_hit_received(attack: AttackData, source: Node3D) -> void:
 	_clear_buffer()
 	_post_hit_timer = stats.post_hit_invulnerability
 	state_machine.transition_to(PlayerState.HIT_STUN, {"knockback": push, "guard_break": guard_broken,
-			"stun_scale": attack.hit_stun_multiplier})
+			"stun_scale": attack.hit_stun_multiplier, "knockdown": attack.knockdown,
+			"away": _knockback_direction(source)})
 
 
 func _debug_hurt() -> void:
@@ -545,12 +548,14 @@ func _apply_stick_look(delta: float) -> void:
 ## While locked on, swing the camera behind the player facing the target so both stay framed.
 func _update_lock_on_camera(delta: float) -> void:
 	_lock_on_marker.visible = lock_target != null
+	var weight := 1.0 - exp(-stats.lock_on_camera_speed * delta)
+	var distance: float = stats.lock_on_camera_distance if lock_target != null else _free_camera_distance
+	_spring_arm.spring_length = lerpf(_spring_arm.spring_length, distance, weight)
 	if lock_target == null:
 		return
 	_lock_on_marker.global_position = lock_target.global_position + Vector3.UP * LOCK_ON_MARKER_HEIGHT
 	var to_target := lock_target.global_position - global_position
 	to_target.y = 0.0
-	var weight := 1.0 - exp(-stats.lock_on_camera_speed * delta)
 	if to_target.length_squared() > 0.01:
 		var yaw := atan2(-to_target.x, -to_target.z)
 		_camera_rig.rotation.y = lerp_angle(_camera_rig.rotation.y, yaw, weight)

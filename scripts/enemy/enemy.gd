@@ -8,6 +8,9 @@ signal died
 
 ## Below this ground speed (m/s) the model stands instead of walking.
 const WALK_ANIM_MIN_SPEED: float = 0.15
+const TUNING: CombatTuning = preload("res://resources/combat_tuning.tres")
+const KNOCKDOWN_POSE := preload("res://scripts/combat/knockdown_pose.gd")
+const FLAIL_LIMBS := preload("res://scripts/enemy/flail_limbs.gd")
 
 @export var stats: EnemyStats
 ## Size (world X/Z, m) of the box around the spawn point the enemy wanders in
@@ -41,6 +44,14 @@ var _hit_flash_timer: float = 0.0
 ## Feel's hit push: extra velocity and seconds left.
 var _push_velocity: Vector3 = Vector3.ZERO
 var _push_timer: float = 0.0
+## Seconds left floating at the top of a launch (see launch()).
+var _hang_timer: float = 0.0
+## Flying back from a finisher or launch (null when standing); see knock_down().
+var _knockdown: KNOCKDOWN_POSE = null
+## Where Facing sits at rest; the knockdown turns it about the hips.
+var _facing_rest_position: Vector3 = Vector3.ZERO
+## Flailing limbs while flying back; made on the first knockdown.
+var _flail: FLAIL_LIMBS = null
 ## Seconds left of the post-combo vulnerability window.
 var _vulnerable_timer: float = 0.0
 ## Seconds until the next combo may start.
@@ -59,6 +70,7 @@ func _ready() -> void:
 	home_position = global_position
 	health.setup(stats.max_health)
 	model.set_tint(body_tint)
+	_facing_rest_position = facing.position
 	health.died.connect(_award_xp)
 	hurtbox.hit_received.connect(_on_hit_received)
 	state_machine.start(self)
@@ -73,7 +85,15 @@ func _physics_process(delta: float) -> void:
 	if not _scaled_to_player:
 		_scale_to_player()
 	if not is_on_floor():
-		velocity.y -= _gravity * delta
+		# Juggled: full gravity on the way up, then a slow drift from the top of
+		# the arc for the hang time.
+		var floating := _hang_timer > 0.0 and velocity.y <= 0.0
+		velocity.y -= _gravity * (TUNING.juggle_hang_gravity_scale if floating else 1.0) * delta
+		if floating:
+			_hang_timer = maxf(_hang_timer - delta, 0.0)
+	elif velocity.y <= 0.0:
+		# Landed (a launch this frame is still on the floor, moving up).
+		_hang_timer = 0.0
 	state_machine.physics_update(delta)
 	if _push_timer > 0.0:
 		# Feel's push rides on top of the state's own movement for one step.
@@ -85,6 +105,7 @@ func _physics_process(delta: float) -> void:
 		velocity.z = own_velocity.z
 	else:
 		move_and_slide()
+	_update_knockdown(delta)
 	_vulnerable_timer = maxf(_vulnerable_timer - delta, 0.0)
 	_combo_cooldown = maxf(_combo_cooldown - delta, 0.0)
 	_update_visuals(delta)
@@ -276,6 +297,79 @@ func flash(color: Color, seconds: float) -> void:
 	model.set_flash(color)
 
 
+## Knocks the enemy up (positive) or down (negative) at speed m/s, then floats
+## it near the top of the arc for hang_time seconds so it can be juggled.
+func launch(speed: float, hang_time: float) -> void:
+	if not stats.launchable:
+		return
+	velocity.y = speed
+	_hang_timer = hang_time
+
+
+func is_airborne() -> bool:
+	return not is_on_floor()
+
+
+## Sends it flying back from source: it turns to face the hit, then sails back
+## through the air leaning back, spinning round and flailing its arms and legs,
+## lands on its back, lies there, then gets up (the stagger lasts until it's
+## standing). Hit again mid-air, it keeps flying.
+func knock_down(source: Node3D) -> void:
+	if not stats.launchable:
+		return
+	if _knockdown != null:
+		_knockdown.refresh()
+		return
+	_knockdown = KNOCKDOWN_POSE.new(false, TUNING.enemy_flyback_lean_speed, TUNING.enemy_down_time,
+			TUNING.enemy_get_up_time, TUNING.enemy_flyback_lean_degrees)
+	_start_flail()
+	if source != null and is_instance_valid(source):
+		var toward := source.global_position - global_position
+		toward.y = 0.0
+		if toward.length_squared() > 0.0001:
+			var body_yaw := atan2(global_basis.z.x, global_basis.z.z)
+			facing.rotation.y = atan2(-toward.x, -toward.z) - body_yaw
+
+
+## Down or flying back from a knock_down() and not up yet.
+func is_knocked_down() -> bool:
+	return _knockdown != null
+
+
+func _start_flail() -> void:
+	if _flail == null:
+		var skeletons := model.find_children("*", "Skeleton3D", true, false)
+		if skeletons.is_empty():
+			return
+		_flail = FLAIL_LIMBS.new()
+		# Last child, so it runs after the clip and the model's own modifiers.
+		skeletons[0].add_child(_flail)
+	_flail.degrees = TUNING.enemy_flail_degrees
+	_flail.speed = TUNING.enemy_flail_speed
+
+
+func _update_knockdown(delta: float) -> void:
+	if _knockdown == null:
+		return
+	var flying := _knockdown.is_flying() and is_airborne()
+	if _flail != null:
+		_flail.amount = 1.0 if flying else 0.0
+	if flying:
+		facing.rotation.y += deg_to_rad(TUNING.enemy_flyback_spin_degrees) * delta
+	var pitch := _knockdown.update(delta, is_airborne())
+	var lying := _knockdown.lying_amount()
+	if _knockdown.done():
+		_knockdown = null
+		pitch = 0.0
+		lying = 0.0
+	facing.rotation.x = pitch
+	var height := TUNING.enemy_tumble_pivot_height
+	var pivot := Vector3.UP * height
+	# Lying on its back, it rests on the ground rather than at hip height.
+	var drop := Vector3.DOWN * (height - KNOCKDOWN_POSE.LYING_HIP_HEIGHT) * lying
+	facing.position = _facing_rest_position + pivot - facing.quaternion * pivot + drop
+
+
 ## Adds a push (m/s) for seconds through the body's normal movement, so walls
 ## still stop it (hit feedback, on top of the hit's own knockback).
 func push(push_velocity: Vector3, seconds: float) -> void:
@@ -318,3 +412,9 @@ func _on_hit_received(attack: AttackData, source: Node3D) -> void:
 		died.emit()
 	elif (state_machine.current as EnemyState).can_be_staggered():
 		state_machine.transition_to(EnemyState.STAGGER, msg)
+	else:
+		return
+	if attack.launch_speed != 0.0:
+		launch(attack.launch_speed, attack.hang_time)
+	if attack.heavy_hit or attack.launch_speed > 0.0 or _knockdown != null:
+		knock_down(source)

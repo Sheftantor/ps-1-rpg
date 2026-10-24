@@ -1,6 +1,8 @@
 extends Node
 ## Combat feedback (autoload "Feel"): hit stop, camera shake, enemy hit flash and
-## push, floating damage numbers, kill puff and "+XP", and sound hooks. Every value
+## push, the Kingdom Hearts style hit sparks (HitSpark) and camera zoom punch on
+## the player's melee hits, floating damage numbers, kill puff and "+XP", and
+## sound hooks. Every value
 ## comes from `settings` (res://settings/feel_settings.tres); F9 opens a live
 ## tuning panel (FeelPanel). Feedback only: never changes damage or timing.
 ##
@@ -14,6 +16,7 @@ extends Node
 
 const SETTINGS_PATH := "res://settings/feel_settings.tres"
 const FONT: Font = preload("res://Import/MGS1 HUD.ttf")
+const HIT_SPARK := preload("res://scripts/feel/hit_spark.gd")
 const POOL_SIZE := 8
 ## Where numbers and puffs appear on a body without a better point (m above its feet).
 const BODY_HEIGHT := 1.4
@@ -25,6 +28,9 @@ var _frozen: Dictionary = {}
 var _trauma: float = 0.0
 var _shake_time: float = 0.0
 var _shaken_camera: Camera3D = null
+## Current zoom-in (FOV degrees) and the shaken camera's own FOV.
+var _fov_punch: float = 0.0
+var _base_fov: float = 0.0
 var _noise := FastNoiseLite.new()
 var _pool: Array[AudioStreamPlayer] = []
 var _next_player: int = 0
@@ -76,6 +82,14 @@ func on_hit(attacker: Node, target: Node, damage: int, is_heavy := false) -> voi
 	if settings.shake_enabled and (player_hurt or attacker is Player):
 		var amount := settings.shake_heavy if heavy else settings.shake_light
 		add_trauma(amount * (settings.shake_player_hurt_multiplier if player_hurt else 1.0))
+	# The KH-style punch only on the player's own melee hits.
+	if attacker is Player and not gun and target is Node3D:
+		if settings.sparks_enabled and get_tree().current_scene != null:
+			var spark := HIT_SPARK.new()
+			spark.setup(settings, heavy, _contact_point(attacker as Node3D, target as Node3D))
+			get_tree().current_scene.add_child(spark)
+		if settings.fov_punch_enabled:
+			_fov_punch = maxf(_fov_punch, settings.fov_punch_heavy if heavy else settings.fov_punch_light)
 	if settings.hit_reaction_enabled and target is Enemy:
 		var enemy := target as Enemy
 		enemy.flash(settings.flash_color, settings.flash_time)
@@ -166,10 +180,16 @@ func _update_shake(real_delta: float) -> void:
 		if is_instance_valid(_shaken_camera):
 			_shaken_camera.h_offset = 0.0
 			_shaken_camera.v_offset = 0.0
+			_shaken_camera.fov = _base_fov
 		_shaken_camera = camera
+		_fov_punch = 0.0
+		if camera != null:
+			_base_fov = camera.fov
 	_trauma = maxf(_trauma - settings.shake_decay * real_delta, 0.0)
 	if camera == null:
 		return
+	_fov_punch = lerpf(_fov_punch, 0.0, 1.0 - exp(-settings.fov_punch_recover * real_delta))
+	camera.fov = _base_fov - _fov_punch
 	_shake_time += real_delta * settings.shake_frequency
 	var strength := pow(_trauma, settings.shake_exponent) * settings.shake_max_offset
 	camera.h_offset = _noise.get_noise_2d(_shake_time, 0.0) * strength
@@ -245,6 +265,13 @@ func _puff(position: Vector3) -> void:
 	puff.global_position = position
 	puff.emitting = true
 	puff.finished.connect(puff.queue_free)
+
+
+## Where a melee hit visibly lands: the target's chest, pulled toward the attacker.
+func _contact_point(attacker: Node3D, target: Node3D) -> Vector3:
+	var chest := target.global_position + Vector3.UP * BODY_HEIGHT * 0.75
+	var toward := attacker.global_position + Vector3.UP * BODY_HEIGHT * 0.75 - chest
+	return chest + toward.limit_length(0.4)
 
 
 ## Just above the body: the top of its collision shape, or BODY_HEIGHT.

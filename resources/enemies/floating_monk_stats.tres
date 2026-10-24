@@ -26,6 +26,7 @@ lose_interest_radius = 26.0
 attacks = Array[ExtResource("1_attack")]([SubResource("Resource_strike")])
 stagger_time = 0.6
 stagger_friction = 12.0
+launchable = false
 slow_swing_time = 0.6
 rapid_swing_time = 0.32
 telegraph_time = 0.45

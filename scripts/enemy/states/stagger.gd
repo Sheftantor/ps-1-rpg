@@ -27,7 +27,10 @@ func drives_animation() -> bool:
 
 
 func physics_update(delta: float) -> void:
-	enemy.move_horizontal(Vector3.ZERO, enemy.stats.stagger_friction, delta)
+	# Flying back, it keeps more of its momentum.
+	var air_scale: float = Enemy.TUNING.enemy_air_friction_scale if enemy.is_airborne() else 1.0
+	enemy.move_horizontal(Vector3.ZERO, enemy.stats.stagger_friction * air_scale, delta)
 	_timer -= delta
-	if _timer <= 0.0:
+	# A launched or knocked-down enemy stays helpless until it's back on its feet.
+	if _timer <= 0.0 and not enemy.is_airborne() and not enemy.is_knocked_down():
 		transition_to(IDLE if enemy.stats.passive else REPOSITION)

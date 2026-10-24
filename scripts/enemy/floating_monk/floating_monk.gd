@@ -127,11 +127,14 @@ func fire_bolt(arm: String) -> void:
 	bolt.launch(from, direction, self)
 
 
-## The last strike of the combo: combo_attack() with the finisher's punch.
+## The last strike of the combo: combo_attack() with the finisher's punch,
+## knocking the player down.
 func finisher_attack() -> AttackData:
 	var attack := combo_attack()
 	attack.damage = roundi(attack.damage * finisher_damage_scale)
 	attack.knockback = finisher_knockback
+	attack.knockdown = true
+	attack.heavy_hit = true
 	return attack
 
 

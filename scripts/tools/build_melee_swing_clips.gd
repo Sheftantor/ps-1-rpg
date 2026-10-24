@@ -8,6 +8,9 @@
 # clip's hit frames, and an ease-in-out recovery. The phase lengths are stored on
 # each clip ("phase_times") so the MeleeSwing state can retime them live if the
 # tuning changes later; rerun this after changing the source Attack clip.
+# The air combo gets the same three from the air clips: AirSwingRL / AirSwingLR
+# from AirAttack (legs tucked under), AirSwingFinisher from AirStrongAttack (the
+# overhead plunge, the air finisher's slam).
 # Also copies the clip metadata (hit_frames, trail_frames) from the source
 # library, which the retarget to the Real_MainC rig had dropped.
 extends SceneTree
@@ -16,6 +19,11 @@ const SOURCE_LIBRARY := "res://resources/player/player_animations.tres"
 const LIBRARY := "res://resources/player/player_animations_real.tres"
 const TUNING: CombatTuning = preload("res://resources/combat_tuning.tres")
 const SOURCE_CLIP := &"Attack"
+const AIR_SOURCE_CLIP := &"AirAttack"
+const AIR_FINISHER_SOURCE_CLIP := &"AirStrongAttack"
+## AirStrongAttack has no hit frames (strong attacks were timed by AttackData):
+## the overhead blade comes down through these frames (30 fps).
+const AIR_FINISHER_STRIKE_FRAMES := Vector2i(11, 14)
 const FPS := 60.0
 
 
@@ -31,19 +39,26 @@ func _initialize() -> void:
 	var attack := library.get_animation(SOURCE_CLIP)
 	var normal: Array[float] = [TUNING.swing_windup_time, TUNING.swing_strike_time, TUNING.swing_recovery_time]
 	var finisher: Array[float] = [TUNING.finisher_windup_time, TUNING.finisher_strike_time, TUNING.finisher_recovery_time]
-	for clip_name: StringName in [&"SwingRL", &"SwingLR", &"SwingFinisher"]:
+	var air := library.get_animation(AIR_SOURCE_CLIP)
+	var air_finisher := library.get_animation(AIR_FINISHER_SOURCE_CLIP)
+	for clip_name: StringName in [&"SwingRL", &"SwingLR", &"SwingFinisher", &"AirSwingRL", &"AirSwingLR", &"AirSwingFinisher"]:
 		if library.has_animation(clip_name):
 			library.remove_animation(clip_name)
 	library.add_animation(&"SwingRL", _swing(attack, false, normal))
 	library.add_animation(&"SwingLR", _swing(attack, true, normal))
 	library.add_animation(&"SwingFinisher", _swing(attack, false, finisher))
+	library.add_animation(&"AirSwingRL", _swing(air, false, normal))
+	library.add_animation(&"AirSwingLR", _swing(air, true, normal))
+	library.add_animation(&"AirSwingFinisher", _swing(air_finisher, false, finisher, AIR_FINISHER_STRIKE_FRAMES))
 	var err := ResourceSaver.save(library, LIBRARY)
 	print("saved %s (error %d)" % [LIBRARY, err])
 	quit()
 
 
-func _swing(source: Animation, reverse: bool, durations: Array[float]) -> Animation:
-	var hit_frames: Vector2i = source.get_meta(&"hit_frames")
+## strike_frames: the source's frames where the blade sweeps through; by default
+## its "hit_frames" meta.
+func _swing(source: Animation, reverse: bool, durations: Array[float], strike_frames := Vector2i(-1, -1)) -> Animation:
+	var hit_frames: Vector2i = strike_frames if strike_frames.x >= 0 else source.get_meta(&"hit_frames")
 	var strike_start := hit_frames.x * source.step
 	var strike_end := (hit_frames.y + 1) * source.step
 	# Source time covered by each phase, in playback order.

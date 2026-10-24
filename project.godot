@@ -25,6 +25,7 @@ Win95Cursor="*res://scripts/ui/win95/win95_cursor.gd"
 Feel="*res://scripts/feel/feel.gd"
 ComboInput="*res://scripts/input/combo_input.gd"
 InputDevice="*res://scripts/input/input_device.gd"
+FocusPulse="*res://scripts/ui/focus_pulse.gd"
 
 [beckett]
 
@@ -42,7 +43,7 @@ window/stretch/scale_mode="integer"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/beckett/plugin.cfg", "res://addons/windows_95_theme/plugin.cfg")
+enabled=PackedStringArray("res://addons/beckett/plugin.cfg")
 
 [file_customization]
 

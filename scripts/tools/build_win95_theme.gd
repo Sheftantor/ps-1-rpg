@@ -20,7 +20,10 @@ const DIR := "res://resources/ui/win95/"
 const PALETTES := {"palette_dark.tres": "win95_dark.tres", "palette_light.tres": "win95_light.tres"}
 const HUD_SUFFIX := "_hud.tres"
 
-const TITLE_TTF := "res://resources/ui/fonts/PixelifySans-Variable.ttf"
+## Jersey 10: a chunky pixel face whose digits stay distinct (Pixelify's 5, 6
+## and 8 looked alike). Smaller per point than Pixelify, so title text is sized
+## up by the palette's title_font_scale (see _title_size()).
+const TITLE_TTF := "res://resources/ui/fonts/Jersey10-Regular.ttf"
 const BODY_TTF := "res://resources/ui/fonts/IBMPlexSans-Variable.ttf"
 const MONO_TTF := "res://resources/ui/fonts/IBMPlexMono-Regular.ttf"
 
@@ -95,7 +98,7 @@ func _fonts() -> Dictionary:
 	var ts := TextServerManager.get_primary_interface()
 	var wght := ts.name_to_tag("wght")
 	var specs := {
-		title = [TITLE_TTF, 500, "font_title.tres"],
+		title = [TITLE_TTF, 0, "font_title.tres"],
 		body = [BODY_TTF, 400, "font_body.tres"],
 		mono = [MONO_TTF, 0, "font_mono.tres"],
 	}
@@ -107,7 +110,7 @@ func _fonts() -> Dictionary:
 		if specs[key][1] > 0:
 			font.variation_opentype = {wght: specs[key][1]}
 		if key == "title":
-			# Pixelify's "fi"/"fl" ligatures draw badly ("Confirm" read "ConArm").
+			# No ligatures: pixel faces draw "fi"/"fl" badly ("Confirm" read "ConArm").
 			font.opentype_features = {ts.name_to_tag("liga"): 0}
 		ResourceSaver.save(font, path)
 		out[key] = load(path)
@@ -139,6 +142,13 @@ static func _margins(box: StyleBox, left: float, top: float, right: float, botto
 	box.content_margin_bottom = bottom
 
 
+## A title-font size: size (before the palette's scale) times title_font_scale,
+## snapped to the font's pixel grid so its pixels stay whole.
+func _title_size(size: int) -> int:
+	var grid := maxi(p.title_font_grid, 1)
+	return maxi(grid, roundi(p.px(size) * p.title_font_scale / grid) * grid)
+
+
 func _raised(face := Color(), margin_x := -1, margin_y := -1) -> Win95StyleBox:
 	return _box(Win95StyleBox.Bevel.RAISED, p.face if face == Color() else face, margin_x, margin_y)
 
@@ -153,11 +163,18 @@ func _focus(dots_inset := -1) -> Win95StyleBox:
 	var box := _box(Win95StyleBox.Bevel.NONE, Color(0, 0, 0, 0), 0, 0)
 	box.outline_color = p.accent
 	box.outline_width = p.px(p.focus_outline)
+	_pulse(box)
 	if dots_inset >= 0:
 		box.dotted_color = p.text
 		box.dotted_width = p.px(p.focus_dots)
 		box.dotted_inset = dots_inset
 	return box
+
+
+## Makes a focus style pulse (FocusPulse redraws the focused control each frame).
+func _pulse(box: Win95StyleBox) -> void:
+	box.pulse_color = p.focus_pulse
+	box.pulse_period = p.focus_pulse_period
 
 
 ## Selected row: a lifted face with the accent bar on the left.
@@ -315,11 +332,11 @@ func _theme() -> Theme:
 	t.set_constant(&"outline_size", &"Label", 0)
 	_variation(t, &"TitleLabel", &"Label")
 	t.set_font(&"font", &"TitleLabel", p.title_font)
-	t.set_font_size(&"font_size", &"TitleLabel", p.px(p.title_font_size))
+	t.set_font_size(&"font_size", &"TitleLabel", _title_size(p.title_font_size))
 	t.set_color(&"font_color", &"TitleLabel", p.title_text)
 	_variation(t, &"HeadingLabel", &"Label")
 	t.set_font(&"font", &"HeadingLabel", p.title_font)
-	t.set_font_size(&"font_size", &"HeadingLabel", p.px(p.heading_font_size))
+	t.set_font_size(&"font_size", &"HeadingLabel", _title_size(p.heading_font_size))
 	_variation(t, &"HintLabel", &"Label")
 	t.set_font_size(&"font_size", &"HintLabel", p.px(p.small_font_size))
 	t.set_color(&"font_color", &"HintLabel", p.muted)
@@ -334,7 +351,7 @@ func _theme() -> Theme:
 	# Section headings inside windows ("WEAPONS", "CONTROLS").
 	_variation(t, &"SectionLabel", &"Label")
 	t.set_font(&"font", &"SectionLabel", p.title_font)
-	t.set_font_size(&"font_size", &"SectionLabel", p.px(p.title_font_size))
+	t.set_font_size(&"font_size", &"SectionLabel", _title_size(p.title_font_size))
 	# Dims the game behind a full-screen menu.
 	_variation(t, &"ScreenDim", &"Panel")
 	t.set_stylebox(&"panel", &"ScreenDim", _flat(Color(p.shadow, 0.65)))
@@ -352,14 +369,14 @@ func _theme() -> Theme:
 	# Big announcement (level up): heading text in a raised panel with a shadow.
 	_variation(t, &"BannerLabel", &"Label")
 	t.set_font(&"font", &"BannerLabel", p.title_font)
-	t.set_font_size(&"font_size", &"BannerLabel", p.px(p.heading_font_size))
+	t.set_font_size(&"font_size", &"BannerLabel", _title_size(p.heading_font_size))
 	var banner := _raised(Color(), p.px(p.bevel + p.body_padding), p.px(p.bevel + 6))
 	banner.shadow_size = p.px(p.drop_shadow)
 	t.set_stylebox(&"normal", &"BannerLabel", banner)
 	# Text over the 3D view, in a small box (see _hud_theme for code-made labels).
 	_variation(t, &"MessageLabel", &"Label")
 	t.set_font(&"font", &"MessageLabel", p.title_font)
-	t.set_font_size(&"font_size", &"MessageLabel", p.px(p.title_font_size))
+	t.set_font_size(&"font_size", &"MessageLabel", _title_size(p.title_font_size))
 	t.set_stylebox(&"normal", &"MessageLabel", _message_box())
 	t.set_color(&"default_color", &"RichTextLabel", p.text)
 	t.set_font(&"mono_font", &"RichTextLabel", p.mono_font)
@@ -413,6 +430,7 @@ func _theme() -> Theme:
 		t.set_stylebox(&"disabled", type, disabled)
 		t.set_stylebox(&"focus", type, _focus(p.px(p.focus_dots_inset)))
 		t.set_font(&"font", type, p.title_font)
+		t.set_font_size(&"font_size", type, _title_size(p.body_font_size))
 		_button_colors(t, type)
 	_variation(t, &"TitleButton", &"Button")
 	var tb := _raised(Color(), 0, 0)
@@ -540,6 +558,7 @@ func _theme() -> Theme:
 	row_hover.content_margin_left = row_margin
 	var row_focus := _flat(Color(0, 0, 0, 0), 0)
 	row_focus.accent_width = p.px(p.selection_bar)
+	_pulse(row_focus)
 	for state: StringName in [&"normal", &"disabled"]:
 		t.set_stylebox(state, &"ListButton", row_normal)
 	t.set_stylebox(&"hover", &"ListButton", row_hover)
@@ -614,6 +633,7 @@ func _theme() -> Theme:
 		t.set_stylebox(&"tab_disabled", type, _raised(Color(), bx, by))
 		t.set_stylebox(&"tab_focus", type, _focus())
 		t.set_font(&"font", type, p.title_font)
+		t.set_font_size(&"font_size", type, _title_size(p.body_font_size))
 		t.set_color(&"font_selected_color", type, p.text)
 		t.set_color(&"font_unselected_color", type, p.muted)
 		t.set_color(&"font_hovered_color", type, p.text)
@@ -634,7 +654,7 @@ func _theme() -> Theme:
 	t.set_stylebox(&"embedded_border", &"Window", embedded)
 	t.set_stylebox(&"embedded_unfocused_border", &"Window", embedded)
 	t.set_font(&"title_font", &"Window", p.title_font)
-	t.set_font_size(&"title_font_size", &"Window", p.px(p.title_font_size))
+	t.set_font_size(&"title_font_size", &"Window", _title_size(p.title_font_size))
 	t.set_color(&"title_color", &"Window", p.text)
 	t.set_constant(&"title_height", &"Window", p.px(p.title_height))
 	t.set_stylebox(&"panel", &"AcceptDialog", _flat(p.face, p.px(p.body_padding)))
@@ -657,7 +677,7 @@ func _message_box() -> Win95StyleBox:
 func _hud_theme() -> Theme:
 	var t := Theme.new()
 	t.set_font(&"font", &"Label", p.title_font)
-	t.set_font_size(&"font_size", &"Label", p.px(p.title_font_size))
+	t.set_font_size(&"font_size", &"Label", _title_size(p.title_font_size))
 	t.set_color(&"font_color", &"Label", p.text)
 	t.set_constant(&"outline_size", &"Label", 0)
 	t.set_stylebox(&"normal", &"Label", _message_box())

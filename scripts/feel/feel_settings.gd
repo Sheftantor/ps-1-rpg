@@ -37,6 +37,42 @@ extends Resource
 ## How fast the shake wobbles (noise samples per second).
 @export_range(1.0, 60.0, 0.5) var shake_frequency: float = 22.0
 
+@export_group("Camera Punch")
+## A quick zoom-in on hits the player lands (FOV degrees), easing back out.
+@export var fov_punch_enabled: bool = true
+@export_range(0.0, 10.0, 0.1) var fov_punch_light: float = 1.0
+@export_range(0.0, 20.0, 0.1) var fov_punch_heavy: float = 4.0
+## How fast the zoom eases back (per second; higher = shorter punch).
+@export_range(1.0, 40.0, 0.5) var fov_punch_recover: float = 10.0
+
+@export_group("Hit Sparks")
+## Kingdom Hearts style impact where the player's melee hits land (HitSpark):
+## a flash, bursting gold orbs, drifting flecks, and a ring on heavy hits.
+@export var sparks_enabled: bool = true
+## Flash diameter (m) for a normal / heavy hit, and how long it lasts (s).
+@export_range(0.0, 4.0, 0.05) var spark_flash_size: float = 1.1
+@export_range(0.0, 6.0, 0.05) var spark_flash_size_heavy: float = 2.0
+@export_range(0.02, 0.5, 0.01) var spark_flash_time: float = 0.14
+@export var spark_flash_color: Color = Color(1.0, 0.92, 0.65)
+@export_range(0, 32) var spark_orb_count: int = 5
+@export_range(0, 64) var spark_orb_count_heavy: int = 10
+## Orb size (m) for a normal / heavy hit.
+@export_range(0.05, 1.0, 0.01) var spark_orb_size: float = 0.24
+@export_range(0.05, 1.5, 0.01) var spark_orb_size_heavy: float = 0.38
+## How fast the orbs burst out (m/s) and how long they hang around (s).
+@export_range(0.5, 12.0, 0.1) var spark_orb_speed: float = 4.0
+@export_range(0.1, 2.0, 0.05) var spark_orb_time: float = 0.7
+@export var spark_orb_color: Color = Color(1.0, 0.9, 0.55)
+@export_range(0, 64) var spark_fleck_count: int = 10
+@export_range(0, 128) var spark_fleck_count_heavy: int = 26
+@export_range(0.01, 0.3, 0.01) var spark_fleck_size: float = 0.07
+@export_range(0.1, 3.0, 0.05) var spark_fleck_time: float = 1.0
+@export var spark_fleck_color: Color = Color(1.0, 0.8, 0.35)
+## Heavy hits: the glowing ring's final diameter (m; 0 = none) and time (s).
+@export_range(0.0, 10.0, 0.1) var spark_ring_size: float = 4.0
+@export_range(0.05, 1.0, 0.01) var spark_ring_time: float = 0.35
+@export var spark_ring_color: Color = Color(1.0, 0.7, 0.35)
+
 @export_group("Enemy Hit Reaction")
 @export var hit_reaction_enabled: bool = true
 ## White flash on a hit (s).

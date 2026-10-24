@@ -2,7 +2,7 @@
 
 [ext_resource type="FontVariation" path="res://resources/ui/win95/font_body.tres" id="1_xfvsk"]
 [ext_resource type="FontVariation" path="res://resources/ui/win95/font_title.tres" id="2_06jp6"]
-[ext_resource type="Script" uid="uid://dl1eqlbetqqd6" path="res://scripts/ui/win95/win95_style_box.gd" id="3_w7sao"]
+[ext_resource type="Script" path="res://scripts/ui/win95/win95_style_box.gd" id="3_w7sao"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4e6ko"]
 
@@ -26,7 +26,7 @@ HintLabel/fonts/font = ExtResource("1_xfvsk")
 HintLabel/styles/normal = SubResource("StyleBoxEmpty_4e6ko")
 Label/colors/font_color = Color(0.9098039, 0.9019608, 0.8745098, 1)
 Label/constants/outline_size = 0
-Label/font_sizes/font_size = 30
+Label/font_sizes/font_size = 40
 Label/fonts/font = ExtResource("2_06jp6")
 Label/styles/normal = SubResource("StyleBox_babsr")
 SlotCount/fonts/font = ExtResource("1_xfvsk")

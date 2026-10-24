@@ -1,7 +1,7 @@
 class_name EnemyHudVisibility
 extends Node
-## Fades an enemy's floating HUD (its FloatingHealthBar parent: the health
-## number, bar and level badge, all on one billboard) by distance from the
+## Fades an enemy's floating HUD (its FloatingHealthBar parent: the health bar
+## and level badge, both on one billboard) by distance from the
 ## camera and hides it when world geometry is in the way. Fully visible up to
 ## full_opacity_distance, fading out by hide_distance and hidden (not drawn,
 ## not rendered) beyond. A ray from the camera to the HUD anchor (the bar,

@@ -11,6 +11,17 @@ extends Resource
 @export var hit_stun_multiplier: float = 1.0
 ## Forward speed of the attacker while the attack is winding up and active (m/s).
 @export var lunge_speed: float = 0.0
+## Vertical speed given to an enemy this hit staggers or kills (m/s): positive
+## pops it into the air (a launcher), negative slams an airborne one down.
+@export var launch_speed: float = 0.0
+## After a launch, the enemy floats near the top of its arc this long (s), so an
+## air combo can keep hitting it.
+@export var hang_time: float = 0.0
+## Big-hit feedback (Feel): longer hit stop, stronger shake, the finisher burst.
+@export var heavy_hit: bool = false
+## Throws the player back off their feet (an enemy combo's final hit; see
+## HitStun). Enemies are knocked down by heavy hits and launches instead.
+@export var knockdown: bool = false
 
 @export_group("Timing")
 ## Wind-up before the hitbox goes live (player attacks; enemies use telegraph_time).

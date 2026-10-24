@@ -42,6 +42,72 @@ extends Resource
 ## The body turns with the sweep: wound back this far before it, carried
 ## through the other way after (degrees, total).
 @export var finisher_body_twist_degrees: float = 70.0
+## The ground finisher launches what it staggers into the air (m/s up), ready
+## for an air combo; 0 = just knocks it back.
+@export var finisher_launch_speed: float = 6.0
+## How long a launched enemy floats near the top (s).
+@export var finisher_hang_time: float = 0.9
+
+@export_group("Air Combo")
+## Swinging in the air hangs the player there, Kingdom Hearts style: each swing
+## gives this small hop (m/s up) ...
+@export var air_swing_hop: float = 0.9
+## ... and gravity is cut to this fraction for the swing.
+@export var air_swing_gravity_scale: float = 0.2
+## Locked on to a target above or below: how fast the air swing closes the
+## height gap (per second of difference, capped at air_home_max_speed m/s).
+@export var air_home_rate: float = 4.0
+@export var air_home_max_speed: float = 4.0
+## Air swings 1 and 2 pop the target up this much (m/s) so it stays in reach...
+@export var air_hit_lift: float = 3.0
+## ... and float it this long (s).
+@export var air_hit_hang_time: float = 0.6
+## Air hits push sideways less, so the target stays in front of you.
+@export var air_knockback_scale: float = 0.35
+## The air finisher slams the target down (m/s, negative = down).
+@export var air_finisher_slam: float = -9.0
+
+## Air swings 1 and 2: the body leans into the swing (degrees forward) and
+## spins once around with the sweep; the air finisher somersaults forward into
+## its slam. Visual only.
+@export var air_swing_lean_degrees: float = 20.0
+@export var air_swing_spin: bool = true
+
+@export_group("Juggle")
+## Launched enemies fall at this fraction of gravity while hanging.
+@export var juggle_hang_gravity_scale: float = 0.15
+
+@export_group("Enemy Knockdown")
+## Finishers and launches send enemies flying back (KnockdownPose): in the air
+## they lean back this far (degrees) at this speed (degrees/s) ...
+@export var enemy_flyback_lean_degrees: float = 50.0
+@export var enemy_flyback_lean_speed: float = 300.0
+## ... spin round (degrees/s; 0 = no spin) ...
+@export var enemy_flyback_spin_degrees: float = 360.0
+## ... and flail their arms and legs (FlailLimbs): an upper arm's peak swing
+## (degrees) and swings per second ...
+@export var enemy_flail_degrees: float = 65.0
+@export var enemy_flail_speed: float = 3.0
+## ... all turning about this height (m, the hips) ...
+@export var enemy_tumble_pivot_height: float = 1.0
+## ... keep this fraction of their ground friction while airborne, so they
+## sail back further ...
+@export var enemy_air_friction_scale: float = 0.35
+## ... then lie on their back this long (s) and take this long to get up (s).
+@export var enemy_down_time: float = 0.6
+@export var enemy_get_up_time: float = 0.35
+
+@export_group("Player Knockdown")
+## An enemy combo's final hit (AttackData.knockdown) throws the player back:
+## up at this speed (m/s) ...
+@export var player_knockdown_launch: float = 4.5
+## ... and away at this speed (m/s), tipping over backwards (degrees/s) ...
+@export var player_knockdown_speed: float = 6.0
+@export var player_knockdown_tilt_degrees: float = 420.0
+## ... to lie on the ground this long (s), then get up over this long (s).
+## Hits can't land on the player until they're up.
+@export var player_down_time: float = 0.55
+@export var player_get_up_time: float = 0.35
 
 @export_group("Level Gap: Enemy Health")
 ## Health multiplier per level the enemy is above the player.

@@ -4,15 +4,15 @@ extends Node3D
 ## on-screen size eases between max_scale up close and min_scale far away, so
 ## distant bars recede and nearby ones get big and readable. The bar is ordinary Controls
 ## drawn into the Canvas SubViewport and shown on a billboarded Sprite3D, so it
-## can be styled in the editor. The optional Bar is a TextureProgressBar with a
-## fixed texture: losing health shrinks how much of it shows (enemies have no
-## bar, only the number). Enemy bars also carry a LevelBadge over the number.
-## The white HealthValue always shows current health; each hit spawns a copy of the
-## hidden DamageNumber (yellow, above the middle of the bar) that drifts up a
-## little and fades out. With place_to_side on, the display slides off to the
-## side of the character facing away from the middle of the screen (where the
-## player stands), so the number never covers the model. Used by
-## res://scenes/enemy_health_bar.tscn and player_health_bar.tscn.
+## can be styled in the editor. The optional Bar is any Range: losing health
+## shrinks how much of it shows (the player's is a TextureProgressBar, enemies'
+## a PixelHealthBar). Enemy bars also carry a LevelBadge over the bar. The
+## optional white HealthValue shows current health (the player's only); each hit
+## spawns a copy of the hidden DamageNumber (yellow, above the middle of the bar)
+## that drifts up a little and fades out. With place_to_side on, the display
+## slides off to the side of the character facing away from the middle of the
+## screen (where the player stands), so the readout never covers the model. Used
+## by res://scenes/enemy_health_bar.tscn and player_health_bar.tscn.
 
 ## The character's Health node.
 @export var health_path: NodePath = ^"../Health"
@@ -43,19 +43,19 @@ extends Node3D
 @export_group("Side Placement")
 ## Move the display beside the character instead of straight over it.
 @export var place_to_side: bool = false
-## The character's half-width (m): the number's inner edge sits this far from
+## The character's half-width (m): the readout's inner edge sits this far from
 ## its center, along the camera's right.
 @export var side_distance: float = 0.45
-## Gap (canvas pixels) between the character's edge and the number's inner edge.
+## Gap (canvas pixels) between the character's edge and the readout's inner edge.
 ## 0 = touching; negative tucks it in tighter.
 @export var side_gap: float = 0.0
-## Height change (m) while beside the character, so the number sits next to the
+## Height change (m) while beside the character, so the readout sits next to the
 ## head rather than floating off its top corner.
 @export var side_drop: float = 0.6
 ## Fraction of the screen width either side of center where the side won't flip,
-## so a character near the middle doesn't make the number jump back and forth.
+## so a character near the middle doesn't make the readout jump back and forth.
 @export_range(0.0, 0.5, 0.01) var side_deadzone: float = 0.05
-## Past this fraction from center the number goes on the inner side instead, so it
+## Past this fraction from center the readout goes on the inner side instead, so it
 ## doesn't run off the screen edge.
 @export_range(0.0, 0.5, 0.01) var side_edge: float = 0.4
 ## How quickly the display slides to its side. Higher = snappier.
@@ -63,11 +63,11 @@ extends Node3D
 
 @onready var _display: Sprite3D = $Display
 @onready var _canvas: SubViewport = $Canvas
-## Optional: enemy bars are just the number, the player's has a bar too.
+## Optional: enemy bars are just the bar, the player's has the number too.
 @onready var _bar: Range = get_node_or_null(^"Canvas/Root/Bar")
-@onready var _value: Label = $Canvas/Root/HealthValue
+@onready var _value: Label = get_node_or_null(^"Canvas/Root/HealthValue")
 @onready var _damage_template: Label = $Canvas/Root/DamageNumber
-## Optional: the enemy level badge over the number (EnemyLevelBadge).
+## Optional: the enemy level badge over the bar (EnemyLevelBadge).
 @onready var _badge: Control = get_node_or_null(^"Canvas/Root/LevelBadge")
 @onready var _base_pixel_size: float = _display.pixel_size
 
@@ -75,8 +75,9 @@ var _scale := 1.0
 # Side the display is heading for (-1 left, 1 right) and where it is now.
 var _side := 1.0
 var _side_now := 1.0
-# Half the drawn width (canvas pixels) of the health number, outline included.
-var _text_half_width := 0.0
+# Half the drawn width (canvas pixels) of the readout: the health number's
+# glyphs if there is one, else the bar.
+var _half_width := 0.0
 # Per-instance label settings (shared .tres copies) with their base outline sizes.
 var _outlines: Dictionary[LabelSettings, int] = {}
 
@@ -87,6 +88,8 @@ func _ready() -> void:
 	# Own copies so changing outline thickness doesn't touch other bars. Damage
 	# numbers are duplicated from the template, so they share its copy.
 	for label: Label in [_value, _damage_template]:
+		if label == null:
+			continue
 		label.label_settings = label.label_settings.duplicate()
 		_outlines[label.label_settings] = label.label_settings.outline_size
 	if scale_with_distance:
@@ -126,8 +129,8 @@ func _update_side(delta: float) -> void:
 	_side_now = lerpf(_side_now, _side, 1.0 - exp(-side_smoothing * delta))
 	_display.global_position = global_position + camera.global_basis.x * side_distance * _side_now 			+ Vector3.DOWN * side_drop
 	# The Sprite3D is a fixed_size billboard, so offset is a constant on-screen
-	# push: just enough to put the number's inner edge at the character's edge.
-	_display.offset.x = (_text_half_width + side_gap) * _side_now
+	# push: just enough to put the readout's inner edge at the character's edge.
+	_display.offset.x = (_half_width + side_gap) * _side_now
 
 
 func _target_scale() -> float:
@@ -155,10 +158,13 @@ func _on_health_changed(current: int, maximum: int) -> void:
 	if _bar != null:
 		_bar.max_value = maximum
 		_bar.value = current
+		_half_width = _bar.size.x * 0.5
+	if _value == null:
+		return
 	_value.text = str(current)
 	var settings := _value.label_settings
 	# Just the glyphs: the outline's dark edge may touch the character.
-	_text_half_width = settings.font.get_string_size(_value.text, HORIZONTAL_ALIGNMENT_LEFT, -1, settings.font_size).x * 0.5
+	_half_width = settings.font.get_string_size(_value.text, HORIZONTAL_ALIGNMENT_LEFT, -1, settings.font_size).x * 0.5
 
 
 func _on_damaged(amount: int) -> void:
@@ -180,6 +186,7 @@ func _on_died() -> void:
 	if hide_on_death:
 		if _bar != null:
 			_bar.visible = false
-		_value.visible = false
+		if _value != null:
+			_value.visible = false
 		if _badge != null:
 			_badge.visible = false
