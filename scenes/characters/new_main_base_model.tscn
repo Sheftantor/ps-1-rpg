@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Import/Character/MC-Rig/NewMain_Base.glb" id="1_glb"]
+
+[node name="NewMainBaseModel" type="Node3D"]
+
+[node name="NewMain_Base" parent="." instance=ExtResource("1_glb")]
+transform = Transform3D(-1.800879, 0, 0, 0, 1.800879, 0, 0, 0, -1.800879, 0, 0, 0.014069)

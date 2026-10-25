@@ -1,4 +1,4 @@
-[gd_resource type="AnimationLibrary" format=3]
+[gd_resource type="AnimationLibrary" format=3 uid="uid://drhoxywnyj63g"]
 
 [sub_resource type="Animation" id="Animation_e0xpo"]
 resource_name = "AimFire"

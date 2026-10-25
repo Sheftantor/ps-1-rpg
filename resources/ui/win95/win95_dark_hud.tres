@@ -2,7 +2,7 @@
 
 [ext_resource type="FontVariation" path="res://resources/ui/win95/font_body.tres" id="1_xfvsk"]
 [ext_resource type="FontVariation" path="res://resources/ui/win95/font_title.tres" id="2_06jp6"]
-[ext_resource type="Script" path="res://scripts/ui/win95/win95_style_box.gd" id="3_w7sao"]
+[ext_resource type="Script" uid="uid://dl1eqlbetqqd6" path="res://scripts/ui/win95/win95_style_box.gd" id="3_w7sao"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4e6ko"]
 

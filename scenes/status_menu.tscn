@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/status_menu.gd" id="1_menu"]
 [ext_resource type="Script" path="res://scripts/ui/win95/win95_window.gd" id="3_window"]
 [ext_resource type="Script" path="res://scripts/ui/input_icon.gd" id="5_icon"]
-[ext_resource type="PackedScene" path="res://scenes/player_model.tscn" id="7_model"]
+[ext_resource type="PackedScene" path="res://scenes/player_model_newmain.tscn" id="7_model"]
 [ext_resource type="Compositor" path="res://resources/rendering/ps1_compositor.tres" id="8_ps1"]
 [ext_resource type="Material" path="res://resources/materials/city/stone_trim.tres" id="9_stone"]
 

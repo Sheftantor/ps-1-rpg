@@ -1,17 +1,27 @@
-[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://crghire4b73xh"]
 
 [ext_resource type="Shader" uid="uid://he6gm5upl32r" path="res://shaders/ps1.gdshader" id="1_ps1"]
-[ext_resource type="Texture2D" path="res://textures/city/facade_glass.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://b30ea0vfmjbp7" path="res://textures/city/facade_glass.png" id="2_tex"]
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_ps1")
 shader_parameter/albedo_color = Color(1, 1, 1, 1)
 shader_parameter/albedo_texture = ExtResource("2_tex")
-shader_parameter/box_projection = true
 shader_parameter/uv_scale = Vector2(0.25, 0.33333334)
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/box_projection = true
+shader_parameter/vertex_snap = true
+shader_parameter/wet_sheen = 0.0
+shader_parameter/sheen_color = Color(0.3, 0.32, 0.38, 1)
+shader_parameter/checker_size = 0.0
+shader_parameter/checker_color = Color(0.6, 0.6, 0.6, 1)
+shader_parameter/emission_color = Color(0, 0, 0, 1)
+shader_parameter/emission_energy = 1.0
 shader_parameter/window_lit_ratio = 0.05
 shader_parameter/window_grid = Vector2(8, 1)
+shader_parameter/window_warm_color = Color(1, 0.76, 0.42, 1)
+shader_parameter/window_cool_color = Color(0.5, 0.6, 0.64, 1)
 shader_parameter/window_cool_ratio = 0.85
 shader_parameter/window_energy = 0.6
-shader_parameter/glass_reflect_color = Color(0.5, 0.67, 0.88, 0.9)
+shader_parameter/glass_reflect_color = Color(0, 0, 0, 0)

@@ -3,15 +3,14 @@
 [ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="1_s1l2q"]
 [ext_resource type="Script" uid="uid://e4ea8tpb76l5" path="res://scripts/enemy/enemy_stats.gd" id="1_stats"]
 [ext_resource type="Texture2D" uid="uid://tsrsa7vjsx3g" path="res://textures/ui/icons/suit_guy_portrait.png" id="2_cmkbt"]
-[ext_resource type="Script" path="res://scripts/commands/loot_drop.gd" id="90_drop"]
+[ext_resource type="Script" uid="uid://cognbt6ewk0v8" path="res://scripts/commands/loot_drop.gd" id="90_drop"]
 [ext_resource type="Resource" path="res://resources/items/canned_coffee.tres" id="91_canned_coffee"]
 [ext_resource type="Resource" path="res://resources/items/bandages.tres" id="92_bandages"]
-[ext_resource type="Resource" path="res://resources/items/tonic.tres" id="93_tonic"]
+[ext_resource type="Resource" uid="uid://dkqw2o1qmnkbb" path="res://resources/items/tonic.tres" id="93_tonic"]
 
 [sub_resource type="Resource" id="LootDrop_canned_coffee"]
 script = ExtResource("90_drop")
 item = ExtResource("91_canned_coffee")
-chance = 0.25
 
 [sub_resource type="Resource" id="LootDrop_bandages"]
 script = ExtResource("90_drop")
@@ -31,10 +30,10 @@ display_name = "Suit Guy"
 portrait = ExtResource("2_cmkbt")
 damage_percent = 0.125
 health_in_melee_hits = 7.0
+cash_chance = 0.6
+loot = Array[ExtResource("90_drop")]([SubResource("LootDrop_canned_coffee"), SubResource("LootDrop_bandages"), SubResource("LootDrop_tonic")])
 acceleration = 12.0
 turn_speed = 6.0
 patrol_pause_min = 0.8
 patrol_pause_max = 2.5
 stagger_time = 0.35
-cash_chance = 0.6
-loot = Array[ExtResource("90_drop")]([SubResource("LootDrop_canned_coffee"), SubResource("LootDrop_bandages"), SubResource("LootDrop_tonic")])

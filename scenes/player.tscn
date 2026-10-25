@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://1gh1uj6b4gct"]
 
 [ext_resource type="Script" uid="uid://b8tucuckieblf" path="res://scripts/player/player.gd" id="1_player"]
-[ext_resource type="PackedScene" path="res://scenes/player_model.tscn" id="2_model"]
+[ext_resource type="PackedScene" path="res://scenes/player_model_newmain.tscn" id="2_model"]
 [ext_resource type="Resource" uid="uid://di6l0e5kjipjr" path="res://resources/player/player_stats.tres" id="3_stats"]
 [ext_resource type="Script" uid="uid://ddr3jmrv1sw61" path="res://scripts/combat/hitbox.gd" id="4_hitbox"]
 [ext_resource type="Script" uid="uid://dm4ka8v6bajrj" path="res://scripts/combat/hurtbox.gd" id="5_hurtbox"]

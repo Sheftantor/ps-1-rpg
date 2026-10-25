@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Import/Character/MC-Rig/NewMain_Base.glb" id="1_rig"]
+[ext_resource type="Shader" path="res://shaders/ps1.gdshader" id="2_ps1"]
+[ext_resource type="Texture2D" path="res://Import/Character/MC-Rig/NewMain_Base_tripo_rgb_9d7fdbd7-31ed-4903-ac13-294d753b034c.jpg" id="3_skin"]
+[ext_resource type="AnimationLibrary" path="res://resources/player/player_animations_newmain.tres" id="4_anims"]
+[ext_resource type="PackedScene" path="res://scenes/bat.tscn" id="5_melee"]
+[ext_resource type="AnimationNodeBlendTree" path="res://resources/player/player_animation_tree.tres" id="6_tree"]
+[ext_resource type="Script" path="res://scripts/combat/weapon_trail.gd" id="7_trail"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_skin"]
+render_priority = 0
+shader = ExtResource("2_ps1")
+shader_parameter/albedo_texture = ExtResource("3_skin")
+
+[node name="PlayerModel" instance=ExtResource("1_rig")]
+
+[node name="tripo_node_7593d5e0" parent="Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("ShaderMaterial_skin")
+
+[node name="RightHandAttachment" type="BoneAttachment3D" parent="Skeleton3D" index="1"]
+bone_name = "mixamorig_RightHand"
+bone_idx = 44
+
+[node name="MeleeWeapon" type="Node3D" parent="Skeleton3D/RightHandAttachment"]
+transform = Transform3D(0.07971513, 0.16072498, 0.98377496, 0.85689205, 0.493187, -0.15000863, -0.50929534, 0.8549469, -0.0984095, -0.011427209, 0.044264793, 0.0012000762)
+
+[node name="Model" parent="Skeleton3D/RightHandAttachment/MeleeWeapon" instance=ExtResource("5_melee")]
+
+[node name="WeaponTrail" type="MeshInstance3D" parent="Skeleton3D/RightHandAttachment/MeleeWeapon"]
+script = ExtResource("7_trail")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": ExtResource("4_anims")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = ExtResource("6_tree")
+anim_player = NodePath("../AnimationPlayer")
+callback_mode_process = 0
