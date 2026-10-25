@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnergyAbility" format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/energy_ability.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+id = &"summon"
+display_name = "Summon"
+description = "The summon every class can get."
+kind = 1
+scaling_stat = &"memes"
+summon_count_base = 1
+memes_per_extra_summon = 0
+summon_count_max = 1
+summon_upgrade_thresholds = PackedInt32Array(15, 25)
+notes = "Behaviour not built yet. Scaling stat is a design call, not a placeholder. PLACEHOLDER summon numbers: 1 out, max 1; upgrade tiers at 15 / 25 memes."

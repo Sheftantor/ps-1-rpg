@@ -1,0 +1,99 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/ps1.gdshader" id="1_ps1"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rubber"]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(0.08, 0.08, 0.09, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_chrome"]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(0.74, 0.76, 0.8, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_case"]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(0.85, 0.25, 0.62, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_screen"]
+render_priority = 0
+shader = ExtResource("1_ps1")
+shader_parameter/albedo_color = Color(0.35, 0.85, 1, 1)
+shader_parameter/emission_color = Color(0.35, 0.85, 1, 1)
+shader_parameter/emission_energy = 1.4
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_grip"]
+material = SubResource("ShaderMaterial_rubber")
+top_radius = 0.016
+bottom_radius = 0.016
+height = 0.12
+radial_segments = 8
+rings = 0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pole1"]
+material = SubResource("ShaderMaterial_chrome")
+top_radius = 0.009
+bottom_radius = 0.009
+height = 0.18
+radial_segments = 6
+rings = 0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pole2"]
+material = SubResource("ShaderMaterial_chrome")
+top_radius = 0.007
+bottom_radius = 0.007
+height = 0.16
+radial_segments = 6
+rings = 0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pole3"]
+material = SubResource("ShaderMaterial_chrome")
+top_radius = 0.005
+bottom_radius = 0.005
+height = 0.1
+radial_segments = 6
+rings = 0
+
+[sub_resource type="BoxMesh" id="BoxMesh_clamp"]
+material = SubResource("ShaderMaterial_rubber")
+size = Vector3(0.085, 0.02, 0.02)
+
+[sub_resource type="BoxMesh" id="BoxMesh_phone"]
+material = SubResource("ShaderMaterial_case")
+size = Vector3(0.075, 0.14, 0.01)
+
+[sub_resource type="BoxMesh" id="BoxMesh_screen"]
+material = SubResource("ShaderMaterial_screen")
+size = Vector3(0.066, 0.124, 0.002)
+
+[node name="SelfieStick" type="Node3D"]
+
+[node name="Grip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = SubResource("CylinderMesh_grip")
+
+[node name="Pole1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, 0)
+mesh = SubResource("CylinderMesh_pole1")
+
+[node name="Pole2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+mesh = SubResource("CylinderMesh_pole2")
+
+[node name="Pole3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47, 0)
+mesh = SubResource("CylinderMesh_pole3")
+
+[node name="Clamp" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.525, 0)
+mesh = SubResource("BoxMesh_clamp")
+
+[node name="Phone" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("BoxMesh_phone")
+
+[node name="Screen" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0.006)
+mesh = SubResource("BoxMesh_screen")

@@ -177,6 +177,8 @@ func _place_bubble(slot: IconSlot) -> void:
 
 const MELEE_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_melee.png")
 const GUN_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_gun.png")
+## Shown on the weapon slots: how to swap in the next owned weapon that fits.
+const SWAP_HINT := "Right-click or Interact to swap."
 
 
 ## A new icon slot at the shared size, added to `parent`.
@@ -187,24 +189,36 @@ static func new_slot(parent: Container) -> IconSlot:
 	return slot
 
 
-## The melee weapon and gun slots (greyed placeholders when empty).
-func add_weapons(parent: Container, player: Player) -> void:
+## The main and secondary weapon slots (greyed placeholders when empty).
+## Returns [main slot, secondary slot] so the screen can swap what's in them.
+func add_weapons(parent: Container, player: Player) -> Array[IconSlot]:
+	var swap := "\n" + SWAP_HINT
 	var melee := player.melee_weapon
-	var slot := new_slot(parent)
+	var main_slot := new_slot(parent)
 	if melee == null:
-		add(slot, "WEAPON", "WEAPON", "Empty. Your melee weapon goes here.", _greyed.bind(slot, MELEE_PLACEHOLDER))
+		add(main_slot, "MAIN", "MAIN", "Empty. Any melee weapon goes here." + swap,
+				_greyed.bind(main_slot, MELEE_PLACEHOLDER))
 	else:
 		var item_name := melee.display_name.to_upper()
-		add(slot, "WEAPON\n" + item_name, "WEAPON: " + item_name, GearText.melee(player),
-				slot.show_icon.bind(melee.icon, ""), false, melee)
-	var gun := player.gun
-	slot = new_slot(parent)
-	if gun == null:
-		add(slot, "GUN", "GUN", "Empty. Pick up a gun to carry it here.", _greyed.bind(slot, GUN_PLACEHOLDER))
+		add(main_slot, "MAIN\n" + item_name, "MAIN: " + item_name, GearText.melee(player) + swap,
+				main_slot.show_icon.bind(melee.icon, ""), false, melee)
+	var second := player.secondary_weapon()
+	var second_slot := new_slot(parent)
+	if second == null:
+		add(second_slot, "SECONDARY", "SECONDARY",
+				"Empty. A gun goes here, or a second dual-wield blade next to a dual-wield main weapon." + swap,
+				_greyed.bind(second_slot, GUN_PLACEHOLDER))
+	elif second is WeaponData:
+		var item_name := (second as WeaponData).display_name.to_upper()
+		add(second_slot, "SECONDARY\n" + item_name, "SECONDARY: " + item_name, GearText.gun(second) + swap,
+				second_slot.show_icon.bind((second as WeaponData).icon, ""), false, second)
 	else:
-		var item_name := gun.display_name.to_upper()
-		add(slot, "GUN\n" + item_name, "GUN: " + item_name, GearText.gun(gun),
-				slot.show_icon.bind(gun.icon, ""), false, gun)
+		var blade := second as MeleeWeaponData
+		var item_name := blade.display_name.to_upper()
+		add(second_slot, "SECONDARY\n" + item_name, "SECONDARY: " + item_name + "  (DUAL WIELD)",
+				GearText.join(blade.description, "Dual wielded with the main weapon.") + swap,
+				second_slot.show_icon.bind(blade.icon, ""), false, blade)
+	return [main_slot, second_slot]
 
 
 ## A carried item stack, with its count in the corner.

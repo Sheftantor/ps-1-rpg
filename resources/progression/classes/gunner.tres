@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/class_data.gd" id="1_class"]
+[ext_resource type="Resource" path="res://resources/progression/abilities/line_shot.tres" id="2_ability"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"gunner"
+display_name = "Gunner"
+main_stat = &"focus"
+weapon_kind = &"gun"
+weapons = "Guns."
+ability = ExtResource("2_ability")
+notes = "Starting point, not a lock: main stat and weapon kind only shape the starting build. No starting kit: uses PlayerLoadout's weapons."

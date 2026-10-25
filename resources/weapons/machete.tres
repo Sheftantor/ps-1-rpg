@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MeleeWeaponData" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/melee_weapon_data.gd" id="1_melee"]
+[ext_resource type="Texture2D" path="res://textures/ui/icons/weapon_machete.png" id="3_icon"]
+[ext_resource type="PackedScene" path="res://scenes/machete.tscn" id="2_model"]
+
+[resource]
+script = ExtResource("1_melee")
+display_name = "Machete"
+description = "A long, wide blade for clearing more than brush. Dual wield it with another light blade."
+icon = ExtResource("3_icon")
+model = ExtResource("2_model")
+weapon_kind = &"dual_melee"
+dual_wieldable = true
+trail_tip = 0.58

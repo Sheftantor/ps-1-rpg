@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/class_data.gd" id="1_class"]
+[ext_resource type="Resource" path="res://resources/progression/abilities/rush_attack.tres" id="2_ability"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"warrior"
+display_name = "Warrior"
+main_stat = &"strength"
+weapon_kind = &"melee"
+weapons = "Melee only."
+ability = ExtResource("2_ability")
+notes = "Starting point, not a lock: main stat and weapon kind only shape the starting build. No starting kit: uses PlayerLoadout's weapons."

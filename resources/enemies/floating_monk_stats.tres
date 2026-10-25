@@ -6,6 +6,9 @@
 [ext_resource type="Script" path="res://scripts/commands/loot_drop.gd" id="90_drop"]
 [ext_resource type="Resource" path="res://resources/items/potion.tres" id="91_potion"]
 [ext_resource type="Resource" path="res://resources/items/tonic.tres" id="92_tonic"]
+[ext_resource type="Resource" path="res://resources/weapons/switchblade.tres" id="95_switchblade"]
+[ext_resource type="Resource" path="res://resources/weapons/machete.tres" id="95_machete"]
+[ext_resource type="Resource" path="res://resources/weapons/selfie_stick.tres" id="95_selfie_stick"]
 
 [sub_resource type="Resource" id="Resource_strike"]
 script = ExtResource("1_attack")
@@ -24,6 +27,21 @@ count_max = 2
 script = ExtResource("90_drop")
 item = ExtResource("92_tonic")
 chance = 0.3
+
+[sub_resource type="Resource" id="LootDrop_weapon_switchblade"]
+script = ExtResource("90_drop")
+weapon = ExtResource("95_switchblade")
+chance = 0.15
+
+[sub_resource type="Resource" id="LootDrop_weapon_machete"]
+script = ExtResource("90_drop")
+weapon = ExtResource("95_machete")
+chance = 0.15
+
+[sub_resource type="Resource" id="LootDrop_weapon_selfie_stick"]
+script = ExtResource("90_drop")
+weapon = ExtResource("95_selfie_stick")
+chance = 0.1
 
 [resource]
 script = ExtResource("2_stats")
@@ -51,4 +69,4 @@ combo_stagger_immune = true
 cash_chance = 1.0
 cash_per_level_min = 4
 cash_per_level_max = 8
-loot = Array[ExtResource("90_drop")]([SubResource("LootDrop_potion"), SubResource("LootDrop_tonic")])
+loot = Array[ExtResource("90_drop")]([SubResource("LootDrop_potion"), SubResource("LootDrop_tonic"), SubResource("LootDrop_weapon_switchblade"), SubResource("LootDrop_weapon_machete"), SubResource("LootDrop_weapon_selfie_stick")])

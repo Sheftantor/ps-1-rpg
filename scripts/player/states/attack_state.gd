@@ -46,7 +46,7 @@ func advance(delta: float) -> bool:
 	var live := on_hit_frames == 1 if on_hit_frames >= 0 else elapsed >= attack.startup_time and elapsed < active_end
 	# One activation per swing, so each enemy is hit at most once (Hitbox tracks it).
 	if live and not hitbox.is_active():
-		hitbox.activate(attack, player)
+		hitbox.activate(player.melee_attack(attack), player)
 	elif not live and hitbox.is_active():
 		hitbox.deactivate()
 	return elapsed >= active_end + attack.recovery_time

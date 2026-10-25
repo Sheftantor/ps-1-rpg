@@ -38,6 +38,7 @@ func get_save_data() -> Dictionary:
 		xp = state.xp,
 		stat_points = state.stat_points,
 		attributes = state.attributes,
+		starting_class = _path(state.starting_class),
 		max_health = state.max_health,
 		health = state.health,
 		max_energy = state.max_stamina,
@@ -47,6 +48,8 @@ func get_save_data() -> Dictionary:
 		money = state.money,
 		gun = _path(state.gun),
 		melee_weapon = _path(player.melee_weapon),
+		off_hand = _path(player.off_hand),
+		weapon_bag = player.weapon_bag.map(_path),
 		armor = armor,
 	}
 
@@ -79,6 +82,10 @@ func apply_save_data(data: Dictionary) -> void:
 		xp = int(data.get("xp", current.xp)),
 		stat_points = int(data.get("stat_points", current.stat_points)),
 		attributes = attributes,
+		starting_class = _load(data.get("starting_class", "")) as ClassData,
+		melee_weapon = _load(data.get("melee_weapon", "")) as MeleeWeaponData,
+		off_hand = _load(data.get("off_hand", "")) as MeleeWeaponData,
+		weapon_bag = _load_all(data.get("weapon_bag", [])),
 		max_health = max_health,
 		health = clampi(int(data.get("health", max_health)), 1, max_health),
 		max_stamina = max_energy,
@@ -89,12 +96,8 @@ func apply_save_data(data: Dictionary) -> void:
 		money = maxi(0, int(data.get("money", current.money))),
 	})
 
-	# Gear. Only the gun can change in play today; the melee weapon and armour
-	# come from the loadout, so these restore the same pieces (the melee
-	# weapon's hand model isn't rebuilt here).
-	var melee := _load(data.get("melee_weapon", "")) as MeleeWeaponData
-	if melee != null:
-		player.melee_weapon = melee
+	# Armour comes from the loadout, so this restores the same pieces. The
+	# weapons (main, secondary, bag) went through load_state above.
 	var saved_armor = data.get("armor")
 	if saved_armor is Dictionary:
 		player.armor.clear()
@@ -115,6 +118,17 @@ func apply_save_data(data: Dictionary) -> void:
 
 static func _path(resource: Resource) -> String:
 	return resource.resource_path if resource != null else ""
+
+
+## Loads each path in a saved array, skipping missing files.
+static func _load_all(paths: Variant) -> Array[Resource]:
+	var out: Array[Resource] = []
+	if paths is Array:
+		for path: Variant in paths:
+			var resource := _load(path)
+			if resource != null:
+				out.append(resource)
+	return out
 
 
 static func _load(path: Variant) -> Resource:

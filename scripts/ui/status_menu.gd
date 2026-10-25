@@ -48,6 +48,8 @@ var _was_paused: bool = false
 var _player: Player = null
 ## Hover, focus and the item tooltip for the slots.
 var _board: SlotBoard
+## The main and secondary weapon slots of the current build (swappable).
+var _weapon_slot_pair: Array[IconSlot] = []
 
 @onready var _root: Control = $Root
 @onready var _frame: Control = $Root/Frame
@@ -69,6 +71,7 @@ func _ready() -> void:
 	_frame.resized.connect(func() -> void: _frame.pivot_offset = _frame.size * 0.5)
 	# No bubble or description panel: tooltip mode.
 	_board = SlotBoard.new(null, null, null, "", "")
+	_board.slot_right_clicked.connect(_swap_weapon)
 	_model_view.gui_input.connect(_on_model_input)
 	_close_icon.follow_device = true
 	ActiveDevice.connect_changed(_on_device_changed)
@@ -94,6 +97,33 @@ func _input(event: InputEvent) -> void:
 	if is_open and (event.is_action_pressed(&"status_menu") or event.is_action_pressed(&"pause")):
 		close()
 		get_viewport().set_input_as_handled()
+	elif is_open and event.is_action_pressed(&"interact"):
+		# Interact (E / D-pad down) on a focused weapon slot swaps it.
+		var focused := _root.get_viewport().gui_get_focus_owner() as IconSlot
+		if focused != null and _weapon_slot_pair.has(focused):
+			_swap_weapon(focused)
+			get_viewport().set_input_as_handled()
+
+
+## Swaps the weapon in a weapon slot for the next owned one that fits
+## (Player.cycle_main_weapon / cycle_secondary_weapon) and redraws the screen.
+func _swap_weapon(slot: IconSlot) -> void:
+	var index := _weapon_slot_pair.find(slot)
+	if index < 0 or _player == null:
+		return
+	if index == 0:
+		_player.cycle_main_weapon()
+	else:
+		_player.cycle_secondary_weapon()
+	ItemTooltip.service().hide_now()
+	# After this input: the rebuild frees the slot.
+	_rebuild_focusing.call_deferred(index)
+
+
+func _rebuild_focusing(index: int) -> void:
+	_build(_player)
+	if index < _weapon_slot_pair.size():
+		_weapon_slot_pair[index].grab_focus()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -164,7 +194,7 @@ func _build(player: Player) -> void:
 		_gear_slot(_main_slots, player, spec)
 	for spec: Array in ACCESSORY_SLOTS:
 		_gear_slot(_accessory_slots, player, spec)
-	_board.add_weapons(_weapon_slots, player)
+	_weapon_slot_pair = _board.add_weapons(_weapon_slots, player)
 	_item_slots_for(player)
 
 	var needed := player.xp_to_next()
@@ -263,17 +293,23 @@ func _spend(attribute: StringName) -> void:
 
 # --- Model preview ------------------------------------------------------------
 
-## Puts the equipped melee weapon's model in the preview's hand, as the player does.
+## Puts the equipped melee weapons' models in the preview's hands (the main one
+## right, an off-hand one left), as the player does.
 func _dress_model(player: Player) -> void:
-	var mount := _model.get_node_or_null(^"Skeleton3D/RightHandAttachment/MeleeWeapon")
+	_dress_hand(^"Skeleton3D/RightHandAttachment/MeleeWeapon", player.melee_weapon)
+	_dress_hand(^"Skeleton3D/LeftHandAttachment/OffHandWeapon", player.off_hand)
+
+
+func _dress_hand(mount_path: NodePath, weapon_data: MeleeWeaponData) -> void:
+	var mount := _model.get_node_or_null(mount_path)
 	if mount == null:
 		return
 	var current := mount.get_node_or_null(^"Model")
 	if current != null:
 		mount.remove_child(current)
 		current.queue_free()
-	if player.melee_weapon != null and player.melee_weapon.model != null:
-		var weapon: Node3D = player.melee_weapon.model.instantiate()
+	if weapon_data != null and weapon_data.model != null:
+		var weapon: Node3D = weapon_data.model.instantiate()
 		weapon.name = &"Model"
 		mount.add_child(weapon)
 		mount.move_child(weapon, 0)

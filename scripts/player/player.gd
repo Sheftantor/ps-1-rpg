@@ -95,6 +95,12 @@ const FALL_ANIM_DELAY: float = 0.12
 
 @export var stats: PlayerStats
 @export var loadout: PlayerLoadout
+## Level, stat and unlock scaling (stat points per level, health / energy per
+## stat point, weapon bonus, ability unlocks).
+@export var progression: ProgressionTable = preload("res://resources/progression/progression_table.tres")
+## The class this character started as: its signature ability is unlocked from
+## the start. A starting point, not a lock (see ProgressionTable).
+@export var starting_class: ClassData = preload("res://resources/progression/classes/warrior.tres")
 @export var mouse_sensitivity: float = 0.0025
 ## Right-stick camera speed at full tilt (radians per second).
 @export var stick_look_speed: float = 3.0
@@ -148,10 +154,17 @@ var _action_speed: float = 1.0
 var _action_slot: int = 0
 ## Whether the current airborne stretch started with a jump (not a ledge drop).
 var _jumped: bool = false
-## Primary weapon (any melee weapon), from the loadout.
+## Main slot: any melee weapon. Starts from the class kit or the loadout.
 var melee_weapon: MeleeWeaponData = null
-## Secondary weapon slot (the melee weapon is always the primary). Null until a gun is picked up.
+## Secondary slot, gun side: the gun, or null. Holds nothing while off_hand does.
 var gun: WeaponData = null
+## Secondary slot, melee side: a dual-wieldable melee weapon held in the left
+## hand, only next to a dual-wieldable main weapon (dual wielding). Null while
+## the secondary is the gun or empty.
+var off_hand: MeleeWeaponData = null
+## Weapons owned but not equipped (MeleeWeaponData / WeaponData), swapped in
+## from the status screen (cycle_main_weapon / cycle_secondary_weapon).
+var weapon_bag: Array[Resource] = []
 ## Worn armour by slot, from the loadout; empty slots are absent.
 var armor: Dictionary[ArmorData.Slot, ArmorData] = {}
 var _gun_model: Node3D = null
@@ -174,6 +187,8 @@ var _hip_attachment: BoneAttachment3D = null
 @onready var _anim: AnimationPlayer = $Facing/Model/AnimationPlayer
 @onready var _anim_tree: AnimationTree = $Facing/Model/AnimationTree
 @onready var _weapon_trail: WeaponTrail = $Facing/Model/Skeleton3D/RightHandAttachment/MeleeWeapon/WeaponTrail
+## Left-hand mount for the off-hand weapon (absent on models without one).
+@onready var _off_hand_mount: Node3D = get_node_or_null(^"Facing/Model/Skeleton3D/LeftHandAttachment/OffHandWeapon")
 @onready var _melee: Node3D = $Facing/Model/Skeleton3D/RightHandAttachment/MeleeWeapon
 @onready var hud: PlayerHud = $PlayerHud
 @onready var status_menu: StatusMenu = $StatusMenu
@@ -192,7 +207,7 @@ func _ready() -> void:
 	InputBindings.ensure_defaults()
 	add_to_group(&"player")
 	level = stats.level
-	stat_points = stats.stat_points
+	stat_points = stats.stat_points + progression.total_stat_points(level)
 	attributes = {strength = stats.strength, agility = stats.agility, focus = stats.focus, memes = stats.memes}
 	health.setup(stats.max_health)
 	health.died.connect(_on_died)
@@ -401,7 +416,7 @@ func cycle_item(step: int) -> void:
 ## Redraws the HUD loadout row (weapons and inventory) after anything in it changes.
 func _refresh_item_hud() -> void:
 	selected_item_stack()  # Clamps selected_item.
-	hud.set_loadout(melee_weapon, gun, inventory, selected_item)
+	hud.set_loadout(melee_weapon, secondary_weapon(), inventory, selected_item, is_dual_wielding())
 
 
 ## Faces the lock target, or the held direction, at the start of an attack.
@@ -643,12 +658,21 @@ func _update_visuals() -> void:
 
 # --- Weapons & pickups ------------------------------------------------------------
 
-## Takes the melee weapon, gun and armour from the loadout and puts the melee
-## weapon's model in the hand mount (replacing the scene's placeholder).
+## Takes the weapons and armour from the loadout (the starting class's kit
+## replaces its weapons when the class has one) and puts the weapon models in
+## the hands.
 func _equip_from_loadout() -> void:
 	melee_weapon = loadout.melee_weapon
 	if gun == null:
 		gun = loadout.gun
+	if starting_class != null and starting_class.starting_main != null:
+		melee_weapon = starting_class.starting_main
+		gun = null
+		var second := starting_class.starting_secondary
+		if second is WeaponData:
+			gun = second
+		elif second is MeleeWeaponData and can_equip_secondary(second):
+			off_hand = second
 	var slots := {
 		ArmorData.Slot.SHIRT: loadout.shirt, ArmorData.Slot.NECK: loadout.neck, ArmorData.Slot.ARMS: loadout.arms,
 		ArmorData.Slot.BELT: loadout.belt, ArmorData.Slot.PANTS: loadout.pants, ArmorData.Slot.SHOES: loadout.shoes,
@@ -659,15 +683,139 @@ func _equip_from_loadout() -> void:
 	for slot: ArmorData.Slot in slots:
 		if slots[slot] != null:
 			armor[slot] = slots[slot]
-	if melee_weapon != null and melee_weapon.model != null:
-		var placeholder := _melee.get_node_or_null(^"Model")
-		if placeholder != null:
-			_melee.remove_child(placeholder)
-			placeholder.queue_free()
-		var model: Node3D = melee_weapon.model.instantiate()
-		model.name = &"Model"
-		_melee.add_child(model)
-		_melee.move_child(model, 0)
+	_mount_weapon_models()
+
+
+# --- Weapon slots ---------------------------------------------------------------
+# Main: any melee weapon. Secondary: the gun, or a dual-wieldable melee weapon
+# when the main one is dual-wieldable too (then both are wielded together).
+
+## What's in the secondary slot: the gun, the off-hand melee weapon, or null.
+func secondary_weapon() -> Resource:
+	return off_hand if off_hand != null else gun
+
+
+## Two dual-wieldable melee weapons equipped: the combo swings with both in
+## hand, and energy abilities that need dual wield can be used.
+func is_dual_wielding() -> bool:
+	return melee_weapon != null and off_hand != null and melee_weapon.dual_wieldable and off_hand.dual_wieldable
+
+
+## Unlocked, and dual wielding if the ability needs it.
+func can_use_ability(ability: EnergyAbility) -> bool:
+	return unlocked_abilities().has(ability) and (not ability.requires_dual_wield or is_dual_wielding())
+
+
+func can_equip_main(weapon: Resource) -> bool:
+	return weapon is MeleeWeaponData
+
+
+## Guns always; a melee weapon only if it and the main weapon are both dual-wieldable.
+func can_equip_secondary(weapon: Resource) -> bool:
+	if weapon is WeaponData:
+		return true
+	return weapon is MeleeWeaponData and (weapon as MeleeWeaponData).dual_wieldable \
+			and melee_weapon != null and melee_weapon.dual_wieldable
+
+
+## Puts `weapon` in the main slot; the old one goes to the weapon bag. An
+## off-hand weapon that can't pair with the new main goes to the bag too.
+func equip_main(weapon: MeleeWeaponData) -> void:
+	if weapon == null or weapon == melee_weapon:
+		return
+	weapon_bag.erase(weapon)
+	if melee_weapon != null:
+		weapon_bag.append(melee_weapon)
+	melee_weapon = weapon
+	if off_hand != null and not can_equip_secondary(off_hand):
+		weapon_bag.append(off_hand)
+		off_hand = null
+	_weapons_changed()
+
+
+## Puts `weapon` (a gun, a dual-wieldable melee weapon, or null for empty) in
+## the secondary slot; what was there goes to the weapon bag.
+func equip_secondary(weapon: Resource) -> void:
+	if weapon == secondary_weapon() or (weapon != null and not can_equip_secondary(weapon)):
+		return
+	if _gun_model != null:
+		# The drawn gun's model is cached; the next draw builds the new one.
+		_gun_model.queue_free()
+		_gun_model = null
+	weapon_bag.erase(weapon)
+	var old := secondary_weapon()
+	if old != null:
+		weapon_bag.append(old)
+	gun = weapon as WeaponData
+	off_hand = weapon as MeleeWeaponData
+	_weapons_changed()
+
+
+## Main-slot choices: the equipped melee weapon, then the bag's, in order.
+func main_weapon_choices() -> Array[Resource]:
+	var out: Array[Resource] = []
+	if melee_weapon != null:
+		out.append(melee_weapon)
+	for weapon: Resource in weapon_bag:
+		if can_equip_main(weapon):
+			out.append(weapon)
+	return out
+
+
+## Secondary-slot choices, starting with what's there now (null = empty): the
+## bag's guns and (next to a dual-wieldable main) dual-wieldable melee weapons,
+## and empty.
+func secondary_weapon_choices() -> Array[Resource]:
+	var out: Array[Resource] = [secondary_weapon()]
+	for weapon: Resource in weapon_bag:
+		if can_equip_secondary(weapon):
+			out.append(weapon)
+	if secondary_weapon() != null:
+		out.append(null)
+	return out
+
+
+## Swaps the main weapon for the next one that fits (status screen).
+func cycle_main_weapon() -> void:
+	var choices := main_weapon_choices()
+	if choices.size() > 1:
+		equip_main(choices[1] as MeleeWeaponData)
+
+
+## Swaps the secondary for the next one that fits, or empties it (status screen).
+func cycle_secondary_weapon() -> void:
+	var choices := secondary_weapon_choices()
+	if choices.size() > 1:
+		equip_secondary(choices[1])
+
+
+func _weapons_changed() -> void:
+	_mount_weapon_models()
+	_refresh_item_hud()
+	progress_changed.emit()
+
+
+## Puts the main weapon's model in the right hand (replacing what's there) and
+## the off-hand weapon's in the left; the swing trail follows the main blade.
+func _mount_weapon_models() -> void:
+	_set_model(_melee, melee_weapon)
+	if _off_hand_mount != null:
+		_set_model(_off_hand_mount, off_hand)
+	if melee_weapon != null:
+		_weapon_trail.blade_tip = Vector3(0.0, melee_weapon.trail_tip, 0.0)
+
+
+static func _set_model(mount: Node3D, weapon: MeleeWeaponData) -> void:
+	var current := mount.get_node_or_null(^"Model")
+	if current != null:
+		mount.remove_child(current)
+		current.queue_free()
+	if weapon == null or weapon.model == null:
+		return
+	var model: Node3D = weapon.model.instantiate()
+	model.name = &"Model"
+	mount.add_child(model)
+	mount.move_child(model, 0)
 
 
 func melee_name() -> String:
@@ -731,26 +879,71 @@ func spend_money(amount: int) -> bool:
 	return true
 
 
-## WoW-style level-up: more max health and energy (the gain is added to the
-## current values too) and a stat point to put into one attribute.
+## Level-up: the new level's stat points from the progression table to put
+## into attributes (health and energy come with spending them).
 func _level_up() -> void:
+	var before := unlocked_abilities()
 	set_level(level + 1)
-	stat_points += stats.stat_points_per_level
-	health.max_health += stats.health_per_level
-	health.heal(stats.health_per_level)
-	stamina.maximum += stats.energy_per_level
-	stamina.restore(stats.energy_per_level)
+	stat_points += progression.row(level).stat_points
 	hud.show_level_up(level)
+	_announce_unlocks(before)
 
 
 ## Puts one unspent point into an attribute (strength, agility, focus, memes).
+## Each point also raises max health and energy by the progression table's
+## amounts for the current level (the gain is added to the current values too).
 func spend_stat_point(attribute: StringName) -> bool:
 	if stat_points <= 0 or not attributes.has(attribute):
 		return false
+	var before := unlocked_abilities()
 	stat_points -= 1
 	attributes[attribute] += 1
+	var health_gain := roundi(progression.health_per_point(level))
+	health.max_health += health_gain
+	health.heal(health_gain)
+	var energy_gain := progression.energy_per_point(level)
+	stamina.maximum += energy_gain
+	stamina.restore(energy_gain)
 	progress_changed.emit()
+	_announce_unlocks(before)
 	return true
+
+
+## Energy abilities and summons available now: the starting class's own, plus
+## whatever level and memes have unlocked (ProgressionTable unlocks).
+func unlocked_abilities() -> Array[EnergyAbility]:
+	return progression.unlocked_abilities(starting_class, level, attributes)
+
+
+func has_ability(id: StringName) -> bool:
+	return unlocked_abilities().any(func(ability: EnergyAbility) -> bool: return ability.id == id)
+
+
+## Flashes each ability that's unlocked now but wasn't in `before`.
+func _announce_unlocks(before: Array[EnergyAbility]) -> void:
+	for ability: EnergyAbility in unlocked_abilities():
+		if not before.has(ability):
+			hud.flash_message("UNLOCKED: %s" % ability.display_name.to_upper())
+
+
+## A melee hit with the small weapon bonus from the attributes on top
+## (ProgressionTable.weapon_multiplier); `attack` itself is never changed.
+func melee_attack(attack: AttackData) -> AttackData:
+	var kind := &"melee"
+	if is_dual_wielding():
+		kind = &"dual_melee"
+	elif melee_weapon != null:
+		kind = melee_weapon.weapon_kind
+	return _weapon_attack(attack, kind)
+
+
+func _weapon_attack(attack: AttackData, weapon_kind: StringName) -> AttackData:
+	var damage := progression.weapon_damage(attack.damage, weapon_kind, attributes)
+	if damage == attack.damage:
+		return attack
+	var scaled := attack.duplicate() as AttackData
+	scaled.damage = damage
+	return scaled
 
 
 ## What carries over when AreaTravel moves the player to another area: the
@@ -761,6 +954,10 @@ func save_state() -> Dictionary:
 		xp = xp,
 		stat_points = stat_points,
 		attributes = attributes.duplicate(),
+		starting_class = starting_class,
+		melee_weapon = melee_weapon,
+		off_hand = off_hand,
+		weapon_bag = weapon_bag.duplicate(),
 		max_health = health.max_health,
 		max_stamina = stamina.maximum,
 		health = health.current,
@@ -779,6 +976,14 @@ func load_state(state: Dictionary) -> void:
 	xp = state.xp
 	stat_points = state.stat_points
 	attributes.assign(state.attributes)
+	if state.get("starting_class") != null:
+		starting_class = state.starting_class
+	if state.get("melee_weapon") != null:
+		melee_weapon = state.melee_weapon
+	if state.has("off_hand"):
+		off_hand = state.off_hand
+	if state.has("weapon_bag"):
+		weapon_bag.assign(state.weapon_bag)
 	health.max_health = state.max_health
 	health.set_current(state.health)
 	stamina.maximum = state.max_stamina
@@ -788,6 +993,7 @@ func load_state(state: Dictionary) -> void:
 	selected_item = state.selected_item
 	money = int(state.get("money", money))
 	money_changed.emit(money)
+	_mount_weapon_models()
 	_refresh_item_hud()
 	progress_changed.emit()
 
@@ -826,12 +1032,21 @@ func take_loot(pickup: Pickup, entry: Resource) -> void:
 		add_money(cash)
 		hud.flash_message("+$%d" % cash)
 	elif entry is WeaponData:
-		gun = entry as WeaponData
-		if _gun_model != null:
-			_gun_model.queue_free()
-			_gun_model = null
-		hud.flash_message("GOT %s" % gun.display_name.to_upper())
-		_refresh_item_hud()
+		# Into the secondary slot; whatever was there goes to the weapon bag.
+		equip_secondary(entry)
+		hud.flash_message("GOT %s" % (entry as WeaponData).display_name.to_upper())
+	elif entry is MeleeWeaponData:
+		# Into an empty slot it fits, otherwise the weapon bag (swap it in on
+		# the status screen).
+		var weapon := entry as MeleeWeaponData
+		weapon_bag.append(weapon)
+		if melee_weapon == null:
+			equip_main(weapon)
+		elif secondary_weapon() == null and can_equip_secondary(weapon):
+			equip_secondary(weapon)
+		else:
+			progress_changed.emit()
+		hud.flash_message("GOT %s" % weapon.display_name.to_upper())
 	elif entry is ItemStack:
 		var stack := entry as ItemStack
 		add_item(stack)
@@ -956,6 +1171,7 @@ func fire_gun(target: Enemy) -> void:
 	if flat_distance_to(enemy) > gun.effective_range:
 		attack = gun.shot.duplicate() as AttackData
 		attack.damage = maxi(1, roundi(gun.shot.damage * gun.out_of_range_damage_scale))
+	attack = _weapon_attack(attack, &"gun")
 	enemy.hurtbox.receive_hit(attack, self)
 	last_hit_result = "shot %s for %d" % [enemy.name, attack.damage]
 

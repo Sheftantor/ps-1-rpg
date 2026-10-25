@@ -17,10 +17,11 @@ static func damage_multiplier(gap: int) -> float:
 	return maxf(TUNING.damage_multiplier_floor, 1.0 + TUNING.damage_loss_per_level_below * gap)
 
 
-## Max health of a base-stat, ungeared player at `level` (Player._level_up adds
-## health_per_level each level from the starting level).
+## Max health of an ungeared player at `level` who spent each level's stat
+## points as they came (each point adds that level's health_per_point, per the
+## progression table).
 static func player_max_health_at(level: int, stats: PlayerStats) -> int:
-	return stats.max_health + stats.health_per_level * (level - stats.level)
+	return ProgressionTable.load_default().expected_max_health(stats.max_health, stats.level, level)
 
 
 ## Damage of one basic melee swing (the MeleeSwing state uses stats.light_combo[0]).

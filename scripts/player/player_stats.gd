@@ -6,7 +6,8 @@ extends Resource
 @export var max_stamina: float = 100.0
 ## Starting character level. The live level is Player.level.
 @export_range(1, 99) var level: int = 1
-## Starting unspent stat points (each level-up adds stat_points_per_level).
+## Starting unspent stat points, on top of the progression table's points for
+## reaching `level` (each level-up adds that level's stat_points).
 @export var stat_points: int = 0
 
 @export_group("Attributes")
@@ -34,10 +35,8 @@ extends Resource
 ## An enemy this many levels below the player gives no XP ("grey"); between, XP
 ## falls off linearly.
 @export var grey_gap: int = 5
-## Gained every level-up.
-@export var health_per_level: int = 10
-@export var energy_per_level: float = 5.0
-@export var stat_points_per_level: int = 1
+## Stat points per level and the health / energy each point gives come from
+## the progression table (res://resources/progression/progression_table.tres).
 
 @export_group("Stamina")
 ## Per second, once regeneration resumes.

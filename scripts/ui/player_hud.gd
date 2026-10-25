@@ -57,7 +57,9 @@ var _message_lines: Array = []
 var _gun_drawn: bool = false
 # Last set_loadout() arguments, redrawn when the drawn weapon changes.
 var _melee: MeleeWeaponData = null
-var _gun: WeaponData = null
+## The secondary slot: a gun, an off-hand melee weapon, or null.
+var _secondary: Resource = null
+var _dual_wielding: bool = false
 var _inventory: Array[ItemStack] = []
 var _selected_item: int = 0
 var _slots: Array[Control] = []
@@ -149,11 +151,14 @@ func _set_stat(bar: Range, value_label: Label, current: float, maximum: float) -
 	value_label.text = "%d/%d" % [roundi(current), roundi(maximum)]
 
 
-## Bottom-left loadout window: both weapons, then the carried items with
-## `selected_item` (the one use_item spends) under the cursor.
-func set_loadout(melee: MeleeWeaponData, gun: WeaponData, inventory: Array[ItemStack], selected_item: int) -> void:
+## Bottom-left loadout window: both weapon slots (secondary: a gun or an
+## off-hand melee weapon), then the carried items with `selected_item` (the one
+## use_item spends) under the cursor. dual_wielding lights both weapons.
+func set_loadout(melee: MeleeWeaponData, secondary: Resource, inventory: Array[ItemStack], selected_item: int,
+		dual_wielding: bool = false) -> void:
 	_melee = melee
-	_gun = gun
+	_secondary = secondary
+	_dual_wielding = dual_wielding
 	_inventory = inventory
 	_selected_item = selected_item
 	_refresh_loadout()
@@ -172,7 +177,7 @@ func set_gun_drawn(drawn: bool) -> void:
 
 
 func _refresh_loadout() -> void:
-	_loadout.set_entries(_melee, _gun, _gun_drawn, _inventory, _selected_item)
+	_loadout.set_entries(_melee, _secondary, _gun_drawn, _inventory, _selected_item, _dual_wielding)
 
 
 ## Shows the interact prompt while something interactable is in reach: the icon

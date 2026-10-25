@@ -157,17 +157,26 @@ func _award_xp() -> void:
 
 
 ## Drops a loot sack rolled from stats' Loot group: cash on stats.cash_chance,
-## and each loot line on its own chance. Nothing rolled, no sack.
+## each item line on its own chance, and at most one weapon (the first weapon
+## line that rolls). Nothing rolled, no sack.
 func _drop_loot() -> void:
 	var cash := 0
 	if randf() < stats.cash_chance:
-		cash = randi_range(stats.cash_per_level_min, maxi(stats.cash_per_level_min, stats.cash_per_level_max)) 				* maxi(1, level())
+		var per_level := randi_range(stats.cash_per_level_min, maxi(stats.cash_per_level_min, stats.cash_per_level_max))
+		cash = per_level * maxi(1, level())
 	var stacks: Array[ItemStack] = []
+	var weapon: Resource = null
 	for drop: LootDrop in stats.loot:
-		var stack := drop.roll() if drop != null else null
+		if drop == null:
+			continue
+		if drop.weapon != null:
+			if weapon == null:
+				weapon = drop.roll_weapon()
+			continue
+		var stack := drop.roll()
 		if stack != null:
 			stacks.append(stack)
-	Pickup.drop(get_tree(), global_position + Vector3.UP * LOOT_DROP_HEIGHT, cash, stacks)
+	Pickup.drop(get_tree(), global_position + Vector3.UP * LOOT_DROP_HEIGHT, cash, stacks, weapon)
 
 
 func level() -> int:

@@ -30,6 +30,13 @@ transform = Transform3D(0.07971513, 0.16072498, 0.98377496, 0.85689205, 0.493187
 [node name="WeaponTrail" type="MeshInstance3D" parent="Skeleton3D/RightHandAttachment/MeleeWeapon"]
 script = ExtResource("7_trail")
 
+[node name="LeftHandAttachment" type="BoneAttachment3D" parent="Skeleton3D" index="2"]
+bone_name = "mixamorig_LeftHand"
+bone_idx = 17
+
+[node name="OffHandWeapon" type="Node3D" parent="Skeleton3D/LeftHandAttachment"]
+transform = Transform3D(0.47602314, 0.87943, 0.0023165434, -0.87723285, 0.4750166, -0.06943969, -0.062167715, 0.031022733, 0.9975835, -0.0009826086, 0.03619978, -0.014029443)
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": ExtResource("4_anims")

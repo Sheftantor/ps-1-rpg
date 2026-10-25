@@ -65,9 +65,12 @@ func _ready() -> void:
 	margin.add_child(_rows)
 
 
-## melee/gun: the two weapon slots (null = empty). gun_drawn: which one is in
-## hand. items: the inventory; selected: index into it of the item under the cursor.
-func set_entries(melee: MeleeWeaponData, gun: WeaponData, gun_drawn: bool, items: Array[ItemStack], selected: int) -> void:
+## melee / secondary: the two weapon slots (null = empty; secondary is a gun or
+## an off-hand melee weapon). gun_drawn: the gun is in hand rather than the melee
+## weapon; dual_wielding: both melee weapons are. items: the inventory; selected:
+## index into it of the item under the cursor.
+func set_entries(melee: MeleeWeaponData, secondary: Resource, gun_drawn: bool, items: Array[ItemStack], selected: int,
+		dual_wielding: bool = false) -> void:
 	if _rows == null:
 		return
 	for child in _rows.get_children():
@@ -75,11 +78,11 @@ func set_entries(melee: MeleeWeaponData, gun: WeaponData, gun_drawn: bool, items
 		child.queue_free()
 	var names: Array[String] = []
 	names.append(melee.display_name if melee != null else "UNARMED")
-	names.append(gun.display_name if gun != null else "-")
+	names.append(String(secondary.get(&"display_name")) if secondary != null else "-")
 	_add_row(false, melee.icon if melee != null else null, names[0],
 		melee != null and not gun_drawn, false)
-	_add_row(false, gun.icon if gun != null else null, names[1],
-		gun != null and gun_drawn, false)
+	_add_row(false, secondary.get(&"icon") as Texture2D if secondary != null else null, names[1],
+		secondary != null and (dual_wielding or (gun_drawn and secondary is WeaponData)), false)
 	var visible_items := mini(items.size(), max_item_rows)
 	var first := clampi(selected - visible_items + 1, 0, maxi(0, items.size() - visible_items))
 	for i in range(first, first + visible_items):

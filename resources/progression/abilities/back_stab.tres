@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnergyAbility" format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/energy_ability.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+id = &"back_stab"
+display_name = "Back Stab"
+description = "Teleports behind an enemy and does a strong back attack."
+kind = 0
+scaling_stat = &"agility"
+requires_dual_wield = true
+notes = "Behaviour not built yet. Scaling stat is a design call, not a placeholder."

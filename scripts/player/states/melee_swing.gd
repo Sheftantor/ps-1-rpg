@@ -114,7 +114,7 @@ func physics_update(delta: float) -> void:
 			_air_motion(wound, FLIP_IN_WINDUP * wound if _is_finisher() else 0.0)
 			if _elapsed >= _windup():
 				_follow_weapon()
-				_hitbox.activate(_swing_attack(), player)
+				_hitbox.activate(player.melee_attack(_swing_attack()), player)
 				_start_phase(Phase.STRIKE)
 		Phase.STRIKE:
 			_take_attack_presses()

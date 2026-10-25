@@ -4,7 +4,8 @@ extends Node3D
 ## gold aura and sparkles (res://scenes/loot_sack.tscn), whatever is inside.
 ## Interact (E / D-pad down) within `radius` has the player bend down to it
 ## (the LootBend state), which opens the loot window, where the player takes
-## the contents one at a time: a weapon for the gun slot, cash for the wallet
+## the contents one at a time: a gun for the secondary slot, a melee weapon for
+## the weapon bag (or an empty slot it fits), cash for the wallet
 ## and stacks of items for the inventory. The sack disappears once it's empty.
 ## Placed in a level, or dropped by a dying enemy (drop()).
 
@@ -13,7 +14,8 @@ const LOOT_STATE := &"LootBend"
 ## Physics layers a dropped sack lands on (1 = world).
 const GROUND_MASK := 1
 
-@export var weapon: WeaponData
+## A gun (WeaponData) or a melee weapon (MeleeWeaponData).
+@export var weapon: Resource
 @export var item: ItemStack
 ## Cash inside (0 = none).
 @export var money: int = 0
@@ -62,15 +64,16 @@ func _process(delta: float) -> void:
 	_glow.light_energy = _glow_energy * (0.75 + pulse * 0.5)
 
 
-## Drops a sack holding money and stacks into the current scene: it pops out
-## of `from` and lands on the ground below in a short arc. Null (and no sack)
-## when there's nothing to put in it.
-static func drop(tree: SceneTree, from: Vector3, cash: int, stacks: Array[ItemStack]) -> Pickup:
+## Drops a sack holding money, stacks and maybe a weapon into the current
+## scene: it pops out of `from` and lands on the ground below in a short arc.
+## Null (and no sack) when there's nothing to put in it.
+static func drop(tree: SceneTree, from: Vector3, cash: int, stacks: Array[ItemStack], weapon: Resource = null) -> Pickup:
 	var scene := tree.current_scene
-	if scene == null or (cash <= 0 and stacks.is_empty()):
+	if scene == null or (cash <= 0 and stacks.is_empty() and weapon == null):
 		return null
 	var pickup := Pickup.new()
 	pickup.dropped = true
+	pickup.weapon = weapon
 	pickup.money = cash
 	pickup.items = stacks
 	scene.add_child(pickup)
@@ -103,7 +106,8 @@ static func _ground_below(node: Node3D, from: Vector3) -> Vector3:
 	return hit.position if not hit.is_empty() else from
 
 
-## What's still in the sack: WeaponData, LootCash and/or ItemStacks.
+## What's still in the sack: a weapon (WeaponData or MeleeWeaponData), LootCash
+## and/or ItemStacks.
 func contents() -> Array[Resource]:
 	var out: Array[Resource] = []
 	if weapon != null:
@@ -155,6 +159,8 @@ func in_reach(point: Vector3) -> bool:
 static func entry_name(entry: Resource) -> String:
 	if entry is WeaponData:
 		return (entry as WeaponData).display_name
+	if entry is MeleeWeaponData:
+		return (entry as MeleeWeaponData).display_name
 	if entry is LootCash:
 		return "$%d" % (entry as LootCash).amount
 	if entry is ItemStack:
@@ -165,6 +171,8 @@ static func entry_name(entry: Resource) -> String:
 static func entry_icon(entry: Resource) -> Texture2D:
 	if entry is WeaponData:
 		return (entry as WeaponData).icon
+	if entry is MeleeWeaponData:
+		return (entry as MeleeWeaponData).icon
 	if entry is LootCash:
 		return LootCash.ICON
 	if entry is ItemStack:
