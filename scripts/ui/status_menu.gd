@@ -1,15 +1,17 @@
 class_name StatusMenu
 extends CanvasLayer
-## Character screen on the status_menu input (C / D-pad up). A 3D render of the
-## player model (with the equipped melee weapon in hand) sits between two columns
-## of gear slots: clothing on the left, rings, trinkets and the charm on the
-## right, with the melee weapon, gun and carried items below, and two stat
-## panels under those reading the player's live numbers.
+## Character screen, always open beside the bag (InventoryMenu opens, closes
+## and pauses for both; the status_menu input opens the pair). A 3D render of
+## the player model (with the equipped melee weapons in hand) sits between two
+## columns of gear slots: clothing on the left, rings, trinkets and the charm on
+## the right, with the main and secondary weapons and the QUICK_SLOTS quick
+## items below, and two stat panels under those reading the player's live numbers.
+## Clicking a slot picks up or puts down through the bag's GearHand; a slot
+## the held piece doesn't fit flashes red.
 ## Empty slots show a grey picture of what goes there. Hovering a slot (or
 ## controller focus on it) shows the shared ItemTooltip: the item's name, type,
 ## numbers and description, or what goes in an empty slot. Drag the
-## model (or push the right stick) to turn it. Frees the mouse and pauses the
-## game while open; status_menu, pause or ui_cancel closes it.
+## model (or push the right stick) to turn it.
 ## Layout and styling live in res://scenes/status_menu.tscn.
 
 ## True while the screen is up; the player ignores input and physics meanwhile.
@@ -42,14 +44,16 @@ const STICK_TURN := 3.0
 const STICK_DEADZONE := 0.25
 ## Overall size of the gear/stats window, scaled about its center.
 const FRAME_SCALE := 0.85
+const NO_FIT_COLOR := Color(1.0, 0.35, 0.35)
 
-var _was_paused: bool = false
 ## The player the screen was last built for.
 var _player: Player = null
 ## Hover, focus and the item tooltip for the slots.
 var _board: SlotBoard
-## The main and secondary weapon slots of the current build (swappable).
-var _weapon_slot_pair: Array[IconSlot] = []
+## The bag's hand (what's on the cursor), while open.
+var _hand: GearHand = null
+## Each slot of the current build -> its GearHand slot.
+var _keys: Dictionary[IconSlot, Variant] = {}
 
 @onready var _root: Control = $Root
 @onready var _frame: Control = $Root/Frame
@@ -58,11 +62,9 @@ var _weapon_slot_pair: Array[IconSlot] = []
 @onready var _weapon_slots: HBoxContainer = $Root/Frame/Layout/Weapons
 @onready var _combat_rows: VBoxContainer = $Root/Frame/Layout/Stats/Combat/Rows
 @onready var _spirit_rows: VBoxContainer = $Root/Frame/Layout/Stats/Spirit/Rows
-@onready var _title: Label = $Root/Title
 @onready var _model_view: SubViewportContainer = $Root/Frame/Layout/Gear/ModelFrame/ModelView
 @onready var _turntable: Node3D = $Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport/Turntable
 @onready var _model: Node3D = $Root/Frame/Layout/Gear/ModelFrame/ModelView/Viewport/Turntable/Model
-@onready var _close_icon: InputIcon = $Root/Hint/Icon
 
 
 func _ready() -> void:
@@ -71,10 +73,9 @@ func _ready() -> void:
 	_frame.resized.connect(func() -> void: _frame.pivot_offset = _frame.size * 0.5)
 	# No bubble or description panel: tooltip mode.
 	_board = SlotBoard.new(null, null, null, "", "")
-	_board.slot_right_clicked.connect(_swap_weapon)
+	_board.slot_clicked.connect(_on_slot_clicked)
 	_model_view.gui_input.connect(_on_model_input)
-	_close_icon.follow_device = true
-	ActiveDevice.connect_changed(_on_device_changed)
+	($Root/Hint/Icon as InputIcon).follow_device = true
 	# Same as the player: a private copy of the tree so its parameters are its own.
 	var anim_tree := _model.get_node(^"AnimationTree") as AnimationTree
 	anim_tree.tree_root = anim_tree.tree_root.duplicate(true)
@@ -91,45 +92,80 @@ func _exit_tree() -> void:
 	is_open = false
 
 
-func _input(event: InputEvent) -> void:
-	# _input, not _unhandled_input: D-pad up is also ui_up, which focus
-	# navigation would swallow before it got here.
-	if is_open and (event.is_action_pressed(&"status_menu") or event.is_action_pressed(&"pause")):
-		close()
-		get_viewport().set_input_as_handled()
-	elif is_open and event.is_action_pressed(&"interact"):
-		# Interact (E / D-pad down) on a focused weapon slot swaps it.
-		var focused := _root.get_viewport().gui_get_focus_owner() as IconSlot
-		if focused != null and _weapon_slot_pair.has(focused):
-			_swap_weapon(focused)
-			get_viewport().set_input_as_handled()
+## Opens this screen (the status_menu input). The bag runs the session for both.
+func open() -> void:
+	var player := get_tree().get_first_node_in_group(&"player") as Player
+	if player != null:
+		player.inventory_menu.open_character()
 
 
-## Swaps the weapon in a weapon slot for the next owned one that fits
-## (Player.cycle_main_weapon / cycle_secondary_weapon) and redraws the screen.
-func _swap_weapon(slot: IconSlot) -> void:
-	var index := _weapon_slot_pair.find(slot)
-	if index < 0 or _player == null:
-		return
-	if index == 0:
-		_player.cycle_main_weapon()
-	else:
-		_player.cycle_secondary_weapon()
-	ItemTooltip.service().hide_now()
-	# After this input: the rebuild frees the slot.
-	_rebuild_focusing.call_deferred(index)
+func close() -> void:
+	var player := get_tree().get_first_node_in_group(&"player") as Player
+	if player != null:
+		player.inventory_menu.close_character()
 
 
-func _rebuild_focusing(index: int) -> void:
+## Puts the controller cursor on the first gear slot.
+func focus_first() -> void:
+	if _main_slots.get_child_count() > 0:
+		(_main_slots.get_child(0) as Control).grab_focus()
+
+
+## Shown by InventoryMenu.open_character(), moving gear with its `hand`.
+func show_for(player: Player, hand: GearHand) -> void:
+	is_open = true
+	_hand = hand
+	_turntable.rotation = Vector3.ZERO
+	_build(player)
+	_root.visible = true
+
+
+func hide_screen() -> void:
+	is_open = false
+	_hand = null
+	_board.hide_bubble()
+	_root.visible = false
+
+
+func rebuild() -> void:
 	_build(_player)
-	if index < _weapon_slot_pair.size():
-		_weapon_slot_pair[index].grab_focus()
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if is_open and event.is_action_pressed(&"ui_cancel"):
-		close()
-		get_viewport().set_input_as_handled()
+func owns(control: Control) -> bool:
+	return _root.is_ancestor_of(control)
+
+
+func slot_at(point: Vector2) -> IconSlot:
+	return _board.slot_at(point) if is_open else null
+
+
+## The GearHand slot of a focused control (null if it isn't one of ours), so
+## focus can come back to the same slot after a rebuild (focus_slot).
+func focus_key(control: Control) -> Variant:
+	return _keys.get(control)
+
+
+func focus_slot(key: Variant) -> void:
+	for slot: IconSlot in _keys:
+		# Armour keys are ints, the rest StringNames: compare types first.
+		if typeof(_keys[slot]) == typeof(key) and _keys[slot] == key:
+			slot.grab_focus()
+			return
+
+
+func _on_slot_clicked(slot: IconSlot) -> void:
+	# After this input event: a move rebuilds the screen, freeing the slot.
+	_click.call_deferred(slot, _keys[slot])
+
+
+func _click(slot: IconSlot, key: Variant) -> void:
+	if _hand == null or _hand.click_slot(key):
+		return
+	# Doesn't fit: flash the slot and say why.
+	_player.inventory_menu.explain(_hand.why_not(key, _hand.held))
+	if is_instance_valid(slot):
+		slot.modulate = NO_FIT_COLOR
+		slot.create_tween().tween_property(slot, ^"modulate", Color.WHITE, 0.35)
 
 
 func _process(delta: float) -> void:
@@ -140,48 +176,6 @@ func _process(delta: float) -> void:
 		_turntable.rotate_y(stick * STICK_TURN * delta)
 
 
-func open() -> void:
-	if is_open or GameMenus.any_open():
-		return
-	var player := get_tree().get_first_node_in_group(&"player") as Player
-	if player == null:
-		return
-	is_open = true
-	_was_paused = get_tree().paused
-	get_tree().paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	player.hud.visible = false
-	_turntable.rotation = Vector3.ZERO
-	_build(player)
-	_root.visible = true
-	_on_device_changed(ActiveDevice.using_gamepad)
-
-
-## Picking up the controller with nothing focused puts the cursor on the first slot.
-func _on_device_changed(gamepad: bool) -> void:
-	if not is_open or not gamepad or _main_slots.get_child_count() == 0:
-		return
-	var focused := _root.get_viewport().gui_get_focus_owner()
-	if focused == null or not _root.is_ancestor_of(focused):
-		(_main_slots.get_child(0) as Control).grab_focus.call_deferred()
-
-
-func close() -> void:
-	if not is_open:
-		return
-	is_open = false
-	var focused := _root.get_viewport().gui_get_focus_owner()
-	if focused != null:
-		focused.release_focus()
-	_board.hide_bubble()
-	get_tree().paused = _was_paused
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	_root.visible = false
-	var player := get_tree().get_first_node_in_group(&"player") as Player
-	if player != null:
-		player.hud.visible = true
-
-
 func _build(player: Player) -> void:
 	_player = player
 	for box: Node in [_main_slots, _accessory_slots, _weapon_slots, _combat_rows, _spirit_rows]:
@@ -189,16 +183,16 @@ func _build(player: Player) -> void:
 			box.remove_child(child)
 			child.queue_free()
 	_board.clear()
+	_keys.clear()
 
 	for spec: Array in MAIN_SLOTS:
 		_gear_slot(_main_slots, player, spec)
 	for spec: Array in ACCESSORY_SLOTS:
 		_gear_slot(_accessory_slots, player, spec)
-	_weapon_slot_pair = _board.add_weapons(_weapon_slots, player)
-	_item_slots_for(player)
-
-	var needed := player.xp_to_next()
-	_title.text = "STATUS   LV %d   XP %s" % [player.level, "%d/%d" % [player.xp, needed] if needed > 0 else "MAX"]
+	var weapons := _board.add_weapons(_weapon_slots, player)
+	_keys[weapons[0]] = GearHand.MAIN
+	_keys[weapons[1]] = GearHand.SECONDARY
+	_quick_slots_for(player)
 
 	_section(_combat_rows, "COMBAT")
 	_stat(_combat_rows, "HEALTH", "%d/%d" % [player.health.current, player.health.max_health])
@@ -227,6 +221,7 @@ func _gear_slot(column: VBoxContainer, player: Player, spec: Array) -> void:
 	# Worn gear without its own picture gets the slot shape, lit up.
 	var worn_icon: Texture2D = load(ICONS + spec[2].replace("slot_", "gear_") + ".png")
 	var slot := SlotBoard.new_slot(column)
+	_keys[slot] = spec[0]
 	var slot_name: String = spec[1]
 	# The right-hand column's bubbles open toward the model.
 	var left := column == _accessory_slots
@@ -241,15 +236,30 @@ func _gear_slot(column: VBoxContainer, player: Player, spec: Array) -> void:
 		slot.show_icon.bind(piece.icon if piece.icon != null else worn_icon, ""), left, piece)
 
 
-func _item_slots_for(player: Player) -> void:
-	if player.inventory.is_empty():
-		return
+## The quick-access items (what use_item / next_item reach in the field).
+func _quick_slots_for(player: Player) -> void:
 	var gap := Control.new()
 	gap.custom_minimum_size.x = ITEM_GAP
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_weapon_slots.add_child(gap)
-	for stack: ItemStack in player.inventory:
-		_board.add_item(_weapon_slots, stack)
+	for i in Player.QUICK_SLOTS:
+		var stack := player.quick_items[i]
+		var kind := player.quick_item_kinds[i]
+		var slot: IconSlot
+		if stack != null:
+			slot = _board.add_item(_weapon_slots, stack)
+		elif kind != null:
+			# Ran out: the item's picture, greyed, until more is picked up.
+			slot = SlotBoard.new_slot(_weapon_slots)
+			var item_name := kind.display_name.to_upper()
+			_board.add(slot, "QUICK ITEM\n" + item_name, "QUICK ITEM: " + item_name,
+				"None left. Picking up more %s refills this slot." % kind.display_name,
+				SlotBoard.greyed.bind(slot, kind.icon))
+		else:
+			slot = SlotBoard.new_slot(_weapon_slots)
+			_board.add(slot, "QUICK ITEM", "QUICK ITEM",
+				"Empty. An item here can be used in the field.", slot.show_empty.bind(""))
+		_keys[slot] = GearHand.QUICK[i]
 
 
 # --- Stats --------------------------------------------------------------------

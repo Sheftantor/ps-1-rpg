@@ -9,3 +9,4 @@ vertex_snap_strength = 0.5
 dither_enabled = true
 color_depth_bits = 5
 affine_warp_amount = 0.0
+animation_fps = 15

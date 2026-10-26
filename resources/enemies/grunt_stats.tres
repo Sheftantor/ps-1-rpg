@@ -51,6 +51,7 @@ chance = 0.02
 script = ExtResource("1_stats")
 display_name = "Mincer"
 portrait = ExtResource("2_ilybo")
+strong_tint_from_level = 5
 damage_percent = 0.2
 health_in_melee_hits = 7.0
 loot = Array[ExtResource("90_drop")]([SubResource("LootDrop_hot_dog"), SubResource("LootDrop_slush"), SubResource("LootDrop_bandages"), SubResource("LootDrop_weapon_switchblade")])

@@ -12,6 +12,11 @@ extends Resource
 ## res://textures/ui/icons/ made by scripts/tools/build_portrait_icons.gd
 ## (rules: docs/enemy_portraits.md). Defaults to a generic placeholder.
 @export var portrait: Texture2D = preload("res://textures/ui/icons/placeholder_portrait.png")
+## From this level up the enemy is recoloured with strong_tint, and below it
+## keeps its own colours; either way this replaces any per-placement
+## Enemy.body_tint. 0 = off (body_tint is used).
+@export_range(0, 99) var strong_tint_from_level: int = 0
+@export var strong_tint: Color = Color(1.0, 0.5, 0.42)
 
 @export_group("Level Scaling")
 ## One hit's damage at the same level as the player, as a share of a same-level,

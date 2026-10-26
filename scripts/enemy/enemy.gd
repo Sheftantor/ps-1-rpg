@@ -71,6 +71,8 @@ func _ready() -> void:
 	add_to_group(&"enemies")
 	home_position = global_position
 	health.setup(stats.max_health)
+	if stats.strong_tint_from_level > 0:
+		body_tint = stats.strong_tint if level() >= stats.strong_tint_from_level else Color.WHITE
 	model.set_tint(body_tint)
 	_facing_rest_position = facing.position
 	health.died.connect(_award_xp)

@@ -122,11 +122,27 @@ extends Resource
 ## The lock breaks once the target is farther than this.
 @export var lock_on_break_range: float = 20.0
 @export var lock_on_camera_speed: float = 8.0
-## Kingdom Hearts framing: a low camera looking along the ground at the target.
+## Far framing (target at lock_on_far_distance or more): a low camera behind
+## the player looking along the ground at the target.
 @export var lock_on_pitch_degrees: float = -10.0
+## Close framing (target within lock_on_close_distance), Elden Ring style: the
+## camera rises (lock_on_camera_lift), moves over the shoulder
+## (lock_on_side_offset) and looks down at this pitch. In between it blends.
+@export var lock_on_close_pitch_degrees: float = -22.0
+@export var lock_on_close_distance: float = 3.5
+@export var lock_on_far_distance: float = 7.0
 ## While locked on the camera pulls in to this distance (m), easing back out to
 ## the free camera's distance when the lock ends.
-@export var lock_on_camera_distance: float = 3.6
+@export var lock_on_camera_distance: float = 3.8
+## How far (m) the camera pivot rises while locked on close.
+@export var lock_on_camera_lift: float = 0.4
+## Over-the-shoulder offset (m): the camera slides to the target's side of the
+## player, so the target sits near the middle and the player off to the other
+## side (target on the right: player framed on the left, and vice versa).
+@export var lock_on_side_offset: float = 0.9
+## The shoulder side sticks until the target crosses this far (m) past the
+## player to the other side of the screen, so it doesn't flip back and forth.
+@export var lock_on_side_flip_margin: float = 0.6
 ## When the target is above the player, the lock-on camera tilts up (past
 ## lock_on_pitch_degrees) until the target is at least this far inside the top
 ## of the screen. It isn't centered, just kept in view.

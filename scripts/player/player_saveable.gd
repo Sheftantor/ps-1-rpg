@@ -45,11 +45,16 @@ func get_save_data() -> Dictionary:
 		energy = state.stamina,
 		inventory = inventory,
 		selected_item = state.selected_item,
+		quick_items = state.quick_items,
+		quick_item_kinds = state.quick_item_kinds.map(_path),
 		money = state.money,
 		gun = _path(state.gun),
 		melee_weapon = _path(player.melee_weapon),
 		off_hand = _path(player.off_hand),
 		weapon_bag = player.weapon_bag.map(_path),
+		# Bag squares: a weapon / armour path, "item:N" for inventory[N], "" empty.
+		bag_layout = player.bag_layout.map(func(piece: Resource) -> String:
+			return "item:%d" % state.inventory.find(piece) if piece is ItemStack else _path(piece)),
 		armor = armor,
 	}
 
@@ -77,7 +82,7 @@ func apply_save_data(data: Dictionary) -> void:
 
 	var max_health := int(data.get("max_health", current.max_health))
 	var max_energy := float(data.get("max_energy", current.max_stamina))
-	player.load_state({
+	var state := {
 		level = int(data.get("level", current.level)),
 		xp = int(data.get("xp", current.xp)),
 		stat_points = int(data.get("stat_points", current.stat_points)),
@@ -92,9 +97,28 @@ func apply_save_data(data: Dictionary) -> void:
 		stamina = clampf(float(data.get("energy", max_energy)), 0.0, max_energy),
 		gun = _load(data.get("gun", "")) as WeaponData,
 		inventory = inventory,
-		selected_item = clampi(int(data.get("selected_item", 0)), 0, maxi(0, inventory.size() - 1)),
+		selected_item = int(data.get("selected_item", 0)),
 		money = maxi(0, int(data.get("money", current.money))),
-	})
+	}
+	# Quick slots are indices into the saved inventory; older saves have none
+	# (load_state then fills them from the inventory).
+	var saved_quick = data.get("quick_items")
+	if saved_quick is Array:
+		state.quick_items = saved_quick.map(func(index: Variant) -> int: return int(index))
+	var saved_kinds = data.get("quick_item_kinds")
+	if saved_kinds is Array:
+		state.quick_item_kinds = saved_kinds.map(func(path: Variant) -> ItemData: return _load(path) as ItemData)
+	var saved_layout = data.get("bag_layout")
+	if saved_layout is Array:
+		var layout: Array[Resource] = []
+		for entry: Variant in saved_layout:
+			var index := int(String(entry).trim_prefix("item:")) if String(entry).begins_with("item:") else -1
+			if index >= 0:
+				layout.append(inventory[index] if index < inventory.size() else null)
+			else:
+				layout.append(_load(entry))
+		state.bag_layout = layout
+	player.load_state(state)
 
 	# Armour comes from the loadout, so this restores the same pieces. The
 	# weapons (main, secondary, bag) went through load_state above.

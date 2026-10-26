@@ -3,7 +3,7 @@ extends Control
 ## Bottom-left loadout window in the Windows 95 theme: a raised window
 ## (WindowPanel) holding one row per entry. Each row is a list row with the
 ## name (ListRow), led by the item's icon square (an IconSlot, the same size as
-## the status screen's). Rows: the melee weapon, the gun, then the carried items
+## the status screen's). Rows: the melee weapon, the gun, then the quick items
 ## with counts. The weapon in hand is lit and the other muted (HintLabel); the
 ## selected item (the one use_item spends, cycled with next_item) gets the
 ## cursor arrow and the accent bar (ListRowSelected). Colors, fonts and sizes
@@ -12,7 +12,7 @@ extends Control
 ## as its longest name needs. PlayerHud fills it through set_entries(). While
 ## drop_handler is set (the loot window is open) it accepts loot dragged onto it.
 
-@export_range(1, 6) var max_item_rows: int = 3
+@export_range(1, 6) var max_item_rows: int = 2
 ## Overall size of the window, scaled from its bottom-left corner. Keep it at 1
 ## so the theme's pixel bevels stay crisp.
 @export_range(0.5, 1.5) var ui_scale: float = 1.0
@@ -67,8 +67,9 @@ func _ready() -> void:
 
 ## melee / secondary: the two weapon slots (null = empty; secondary is a gun or
 ## an off-hand melee weapon). gun_drawn: the gun is in hand rather than the melee
-## weapon; dual_wielding: both melee weapons are. items: the inventory; selected:
-## index into it of the item under the cursor.
+## weapon; dual_wielding: both melee weapons are. items: the quick slots (null =
+## empty, drawn as an empty square and "-"; a count of 0 = ran out, greyed);
+## selected: index into it of the item under the cursor (-1 = none).
 func set_entries(melee: MeleeWeaponData, secondary: Resource, gun_drawn: bool, items: Array[ItemStack], selected: int,
 		dual_wielding: bool = false) -> void:
 	if _rows == null:
@@ -87,8 +88,13 @@ func set_entries(melee: MeleeWeaponData, secondary: Resource, gun_drawn: bool, i
 	var first := clampi(selected - visible_items + 1, 0, maxi(0, items.size() - visible_items))
 	for i in range(first, first + visible_items):
 		var stack := items[i]
+		if stack == null:
+			names.append("-")
+			_add_row(false, null, "-", false, false)
+			continue
 		names.append("%s x%d" % [stack.item.display_name, stack.count])
-		_add_row(true, stack.item.icon, names[-1], i == selected, i == selected)
+		# A count of 0: the slot ran out and waits for a refill (greyed).
+		_add_row(true, stack.item.icon, names[-1], i == selected, i == selected, stack.count == 0)
 	var rows := 2 + visible_items
 	var height := rows * ROW_HEIGHT + (rows - 1) * ROW_GAP + PADDING_Y * 2.0
 	offset_top = offset_bottom - height
@@ -114,7 +120,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	drop_handler.call(data)
 
 
-func _add_row(is_item: bool, icon: Texture2D, text: String, active: bool, cursor: bool) -> void:
+func _add_row(is_item: bool, icon: Texture2D, text: String, active: bool, cursor: bool, greyed := false) -> void:
 	var line := HBoxContainer.new()
 	line.custom_minimum_size.y = ROW_HEIGHT
 	line.add_theme_constant_override(&"separation", int(ROW_SEPARATION))
@@ -133,6 +139,8 @@ func _add_row(is_item: bool, icon: Texture2D, text: String, active: bool, cursor
 		slot.show_icon(icon, "", 0, cursor)
 	else:
 		slot.show_empty()
+	if greyed:
+		slot.modulate = Color(0.55, 0.55, 0.58)
 	line.add_child(slot)
 
 	# Bar: the list row holding the name; the selected item's has the accent bar.

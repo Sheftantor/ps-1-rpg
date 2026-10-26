@@ -152,7 +152,7 @@ func _set_stat(bar: Range, value_label: Label, current: float, maximum: float) -
 
 
 ## Bottom-left loadout window: both weapon slots (secondary: a gun or an
-## off-hand melee weapon), then the carried items with `selected_item` (the one
+## off-hand melee weapon), then the quick items with `selected_item` (the one
 ## use_item spends) under the cursor. dual_wielding lights both weapons.
 func set_loadout(melee: MeleeWeaponData, secondary: Resource, inventory: Array[ItemStack], selected_item: int,
 		dual_wielding: bool = false) -> void:

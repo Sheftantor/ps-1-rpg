@@ -45,6 +45,14 @@ const RESOLUTIONS: Dictionary[InternalResolution, Vector2i] = {
 		affine_warp_amount = value
 		emit_changed()
 
+## Character animation rate ("classic delay"): skeletons update this many times
+## a second instead of every frame, so movement looks steppy like a PS1 game.
+## 0 = smooth (off). Real PS1 games ran around 10-20.
+@export_range(0, 60) var animation_fps: int = 15:
+	set(value):
+		animation_fps = value
+		emit_changed()
+
 
 func get_virtual_height() -> int:
 	return RESOLUTIONS[internal_resolution].y

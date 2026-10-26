@@ -16,6 +16,9 @@ const BUBBLE_GAP := 16.0
 
 ## Emitted when a registered slot is right-clicked (left click and ui_accept pin it).
 signal slot_right_clicked(slot: IconSlot)
+## Left click / ui_accept on a slot. While anything is connected to it, that
+## click goes here instead of pinning (the gear screens pick items up with it).
+signal slot_clicked(slot: IconSlot)
 
 var pinned: IconSlot = null
 
@@ -90,6 +93,21 @@ func add(slot: IconSlot, bubble: String, title: String, body: String, redraw: Ca
 	slot.gui_input.connect(_on_input.bind(slot))
 
 
+## The registered slot under a screen position, or null.
+func slot_at(point: Vector2) -> IconSlot:
+	for slot: IconSlot in _info:
+		if is_instance_valid(slot) and slot.is_visible_in_tree() and slot.get_global_rect().has_point(point):
+			return slot
+	return null
+
+
+## Puts a one-off message in the description panel (until focus moves).
+func say(title: String, body: String) -> void:
+	if _title != null:
+		_title.text = title
+		_body.text = body
+
+
 func show_description(slot: IconSlot) -> void:
 	if _title == null:
 		return
@@ -108,7 +126,10 @@ func _on_input(event: InputEvent, slot: IconSlot) -> void:
 		slot.accept_event()
 	elif (click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT) \
 			or event.is_action_pressed(&"ui_accept"):
-		_pin(slot)
+		if slot_clicked.get_connections().is_empty():
+			_pin(slot)
+		else:
+			slot_clicked.emit(slot)
 		slot.accept_event()
 
 
@@ -156,9 +177,12 @@ func _on_unfocused(slot: IconSlot) -> void:
 
 
 ## Puts the bubble beside the slot with its tail pointing back at it.
-func _place_bubble(slot: IconSlot) -> void:
-	if not is_instance_valid(slot) or not slot.has_focus():
+## Deferred, so the slot may have been freed by a rebuild meanwhile (untyped:
+## a freed object can't even be passed as an IconSlot).
+func _place_bubble(slot_or_freed: Variant) -> void:
+	if not is_instance_valid(slot_or_freed) or not (slot_or_freed as IconSlot).has_focus():
 		return
+	var slot := slot_or_freed as IconSlot
 	var size := _bubble.get_combined_minimum_size()
 	_bubble.size = size
 	var rect := slot.get_global_rect()
@@ -177,8 +201,8 @@ func _place_bubble(slot: IconSlot) -> void:
 
 const MELEE_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_melee.png")
 const GUN_PLACEHOLDER: Texture2D = preload("res://textures/ui/icons/placeholder_gun.png")
-## Shown on the weapon slots: how to swap in the next owned weapon that fits.
-const SWAP_HINT := "Right-click or Interact to swap."
+## Shown on the weapon slots: how to swap in a weapon from the bag.
+const SWAP_HINT := "Click to pick it up, then click a slot or the bag."
 
 
 ## A new icon slot at the shared size, added to `parent`.
@@ -190,14 +214,14 @@ static func new_slot(parent: Container) -> IconSlot:
 
 
 ## The main and secondary weapon slots (greyed placeholders when empty).
-## Returns [main slot, secondary slot] so the screen can swap what's in them.
+## Returns [main slot, secondary slot].
 func add_weapons(parent: Container, player: Player) -> Array[IconSlot]:
 	var swap := "\n" + SWAP_HINT
 	var melee := player.melee_weapon
 	var main_slot := new_slot(parent)
 	if melee == null:
 		add(main_slot, "MAIN", "MAIN", "Empty. Any melee weapon goes here." + swap,
-				_greyed.bind(main_slot, MELEE_PLACEHOLDER))
+				greyed.bind(main_slot, MELEE_PLACEHOLDER))
 	else:
 		var item_name := melee.display_name.to_upper()
 		add(main_slot, "MAIN\n" + item_name, "MAIN: " + item_name, GearText.melee(player) + swap,
@@ -207,7 +231,7 @@ func add_weapons(parent: Container, player: Player) -> Array[IconSlot]:
 	if second == null:
 		add(second_slot, "SECONDARY", "SECONDARY",
 				"Empty. A gun goes here, or a second dual-wield blade next to a dual-wield main weapon." + swap,
-				_greyed.bind(second_slot, GUN_PLACEHOLDER))
+				greyed.bind(second_slot, GUN_PLACEHOLDER))
 	elif second is WeaponData:
 		var item_name := (second as WeaponData).display_name.to_upper()
 		add(second_slot, "SECONDARY\n" + item_name, "SECONDARY: " + item_name, GearText.gun(second) + swap,
@@ -230,7 +254,24 @@ func add_item(parent: Container, stack: ItemStack) -> IconSlot:
 	return slot
 
 
+## A weapon or piece of armour lying in the bag.
+func add_gear(parent: Container, piece: Resource) -> IconSlot:
+	var slot := new_slot(parent)
+	var item_name := String(piece.get(&"display_name")).to_upper()
+	var kind := "GUN" if piece is WeaponData else ("WEAPON" if piece is MeleeWeaponData else "GEAR")
+	var body: String = piece.get(&"description")
+	if piece is WeaponData:
+		body = GearText.gun(piece)
+	elif piece is MeleeWeaponData and (piece as MeleeWeaponData).dual_wieldable:
+		body = GearText.join(body, "DUAL WIELD")
+	elif piece is ArmorData and (piece as ArmorData).defense > 0:
+		body = GearText.join(body, "+%d DEFENSE" % (piece as ArmorData).defense)
+	add(slot, kind + "\n" + item_name, kind + ": " + item_name, body,
+		slot.show_icon.bind(piece.get(&"icon") as Texture2D, ""), false, piece)
+	return slot
+
+
 ## The weapon placeholders are coloured; grey one out like the empty gear slots.
-static func _greyed(slot: IconSlot, texture: Texture2D) -> void:
+static func greyed(slot: IconSlot, texture: Texture2D) -> void:
 	slot.show_placeholder(texture)
 	slot.modulate = Color(0.55, 0.55, 0.58)

@@ -33,6 +33,8 @@ const ACTION_GUN_UNDO: StringName = &"gun_undo"
 const ACTION_STATUS: StringName = &"status_menu"
 ## Opens the inventory screen.
 const ACTION_INVENTORY: StringName = &"inventory"
+## How many items the field can reach (use_item / next_item).
+const QUICK_SLOTS := 2
 const BUTTON_ACTIONS: Array[StringName] = [ACTION_LIGHT, ACTION_HEAVY, ACTION_DODGE, ACTION_JUMP, ACTION_INTERACT, ACTION_GUN,
 		ACTION_GUN_UNDO, ACTION_STATUS, ACTION_INVENTORY]
 
@@ -123,7 +125,14 @@ var attributes: Dictionary[StringName, int] = {}
 var lock_target: Enemy = null
 ## The player's copy of loadout.inventory; items are spent from this.
 var inventory: Array[ItemStack] = []
-## Index into inventory of the item use_item spends; next_item steps it.
+## The quick-access items (QUICK_SLOTS of them, null = empty): stacks out of
+## `inventory`, set on the character screen. The field only uses these.
+var quick_items: Array[ItemStack] = []
+## The item each quick slot is for, kept after its stack runs out (the slot
+## shows it greyed, x0) so picking that item up again refills the slot. Null
+## once the slot is emptied by hand.
+var quick_item_kinds: Array[ItemData] = []
+## Index into quick_items of the item use_item spends; next_item steps it.
 var selected_item: int = 0
 ## Cash in the wallet. Starts at loadout.starting_money; kills add to it, shops spend it.
 var money: int = 0
@@ -162,9 +171,13 @@ var gun: WeaponData = null
 ## hand, only next to a dual-wieldable main weapon (dual wielding). Null while
 ## the secondary is the gun or empty.
 var off_hand: MeleeWeaponData = null
-## Weapons owned but not equipped (MeleeWeaponData / WeaponData), swapped in
-## from the status screen (cycle_main_weapon / cycle_secondary_weapon).
+## Weapons and armour owned but not equipped (MeleeWeaponData / WeaponData /
+## ArmorData): the bag on the inventory screen, equipped from there.
 var weapon_bag: Array[Resource] = []
+## Which bag square each loose piece sits in (null = empty square): the
+## weapon_bag pieces and the carried stacks that aren't quick slotted. Kept up
+## to date by GearHand.bag().
+var bag_layout: Array[Resource] = []
 ## Worn armour by slot, from the loadout; empty slots are absent.
 var armor: Dictionary[ArmorData.Slot, ArmorData] = {}
 var _gun_model: Node3D = null
@@ -201,6 +214,11 @@ var _hip_attachment: BoneAttachment3D = null
 @onready var _lock_on_marker: Node3D = $LockOnMarker
 ## The free camera's distance; lock-on pulls in to stats.lock_on_camera_distance.
 @onready var _free_camera_distance: float = _spring_arm.spring_length
+## The free camera pivot's height; lock-on raises it by stats.lock_on_camera_lift.
+@onready var _free_camera_height: float = _camera_rig.position.y
+## Which shoulder the lock-on camera sits over: 1 = right of the player (player
+## framed on the left of the screen), -1 = left.
+var _lock_side: float = 1.0
 
 
 func _ready() -> void:
@@ -216,6 +234,9 @@ func _ready() -> void:
 
 	for stack: ItemStack in loadout.inventory:
 		inventory.append(stack.duplicate() as ItemStack)
+	quick_items.resize(QUICK_SLOTS)
+	quick_item_kinds.resize(QUICK_SLOTS)
+	_fill_quick_slots()
 	money = loadout.starting_money
 	_equip_from_loadout()
 
@@ -394,29 +415,76 @@ func use_item(stack: ItemStack) -> void:
 	stamina.restore(stack.item.stamina_restore)
 	stack.count -= 1
 	if stack.count <= 0:
-		inventory.erase(stack)
+		_drop_stack(stack)
 	_refresh_item_hud()
 
 
-## The item use_item spends, or null with an empty inventory.
+## The item use_item spends (the selected quick slot), or null with both empty.
 func selected_item_stack() -> ItemStack:
-	if inventory.is_empty():
-		return null
-	selected_item = clampi(selected_item, 0, inventory.size() - 1)
-	return inventory[selected_item]
+	if quick_items[selected_item] == null:
+		cycle_item(1)
+	return quick_items[selected_item]
 
 
+## Steps the selection to the next filled quick slot.
 func cycle_item(step: int) -> void:
-	if inventory.is_empty():
-		return
-	selected_item = posmod(selected_item + step, inventory.size())
+	for i in range(1, QUICK_SLOTS + 1):
+		var index := posmod(selected_item + step * i, QUICK_SLOTS)
+		if quick_items[index] != null:
+			selected_item = index
+			break
 	_refresh_item_hud()
 
 
-## Redraws the HUD loadout row (weapons and inventory) after anything in it changes.
+## Redraws the HUD loadout row (weapons and both quick slots, empty ones too)
+## after anything in it changes. No cursor while the selected slot is empty.
 func _refresh_item_hud() -> void:
-	selected_item_stack()  # Clamps selected_item.
-	hud.set_loadout(melee_weapon, secondary_weapon(), inventory, selected_item, is_dual_wielding())
+	if quick_items[selected_item] == null:
+		# Keep the cursor on a quick item that has something, if any does.
+		for i in QUICK_SLOTS:
+			if quick_items[i] != null:
+				selected_item = i
+				break
+	var selected := selected_item if quick_items[selected_item] != null else -1
+	hud.set_loadout(melee_weapon, secondary_weapon(), quick_slot_view(), selected, is_dual_wielding())
+
+
+## The quick slots for display: each one's stack, a count-0 stack of the item
+## it's waiting for once it ran out, or null for a slot emptied by hand.
+func quick_slot_view() -> Array[ItemStack]:
+	var view: Array[ItemStack] = []
+	for i in QUICK_SLOTS:
+		var stack := quick_items[i]
+		if stack == null and quick_item_kinds[i] != null:
+			stack = ItemStack.new()
+			stack.item = quick_item_kinds[i]
+			stack.count = 0
+		view.append(stack)
+	return view
+
+
+## Puts carried stacks that aren't quick slotted yet into empty quick slots
+## (the starting kit, and old saves without quick slots; loot goes to the bag).
+func _fill_quick_slots() -> void:
+	for stack: ItemStack in inventory:
+		var empty := quick_items.find(null)
+		if empty < 0:
+			return
+		if not quick_items.has(stack):
+			quick_items[empty] = stack
+			quick_item_kinds[empty] = stack.item
+
+
+## A stack that's run out: gone from the inventory and its quick slot.
+func _drop_stack(stack: ItemStack) -> void:
+	inventory.erase(stack)
+	var index := quick_items.find(stack)
+	if index >= 0:
+		# The slot keeps its item (shown x0) for a refill; the cursor moves to
+		# the other quick item, if any.
+		quick_items[index] = null
+		if index == selected_item:
+			cycle_item(1)
 
 
 ## Faces the lock target, or the held direction, at the start of an attack.
@@ -502,6 +570,18 @@ func _on_died() -> void:
 
 func _toggle_lock_on() -> void:
 	lock_target = null if lock_target != null else _find_nearest_enemy()
+	_pick_lock_side()
+
+
+## The shoulder side starts on whichever side of the screen the target is on.
+func _pick_lock_side() -> void:
+	if lock_target != null:
+		_lock_side = 1.0 if _target_lateral() >= 0.0 else -1.0
+
+
+## How far (m) the lock target is to the right of the player, across the camera's view.
+func _target_lateral() -> float:
+	return (lock_target.global_position - global_position).dot(_camera_rig.global_basis.x)
 
 
 ## Mouse wheel / D-pad: moves the gun-mode cursor, or while locked on with the
@@ -522,6 +602,7 @@ func _cycle_target(step: int) -> void:
 	candidates.sort_custom(func(a: Enemy, b: Enemy) -> bool:
 		return global_position.distance_squared_to(a.global_position) < global_position.distance_squared_to(b.global_position))
 	lock_target = candidates[posmod(candidates.find(lock_target) + step, candidates.size())]
+	_pick_lock_side()
 
 
 func _find_nearest_enemy() -> Enemy:
@@ -560,16 +641,27 @@ func _apply_stick_look(delta: float) -> void:
 		_rotate_camera(-look.x * stick_look_speed * delta, -look.y * stick_look_speed * delta)
 
 
-## While locked on, swing the camera behind the player facing the target so both stay framed.
+## While locked on, the camera rises and swings over the player's shoulder on
+## the target's side, facing the target, so both stay framed (Elden Ring style).
 func _update_lock_on_camera(delta: float) -> void:
-	_lock_on_marker.visible = lock_target != null
+	var locked := lock_target != null
+	_lock_on_marker.visible = locked
 	var weight := 1.0 - exp(-stats.lock_on_camera_speed * delta)
-	var distance: float = stats.lock_on_camera_distance if lock_target != null else _free_camera_distance
+	var distance: float = stats.lock_on_camera_distance if locked else _free_camera_distance
 	_spring_arm.spring_length = lerpf(_spring_arm.spring_length, distance, weight)
-	if lock_target == null:
+	var closeness := _lock_closeness() if locked else 0.0
+	var height := _free_camera_height + stats.lock_on_camera_lift * closeness
+	_camera_rig.position.y = lerpf(_camera_rig.position.y, height, weight)
+	if locked and _target_lateral() * _lock_side < -stats.lock_on_side_flip_margin:
+		_lock_side = -_lock_side
+	var side_offset := _lock_side * stats.lock_on_side_offset * closeness
+	_spring_arm.position.x = lerpf(_spring_arm.position.x, side_offset, weight)
+	if not locked:
 		return
 	_lock_on_marker.global_position = lock_target.global_position + Vector3.UP * LOCK_ON_MARKER_HEIGHT
-	var to_target := lock_target.global_position - global_position
+	# Aimed from the shifted pivot, so the target sits near the middle of the
+	# screen and the player off to the opposite side.
+	var to_target := lock_target.global_position - _spring_arm.global_position
 	to_target.y = 0.0
 	if to_target.length_squared() > 0.01:
 		var yaw := atan2(-to_target.x, -to_target.z)
@@ -577,10 +669,17 @@ func _update_lock_on_camera(delta: float) -> void:
 	_spring_arm.rotation.x = lerpf(_spring_arm.rotation.x, _lock_on_pitch(), weight)
 
 
-## The usual lock-on pitch, tilted up just enough to keep a target above the
-## player (flying, on a ledge) inside the top of the frame.
+## 0 with the lock target far away (low framing), 1 up close (raised,
+## over-the-shoulder framing), easing in between.
+func _lock_closeness() -> float:
+	var distance := global_position.distance_to(lock_target.global_position)
+	return smoothstep(stats.lock_on_far_distance, stats.lock_on_close_distance, distance)
+
+
+## The lock-on pitch for the target's distance, tilted up just enough to keep a
+## target above the player (flying, on a ledge) inside the top of the frame.
 func _lock_on_pitch() -> float:
-	var pitch := deg_to_rad(stats.lock_on_pitch_degrees)
+	var pitch := deg_to_rad(lerpf(stats.lock_on_pitch_degrees, stats.lock_on_close_pitch_degrees, _lock_closeness()))
 	var to_target := aim_point(lock_target) - _camera_rig.global_position
 	var elevation := atan2(to_target.y, Vector2(to_target.x, to_target.z).length())
 	var half_view := deg_to_rad(camera().fov * 0.5 - stats.lock_on_view_margin_degrees)
@@ -751,42 +850,37 @@ func equip_secondary(weapon: Resource) -> void:
 	_weapons_changed()
 
 
-## Main-slot choices: the equipped melee weapon, then the bag's, in order.
-func main_weapon_choices() -> Array[Resource]:
-	var out: Array[Resource] = []
-	if melee_weapon != null:
-		out.append(melee_weapon)
-	for weapon: Resource in weapon_bag:
-		if can_equip_main(weapon):
-			out.append(weapon)
-	return out
+## Sets both weapon slots at once (the gear screens; the caller has taken the
+## weapons out of the bag). An off-hand weapon next to a main weapon that can't
+## be dual wielded goes to the weapon bag (an empty main keeps it).
+func set_weapon_slots(main: MeleeWeaponData, secondary: Resource) -> void:
+	if _gun_model != null and secondary != gun:
+		# The drawn gun's model is cached; the next draw builds the new one.
+		_gun_model.queue_free()
+		_gun_model = null
+	melee_weapon = main
+	gun = secondary as WeaponData
+	off_hand = secondary as MeleeWeaponData
+	if off_hand != null and main != null and not main.dual_wieldable:
+		weapon_bag.append(off_hand)
+		off_hand = null
+	_weapons_changed()
 
 
-## Secondary-slot choices, starting with what's there now (null = empty): the
-## bag's guns and (next to a dual-wieldable main) dual-wieldable melee weapons,
-## and empty.
-func secondary_weapon_choices() -> Array[Resource]:
-	var out: Array[Resource] = [secondary_weapon()]
-	for weapon: Resource in weapon_bag:
-		if can_equip_secondary(weapon):
-			out.append(weapon)
-	if secondary_weapon() != null:
-		out.append(null)
-	return out
+## Wears `piece` in `slot`, or empties the slot (null).
+func set_armor(slot: ArmorData.Slot, piece: ArmorData) -> void:
+	if piece == null:
+		armor.erase(slot)
+	else:
+		armor[slot] = piece
+	progress_changed.emit()
 
 
-## Swaps the main weapon for the next one that fits (status screen).
-func cycle_main_weapon() -> void:
-	var choices := main_weapon_choices()
-	if choices.size() > 1:
-		equip_main(choices[1] as MeleeWeaponData)
-
-
-## Swaps the secondary for the next one that fits, or empties it (status screen).
-func cycle_secondary_weapon() -> void:
-	var choices := secondary_weapon_choices()
-	if choices.size() > 1:
-		equip_secondary(choices[1])
+## Puts a carried stack (or null) in quick slot `index`.
+func set_quick_item(index: int, stack: ItemStack) -> void:
+	quick_items[index] = stack
+	quick_item_kinds[index] = stack.item if stack != null else null
+	_refresh_item_hud()
 
 
 func _weapons_changed() -> void:
@@ -958,13 +1052,18 @@ func save_state() -> Dictionary:
 		melee_weapon = melee_weapon,
 		off_hand = off_hand,
 		weapon_bag = weapon_bag.duplicate(),
+		bag_layout = bag_layout.duplicate(),
 		max_health = health.max_health,
 		max_stamina = stamina.maximum,
 		health = health.current,
 		stamina = stamina.current,
 		gun = gun,
 		inventory = inventory.duplicate(),
+		# Quick slots as indices into inventory (-1 = empty).
+		quick_items = quick_items.map(func(stack: ItemStack) -> int: return inventory.find(stack)),
+		quick_item_kinds = quick_item_kinds.duplicate(),
 		selected_item = selected_item,
+		armor = armor.duplicate(),
 		money = money,
 	}
 
@@ -984,13 +1083,27 @@ func load_state(state: Dictionary) -> void:
 		off_hand = state.off_hand
 	if state.has("weapon_bag"):
 		weapon_bag.assign(state.weapon_bag)
+	if state.has("bag_layout"):
+		bag_layout.assign(state.bag_layout)
 	health.max_health = state.max_health
 	health.set_current(state.health)
 	stamina.maximum = state.max_stamina
 	stamina.set_current(state.stamina)
 	gun = state.gun
 	inventory.assign(state.inventory)
-	selected_item = state.selected_item
+	var quick: Array = state.get("quick_items", [])
+	for i in QUICK_SLOTS:
+		var index: int = quick[i] if i < quick.size() else -1
+		quick_items[i] = inventory[index] if index >= 0 and index < inventory.size() else null
+	for i in QUICK_SLOTS:
+		var kinds: Array = state.get("quick_item_kinds", [])
+		var kind: ItemData = kinds[i] if i < kinds.size() else null
+		quick_item_kinds[i] = quick_items[i].item if quick_items[i] != null else kind
+	if not state.has("quick_items"):
+		_fill_quick_slots()
+	selected_item = clampi(state.selected_item, 0, QUICK_SLOTS - 1)
+	if state.get("armor") != null:
+		armor.assign(state.armor)
 	money = int(state.get("money", money))
 	money_changed.emit(money)
 	_mount_weapon_models()
@@ -1024,7 +1137,7 @@ func interact() -> void:
 		target.interact(self)
 
 
-## Takes one entry out of a loot sack: a weapon goes in the gun slot, items
+## Takes one entry out of a loot sack: a gun goes in the bag, items
 ## into the inventory, cash into the wallet. Called by the loot window.
 func take_loot(pickup: Pickup, entry: Resource) -> void:
 	if entry is LootCash:
@@ -1032,9 +1145,10 @@ func take_loot(pickup: Pickup, entry: Resource) -> void:
 		add_money(cash)
 		hud.flash_message("+$%d" % cash)
 	elif entry is WeaponData:
-		# Into the secondary slot; whatever was there goes to the weapon bag.
-		equip_secondary(entry)
-		hud.flash_message("GOT %s" % (entry as WeaponData).display_name.to_upper())
+		# Into the bag; equip it on the inventory / character screen.
+		weapon_bag.append(entry)
+		progress_changed.emit()
+		hud.flash_message("GOT %s (IN BAG)" % (entry as WeaponData).display_name.to_upper())
 	elif entry is MeleeWeaponData:
 		# Into an empty slot it fits, otherwise the weapon bag (swap it in on
 		# the status screen).
@@ -1062,7 +1176,7 @@ func remove_item(item: ItemData, count: int = 1) -> bool:
 				return false
 			held.count -= count
 			if held.count <= 0:
-				inventory.erase(held)
+				_drop_stack(held)
 			_refresh_item_hud()
 			return true
 	return false
@@ -1075,7 +1189,13 @@ func add_item(stack: ItemStack) -> void:
 			held.count += stack.count
 			_refresh_item_hud()
 			return
-	inventory.append(stack.duplicate() as ItemStack)
+	var added := stack.duplicate() as ItemStack
+	inventory.append(added)
+	# Refills an empty quick slot still waiting for this item.
+	for i in QUICK_SLOTS:
+		if quick_items[i] == null and quick_item_kinds[i] == added.item:
+			quick_items[i] = added
+			break
 	_refresh_item_hud()
 
 

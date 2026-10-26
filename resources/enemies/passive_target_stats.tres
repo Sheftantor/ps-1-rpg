@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="EnemyStats" format=3]
+[gd_resource type="Resource" script_class="EnemyStats" format=3 uid="uid://chomk6gf6gn50"]
 
-[ext_resource type="Script" path="res://scripts/enemy/enemy_stats.gd" id="1_stats"]
+[ext_resource type="Script" uid="uid://c51q3iu04f4pp" path="res://scripts/combat/attack_data.gd" id="1_a6efp"]
+[ext_resource type="Script" uid="uid://e4ea8tpb76l5" path="res://scripts/enemy/enemy_stats.gd" id="1_stats"]
+[ext_resource type="Script" uid="uid://cognbt6ewk0v8" path="res://scripts/commands/loot_drop.gd" id="2_7uhus"]
+[ext_resource type="Texture2D" uid="uid://dkl3dod8hq5cm" path="res://textures/ui/icons/placeholder_portrait.png" id="3_ef5fn"]
 
 [resource]
 script = ExtResource("1_stats")
-max_health = 80
-passive = true
 cash_chance = 0.0
+passive = true

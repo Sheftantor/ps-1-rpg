@@ -23,6 +23,9 @@ var settings: PS1Settings
 ## False while the debug toggle has the look switched off.
 var effect_enabled: bool = true
 
+## Animation mixers advanced by hand at settings.animation_fps ("classic delay").
+var _stepped: Array[AnimationMixer] = []
+var _step_accum: float = 0.0
 var _converted: Dictionary[Material, Material] = {}
 var _converted_no_snap: Dictionary[Material, Material] = {}
 
@@ -43,7 +46,8 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_step_animations(delta)
 	var camera := get_viewport().get_camera_3d()
 	if camera != null and camera.compositor == null:
 		camera.compositor = COMPOSITOR
@@ -68,9 +72,14 @@ func apply_settings() -> void:
 			effect.virtual_height = settings.get_virtual_height()
 			effect.dither = settings.dither_enabled
 			effect.color_levels = 0 if settings.color_depth_bits >= 8 else 1 << settings.color_depth_bits
+	for mixer in _stepped:
+		if is_instance_valid(mixer):
+			_apply_step_mode(mixer)
 
 
 func _on_node_added(node: Node) -> void:
+	if node is AnimationMixer:
+		_register_mixer.call_deferred(node as AnimationMixer)
 	var mesh_instance := node as MeshInstance3D
 	if mesh_instance == null or mesh_instance.mesh == null or _has_meta_up(node, KEEP_MATERIALS_META):
 		return
@@ -119,3 +128,43 @@ func _to_ps1(material: Material, snap: bool = true) -> Material:
 		ps1.set_shader_parameter(&"emission_energy", base.emission_energy_multiplier)
 	cache[base] = ps1
 	return ps1
+
+
+# --- Stepped animation ("classic delay") -----------------------------------------
+# PS1 characters animated at a low, fixed rate. Mixers are switched to manual
+# advance and ticked together every 1/animation_fps seconds. A mixer that can't
+# process (hit stop disables it, the tree is paused) is simply skipped.
+
+func _register_mixer(mixer: AnimationMixer) -> void:
+	if not is_instance_valid(mixer) or mixer in _stepped or _has_meta_up(mixer, KEEP_MATERIALS_META):
+		return
+	# A player driven by an AnimationTree is advanced by that tree, not by us.
+	if mixer is AnimationPlayer:
+		for sibling in mixer.get_parent().get_children():
+			var tree := sibling as AnimationTree
+			if tree != null and tree.get_node_or_null(tree.anim_player) == mixer:
+				return
+	_stepped.append(mixer)
+	mixer.tree_exiting.connect(_stepped.erase.bind(mixer), CONNECT_ONE_SHOT)
+	_apply_step_mode(mixer)
+
+
+func _apply_step_mode(mixer: AnimationMixer) -> void:
+	var stepping := effect_enabled and settings.animation_fps > 0
+	mixer.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL if stepping \
+			else AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
+
+
+func _step_animations(delta: float) -> void:
+	if not effect_enabled or settings.animation_fps <= 0:
+		return
+	_step_accum += delta
+	var interval := 1.0 / float(settings.animation_fps)
+	if _step_accum < interval:
+		return
+	var elapsed := _step_accum
+	_step_accum = fmod(_step_accum, interval)
+	elapsed -= _step_accum
+	for mixer in _stepped:
+		if is_instance_valid(mixer) and mixer.is_inside_tree() and mixer.can_process():
+			mixer.advance(elapsed)

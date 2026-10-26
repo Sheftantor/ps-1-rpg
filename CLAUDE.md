@@ -63,15 +63,46 @@ dual-wieldable melee weapon next to a dual-wieldable main (then dual
 wielding: normal combo in action mode, enables `requires_dual_wield`
 abilities like Back Stab). Bat is main-only; Switchblade and Machete are
 dual-wieldable; Selfie Stick is the Memer's (main only, scales with memes).
-Owned spares sit in `Player.weapon_bag`; swap on the status screen
-(right-click / Interact on MAIN or SECONDARY). Class kits: Sneak starts
+Owned spares (weapons and armour) sit in `Player.weapon_bag`; looted guns
+go there too (not straight into SECONDARY). Class kits: Sneak starts
 dual wielding, Memer with the Selfie Stick. Drops: Floating Monk (Multi
 Arm Man) ~35% one of the three; Mincer 2% Switchblade (`LootDrop.weapon`).
+
+**Inventory + character screens:** separate, each on its own button (I = bag,
+C = character), both over the in-game HUD with no dimming, game paused while
+either is up. Moving pieces between them needs both open. `InventoryMenu`
+runs the session for the pair (pause, keys, the held icon); `StatusMenu` is
+the character panel. Moving gear is `GearHand` (`scripts/ui/gear_hand.gd`):
+click to pick up, click a slot to place (the old piece goes onto the cursor),
+click a bag square to put it in that square (a taken square swaps).
+Bag positions live in `Player.bag_layout` (saved; loot takes the first empty square).
+Esc / Cancel / clicking off the slots undoes one step;
+with nothing held Esc closes; closing the last screen undoes a move in
+progress. A refused slot flashes red and says why (`GearHand.why_not`, e.g.
+the Bat can't be dual wielded). Only 2 quick items (`Player.quick_items`,
+`QUICK_SLOTS`) reach the field; a used-up quick slot keeps its item (greyed,
+x0) and picking that item up refills it; other loot goes to the bag.
 
 **Loot:** enemies drop a gold sack on death (`Enemy._drop_loot`, tables in
 `resources/enemies/*_stats.tres`, Loot group), cash on a chance, at most one
 weapon; the player bends down to loot (`LootBend` state); death is a ragdoll
 that dither-fades after 10 s. Notifications stack above the loadout window.
+
+**Lock-on camera:** low and behind when the target is far, Elden Ring style
+when close (rises, looks down, over the shoulder on the target's side, side
+sticks until the target crosses over). Tuning: Lock-on group in
+`player_stats.tres`; code `Player._update_lock_on_camera`.
+
+**Test scene (`scenes/test_scene.tscn`):** player starts as Sneak (dual wield),
+pistol sack by spawn, invisible `Bounds` walls at the floor edges, and a
+`WaveSpawner` (`scripts/enemy/wave_spawner.gd`, waves are `EnemyWave`
+resources on the `Waves` node): a wave from the `Spawn*` markers 30 s after the last one is cleared,
+Suit Guys early, Multi Arm Man from wave 4, last wave repeats a level higher.
+Wave enemies hunt the player (long sight range, patrol centre on the player).
+
+**Mincer colour:** set by level, not per placement: `strong_tint_from_level`
+in `grunt_stats.tres` (5) turns level 5+ Mincers red; below that they keep
+their own colours, and their `body_tint` in the levels is ignored.
 
 ## Not built yet (next steps)
 1. **Energy mode** (the game's ultimate, like a turn-based limit break as
